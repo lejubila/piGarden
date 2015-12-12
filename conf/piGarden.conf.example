@@ -1,0 +1,84 @@
+# Log file
+LOG_FILE="/home/pi/piGarden/log/piGarden.log"
+LOG_FILE_MAX_SIZE=1048576 # 1MB
+
+# Status directory
+STATUS_DIR="/home/pi/piGarden/state"
+
+# Posizione gpio
+GPIO="/usr/local/bin/gpio"
+
+# Posizione js
+JQ="/usr/local/bin/jq"
+
+# Percorso curl
+CURL="/usr/bin/curl"
+
+# Percors wc
+WC="/usr/bin/wc"
+
+# Percorso gzip
+GZIP="/bin/gzip"
+
+# Percors mv
+MV="/bin/mv"
+
+# Id gpio usati per simulare il doppio deviatore con cui eseguire l'alimentazione alle elettrovalvole
+SUPPLY_GPIO_1=2
+SUPPLY_GPIO_2=3
+
+# Stato dei due gpio per impartire l'alimentazione positiva alle elettrovalvole (aperta)
+SUPPLY_GPIO_POS=0
+
+# Stato dei due gpio per impartire l'alimentazione negativa alle elettrovalvole (chiusa)
+SUPPLY_GPIO_NEG=1
+
+# Stato di ingresso da assegnare al gpio per chiudere il rele
+RELE_GPIO_CLOSE=0
+
+# Stato di ingresso da assegnare al gpio per aprire il rele
+RELE_GPIO_OPEN=1
+
+# Id del gpio usato per collegare il sensore di rilevamento pioggia
+RAIN_GPIO=25
+
+# Valore in ingresso sul gpio definito in RAIN_GPIO che indica lo stato di pioggia
+RAIN_GPIO_STATE=0
+
+
+
+
+
+# Numero totale di elettrovalvole
+EV_TOTAL=6
+
+# Definizione delle elettrovalvole
+EV1_ALIAS="1" #"posteriore_sinistra"
+EV1_GPIO=17
+
+EV2_ALIAS="2" #"posteriore_destra"
+EV2_GPIO=27
+
+EV3_ALIAS="3" #
+EV3_GPIO=22
+
+EV4_ALIAS="4" #
+EV4_GPIO=18
+
+EV5_ALIAS="5" #
+EV5_GPIO=23
+
+EV6_ALIAS="6" #
+EV6_GPIO=24
+
+# Definisce l'api key e il luogo per recuperare lo stato meteo online
+WUNDERGROUND_KEY=""
+WUNDERGROUND_LOCATION="IY/Monsummano"	# http://www.wunderground.com/weather/api/d/docs?d=resources/country-to-iso-matching&MR=1
+
+# Blocca l'irrigazione se l'ultima pioggia rilevata online è avvenuta nell'ultima quantità di tempo inserita.
+# Il tempo è espresso in secondi. Quindi inserendo 86400, se nelle ultime 24 ore ha pioviuto viene bloccata l'irrigazione. Inserendo il valore zero nonviene eseguito nessun controllo.
+NOT_IRRIGATE_IF_RAIN_ONLINE=86400
+
+# Il parametro è simile a quello precedente, il controllo però anziché essere fatto attingendo a wunderground, viene eseguito direttamente sul sensore se installato. Inserendo il valore zero nonviene eseguito nessun controllo.
+NOT_IRRIGATE_IF_RAIN_SENSOR=86400
+
