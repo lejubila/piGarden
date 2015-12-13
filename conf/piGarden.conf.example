@@ -53,10 +53,10 @@ RAIN_GPIO_STATE=0
 EV_TOTAL=6
 
 # Definizione delle elettrovalvole
-EV1_ALIAS="1" #"posteriore_sinistra"
+EV1_ALIAS="1" #
 EV1_GPIO=17
 
-EV2_ALIAS="2" #"posteriore_destra"
+EV2_ALIAS="2" #
 EV2_GPIO=27
 
 EV3_ALIAS="3" #
