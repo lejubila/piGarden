@@ -76,9 +76,9 @@ WUNDERGROUND_KEY=""
 WUNDERGROUND_LOCATION="IY/Monsummano"	# http://www.wunderground.com/weather/api/d/docs?d=resources/country-to-iso-matching&MR=1
 
 # Blocca l'irrigazione se l'ultima pioggia rilevata online è avvenuta nell'ultima quantità di tempo inserita.
-# Il tempo è espresso in secondi. Quindi inserendo 86400, se nelle ultime 24 ore ha pioviuto viene bloccata l'irrigazione. Inserendo il valore zero nonviene eseguito nessun controllo.
+# Il tempo è espresso in secondi. Quindi inserendo 86400, se nelle ultime 24 ore ha piovuto viene bloccata l'irrigazione. Inserendo il valore zero non viene eseguito nessun controllo.
 NOT_IRRIGATE_IF_RAIN_ONLINE=86400
 
-# Il parametro è simile a quello precedente, il controllo però anziché essere fatto attingendo a wunderground, viene eseguito direttamente sul sensore se installato. Inserendo il valore zero nonviene eseguito nessun controllo.
+# Il parametro è simile a quello precedente, il controllo però anziché essere fatto attingendo a wunderground, viene eseguito direttamente sul sensore se installato. Inserendo il valore zero non viene eseguito nessun controllo.
 NOT_IRRIGATE_IF_RAIN_SENSOR=86400
 
