@@ -436,7 +436,7 @@ case "$1" in
 		;;
 
 	ev_status)
-		ev_status $2force
+		ev_status $2
 		;;
 
 	ev_status_all)
