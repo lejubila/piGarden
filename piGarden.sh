@@ -246,12 +246,20 @@ function check_rain_online {
 	local weather=`cat /tmp/check_rain_online.json | $JQ -M ".current_observation.weather"`
 	local local_epoch=`cat /tmp/check_rain_online.json | $JQ -M -r ".current_observation.local_epoch"`
 	#echo $weather
+	#weather="[Light/Heavy] Drizzle"
 	if [ "$weather" = "null" ]; then
 		log_write "check_rain_online - failed read online data"
 	else
 		log_write "check_rain_online - weather=$weather, local_epoch=$local_epoch"
 		#if [[ "$weather" == *"Clear"* ]]; then
-		if [[ "$weather" == *"Rain"* ]]; then
+		#if [[ "$weather" == *"Rain"* ]]; then
+		if 	[[ "$weather" == *"Rain"* ]] || 
+		 	[[ "$weather" == *"Snow"* ]] || 
+		 	[[ "$weather" == *"Hail"* ]] || 
+		 	[[ "$weather" == *"Ice"* ]] || 
+		 	[[ "$weather" == *"Thunderstorm"* ]] || 
+			[[ "$weather" == *"Drizzle"* ]]; 
+		then
 			#echo "ECCOMI!!!!!"
 			echo $local_epoch > "$STATUS_DIR/last_rain_online"
 			return $local_epoch	
