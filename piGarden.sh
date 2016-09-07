@@ -50,6 +50,12 @@ function initialize {
 
 }
 
+function reset_messages {
+	rm -f "$LAST_INFO_FILE.$!"
+	rm -f "$LAST_WARNING_FILE.$!"
+	rm -f "$LAST_SUCCESS_FILE.$!"
+}
+
 #
 # Commuta un elettrovalvola nello stato aperto
 # $1 alias elettrovalvola
@@ -64,6 +70,7 @@ function ev_open {
 			let "dif = now - last_rain"
 			if [ $dif -lt $NOT_IRRIGATE_IF_RAIN_ONLINE ]; then
 				log_write "Solenoid '$1' not open for rain (online check)"
+				message_write "warning" "Solenoid not open for rain"
 				return
 			fi
 		fi
@@ -76,12 +83,14 @@ function ev_open {
 			let "dif = now - last_rain"
 			if [ $dif -lt $NOT_IRRIGATE_IF_RAIN_SENSOR ]; then
 				log_write "Solenoid '$1' not open for rain (sensor check)"
+				message_write "warning" "Solenoid not open for rain"
 				return
 			fi
 		fi
 	fi
 
 	log_write "Solenoid '$1' open"
+	message_write "success" "Solenoid open"
 	supply_positive
 	#gpio_alias2number $1
 	ev_alias2number $1
@@ -100,6 +109,7 @@ function ev_open {
 #
 function ev_close {
 	log_write "Solenoid '$1' close"
+	message_write "success" "Solenoid close"
 	supply_negative
 	#$GPIO_alias2number $1
 	ev_alias2number $1
@@ -145,6 +155,26 @@ function log_write {
 }
 
 #
+# Scrive una tipologia di messaggio da inviare via socket server
+# $1 tipo messaggio: info, warning, success
+# $2 messaggio
+#
+function message_write {
+	local file_message=""
+	if [ "$1" = 'info' ]; then
+		file_message="$LAST_INFO_FILE.$!"
+	elif [ "$1" = "warning" ]; then
+		file_message="$LAST_WARNING_FILE.$!"
+	elif [ "$1" = "success" ]; then
+		file_message="$LAST_SUCCESS_FILE.$!"
+	else
+		return
+	fi
+	
+	echo "$2" > "$file_message"
+}
+
+#
 # Imposta lo stgato di una elettrovalvola
 # $1 numero dell'elettrovalvola 
 # $2 stato da scrivere
@@ -177,6 +207,7 @@ function gpio_alias2number {
 	done
 
 	log_write "ERROR solenoid alias not found: $1"
+	message_write "error" "Solenoid alias not found"
 	exit 1
 }
 
@@ -195,6 +226,7 @@ function ev_alias2number {
 	done
 
 	log_write "ERROR solenoid alias not found: $1"
+	message_write "error" "Solenoid alias not found"
 	exit 1
 }
 
@@ -244,6 +276,7 @@ function check_rain_online {
 	# http://www.wunderground.com/weather/api/d/docs?d=resources/phrase-glossary&MR=1
 	$CURL http://api.wunderground.com/api/$WUNDERGROUND_KEY/conditions/q/$WUNDERGROUND_LOCATION.json > /tmp/check_rain_online.json
 	local weather=`cat /tmp/check_rain_online.json | $JQ -M ".current_observation.weather"`
+	local current_observation=`cat /tmp/check_rain_online.json | $JQ -M ".current_observation"`
 	local local_epoch=`cat /tmp/check_rain_online.json | $JQ -M -r ".current_observation.local_epoch"`
 	#echo $weather
 	#weather="[Light/Heavy] Drizzle"
@@ -264,6 +297,7 @@ function check_rain_online {
 			echo $local_epoch > "$STATUS_DIR/last_rain_online"
 			return $local_epoch	
 		fi
+		echo "$current_observation" > "$STATUS_DIR/last_weather_online"
 	fi
 }
 
@@ -325,7 +359,7 @@ function close_all_for_rain {
 			#echo "$al = $state"
 			if [ "$state" = "1" ]; then
 				ev_close $al
-				log_write "close_all_for_rain - Close solenod '$al' for rain"
+				log_write "close_all_for_rain - Close solenoid '$al' for rain"
 			fi
 		done
 	fi
@@ -343,7 +377,7 @@ function close_all {
 			#echo "$al = $state"
 			if [[ "$state" = "1" || "$1" = "force" ]]; then
 				ev_close $al
-				log_write "close_all - Close solenod '$al' for rain"
+				log_write "close_all - Close solenoid '$al' for rain"
 			fi
 		done
 
@@ -362,6 +396,13 @@ function list_alias {
 
 function json_status {
 	local json=""
+	local json_last_weather_online="\"\""
+	local json_error="\"error\":{\"code\":0,\"description\":\"\"}"
+	local last_rain_sensor="";
+	local last_rain_online="";
+	local last_info=""
+	local last_warning=""
+	local last_success=""
 	for i in $(seq $EV_TOTAL)
 	do
 		local a=EV"$i"_ALIAS
@@ -375,7 +416,30 @@ function json_status {
 	done
 	json="\"zones\":{$json}"
 
-	json="{$json}"
+	local last_rain_sensor=`cat "$STATUS_DIR/last_rain_sensor" 2> /dev/null`
+	local last_rain_online=`cat "$STATUS_DIR/last_rain_online" 2> /dev/null`
+
+	local last_weather_online=`cat "$STATUS_DIR/last_weather_online" 2> /dev/null`
+	if [[ ! -z "$last_weather_online" ]]; then
+		json_last_weather_online=$last_weather_online
+	fi
+	if [ -f "$LAST_INFO_FILE.$!" ]; then
+		last_info=`cat "$LAST_INFO_FILE.$!"`
+	fi
+	if [ -f "$LAST_WARNING_FILE.$!" ]; then
+		last_warning=`cat "$LAST_WARNING_FILE.$!"`
+	fi
+	if [ -f "$LAST_SUCCESS_FILE.$!" ]; then
+		last_success=`cat "$LAST_SUCCESS_FILE.$!"`
+	fi
+	local json_last_weather_online="\"last_weather_online\":$json_last_weather_online"
+	local json_last_rain_sensor="\"last_rain_sensor\":\"$last_rain_sensor\""
+	local json_last_rain_online="\"last_rain_online\":\"$last_rain_online\""
+	local json_last_info="\"info\":\"$last_info\""	
+	local json_last_warning="\"warning\":\"$last_warning\""	
+	local json_last_success="\"success\":\"$last_success\""	
+
+	json="{$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor}"
 
 	echo $json
 
@@ -383,6 +447,29 @@ function json_status {
 
 }
 
+function cron_del_check_rain_sensor {
+
+	TMP_CRON_FILE="/tmp/pigarden.user.cron"
+	$CRONTAB -l > /tmp/pigarden.user.cron
+	local START=`$GREP -n "# START cron_del_check_rain_sensor"`
+	local END=`$GREP -n "# END cron_del_check_rain_sensor"`
+	local re='^[0-9]+$'
+	if ! [[ $START =~ $re ]] ; then
+  		echo "Cron start don't find" >&2
+		return
+	fi
+	if ! [[ $END =~ $re ]] ; then
+  		echo "Cron end cron don't find" >&2
+		return
+	fi
+	if [ "$START" -gt "$END" ]; then
+  		echo "Wrong position for start and end in cron" >&2
+		return
+	fi
+	$SED '$START,$ENDd' $TMP_CRON_FILE
+	$CRONTAB $TMP_CRON_FILE
+
+}
 
 function show_usage {
 	echo -e "Usage:"
@@ -397,8 +484,112 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT check_rain_sensor \tcheck rain from hardware sensor"
 	echo -e "\t$NAME_SCRIPT close_all_for_rain \tclose all solenoid if it's raining"
 	echo -e "\t$NAME_SCRIPT close_all [force]\tclose all solenoid"
+	echo -e "\t$NAME_SCRIPT start_socket_server\tstart socket server"
+	echo -e "\t$NAME_SCRIPT stop_socket_server\tstop socket server"
+	echo -e "\t$NAME_SCRIPT cron_set_check_rain_sensor\tset crontab for check rein from sensor"
+	echo -e "\t$NAME_SCRIPT cron_del_check_rain_sensor\tremove crontab for check rein from sensor"
 	echo -e "\t$NAME_SCRIPT debug1 [parameter]|[parameter]|..]\tRun debug code 1"
 	echo -e "\t$NAME_SCRIPT debug2 [parameter]|[parameter]|..]\tRun debug code 2"
+}
+
+function start_socket_server {
+
+	rm -f "$TCPSERVER_PID_FILE"
+	echo $TCPSERVER_PID_SCRIPT > "$TCPSERVER_PID_FILE"
+	$TCPSERVER -v -RHl0 $TCPSERVER_IP $TCPSERVER_PORT $0 socket_server_command 
+
+	#if [ $? -eq 0 ]; then
+	#	echo $TCPSERVER_PID_SCRIPT > "$TCPSERVER_PID_FILE"
+	#	trap stop_socket_server EXIT
+
+	#	log_write "start socket server ";
+	#	return 0
+	#else
+	#	log_write "start socket server failed";
+	#	return 1
+	#fi
+}
+
+function stop_socket_server {
+
+        if [ ! -f "$TCPSERVER_PID_FILE" ]; then
+                echo "Daemon is not running"
+                exit 1
+        fi
+
+	log_write "stop socket server"
+
+        kill -9 $(list_descendants `cat "$TCPSERVER_PID_FILE"`) 2> /dev/null
+        kill -9 `cat "$TCPSERVER_PID_FILE"` 2> /dev/null
+        rm -f "$TCPSERVER_PID_FILE"
+
+}
+
+function socket_server_command {
+
+	RUN_FROM_TCPSERVER=1
+
+	local line=""
+	read line
+	line=$(echo "$line " | $TR -d '[\r\n]')
+	arg1=$(echo "$line " | $CUT -d ' ' -f1)
+	arg2=$(echo "$line " | $CUT -d ' ' -f2)
+	arg3=$(echo "$line " | $CUT -d ' ' -f3)
+	arg4=$(echo "$line " | $CUT -d ' ' -f4)
+	arg5=$(echo "$line " | $CUT -d ' ' -f5)
+
+	log_write "socket connection from: $TCPREMOTEIP - command: $arg1 $arg2 $arg3 $arg4 $arg5"
+	
+	reset_messages &> /dev/null
+
+	case "$arg1" in
+        	status)
+			json_status
+			;;
+
+		open)
+	                if [ "empty$arg2" == "empty" ]; then
+        	                json_error 0 "Alias solenoid not specified"
+			else
+                		ev_open $arg2 $arg3 &> /dev/null
+				json_status
+			fi
+			;;
+
+		close)
+	                if [ "empty$arg2" == "empty" ]; then
+        	                json_error 0 "Alias solenoid not specified"
+			else
+                		ev_close $arg2 &> /dev/null
+				json_status
+                	fi
+			;;
+
+		*)
+			json_error 0 "invalid command"
+			;;
+
+	esac
+	
+	reset_messages &> /dev/null
+
+}
+
+json_error()
+{
+	echo "{\"error\":{\"code\":$1,\"description\":\"$2\"}}"
+}
+
+list_descendants ()
+{
+  local children=$(ps -o pid= --ppid "$1")
+
+  for pid in $children
+  do
+    list_descendants "$pid"
+  done
+
+  echo "$children"
 }
 
 function debug1 {
@@ -412,6 +603,10 @@ function debug2 {
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
 CONFIG_ETC="/etc/piGarden.conf"
+TCPSERVER_PID_FILE="/tmp/piGardenTcpServer.pid"
+TCPSERVER_PID_SCRIPT=$$
+RUN_FROM_TCPSERVER=0
+TMP_CRON_FILE="/tmp/pigarden.user.cron"
 
 if [ -f $CONFIG_ETC ]; then
 	. $CONFIG_ETC
@@ -419,6 +614,10 @@ else
 	echo -e "Config file not found in $CONFIG_ETC"
 	exit 1
 fi
+
+LAST_INFO_FILE="$STATUS_DIR/last_info"
+LAST_WARNING_FILE="$STATUS_DIR/last_worning"
+LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
 
 case "$1" in
 	init) 
@@ -469,6 +668,42 @@ case "$1" in
 
 	close_all)
 		close_all $2
+		;;
+
+        start_socket_server)
+                if [ -f "$TCPSERVER_PID_FILE" ]; then
+                        echo "Daemon is already running, use \"$0 stop_socket_server\" to stop the service"
+                        exit 1
+                fi
+
+                nohup $0 start_socket_server_daemon > /dev/null 2>&1 &
+
+	        #if [ -f "$TCPSERVER_PID_FILE" ]; then
+                echo "Daemon is started widh pid $!"
+		log_write "start socket server with pid $!"
+		#else
+		#	echo "start socket server failed";
+		#fi
+                ;;
+
+	start_socket_server_daemon)
+		start_socket_server
+		;;
+
+	stop_socket_server)
+		stop_socket_server
+		;;
+
+	socket_server_command)
+		socket_server_command
+		;;
+
+	cron_set_check_rain_sensor)
+		cron_set_check_rain_sensor
+		;;
+
+	cron_del_check_rain_sensor)
+		cron_del_check_rain_sensor
 		;;
 
 	debug1)

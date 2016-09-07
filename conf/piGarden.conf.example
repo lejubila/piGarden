@@ -14,14 +14,23 @@ JQ="/usr/local/bin/jq"
 # Percorso curl
 CURL="/usr/bin/curl"
 
-# Percors wc
+# Percorso wc
 WC="/usr/bin/wc"
 
 # Percorso gzip
 GZIP="/bin/gzip"
 
-# Percors mv
+# Percorso mv
 MV="/bin/mv"
+
+# Percorso di tr
+TR="/usr/bin/tr"
+
+# Percorso di cut
+CUT="/usr/bin/cut"
+
+# Percorso tcpserver
+TCPSERVER="/usr/bin/tcpserver"
 
 # Id gpio usati per simulare il doppio deviatore con cui eseguire l'alimentazione alle elettrovalvole
 SUPPLY_GPIO_1=2
@@ -81,4 +90,8 @@ NOT_IRRIGATE_IF_RAIN_ONLINE=86400
 
 # Il parametro è simile a quello precedente, il controllo però anziché essere fatto attingendo a wunderground, viene eseguito direttamente sul sensore se installato. Inserendo il valore zero non viene eseguito nessun controllo.
 NOT_IRRIGATE_IF_RAIN_SENSOR=86400
+
+# Indirizzo ip e porta di ascolto del socket server
+TCPSERVER_IP="127.0.0.1"
+TCPSERVER_PORT="8084"
 
