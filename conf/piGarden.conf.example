@@ -32,6 +32,18 @@ CUT="/usr/bin/cut"
 # Percorso tcpserver
 TCPSERVER="/usr/bin/tcpserver"
 
+# Percorso cron
+CRONTAB="/usr/bin/crontab"
+
+# Percorso grep
+GREP="/bin/grep"
+
+# Percorsp sed
+SED="/bin/sed"
+
+# Percorso readlink
+READLINK="/bin/readlink"
+
 # Id gpio usati per simulare il doppio deviatore con cui eseguire l'alimentazione alle elettrovalvole
 SUPPLY_GPIO_1=2
 SUPPLY_GPIO_2=3

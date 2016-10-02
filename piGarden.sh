@@ -447,29 +447,252 @@ function json_status {
 
 }
 
-function cron_del_check_rain_sensor {
+#
+# Elimina una tipoliga di schedulazione dal crontab dell'utente
+# $1	tipologia del crontab
+# $2	argomento della tipologia
+#
+function cron_del {
 
-	TMP_CRON_FILE="/tmp/pigarden.user.cron"
-	$CRONTAB -l > /tmp/pigarden.user.cron
-	local START=`$GREP -n "# START cron_del_check_rain_sensor"`
-	local END=`$GREP -n "# END cron_del_check_rain_sensor"`
+	local CRON_TYPE=$1
+	local CRON_ARG=$2
+
+	if [ -z "$CRON_TYPE" ]; then
+		echo "Cron type is empty" >&2
+		log_write "Cron type is empty"
+		return 1
+	fi
+
+	$CRONTAB -l > "$TMP_CRON_FILE"
+	local START=`$GREP -n "# START cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
+	local END=`$GREP -n "# END cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
 	local re='^[0-9]+$'
+
+	if ! [[ "$START" =~ $re ]] && ! [[ "$END" =~ $re ]] ; then
+		echo "$1 $2 cron is not present" >&2
+		return
+	fi
 	if ! [[ $START =~ $re ]] ; then
   		echo "Cron start don't find" >&2
-		return
+  		log_write "Cron start don't find"
+		return 1
 	fi
 	if ! [[ $END =~ $re ]] ; then
   		echo "Cron end cron don't find" >&2
-		return
+  		log_write "Cron end cron don't find"
+		return 1
 	fi
 	if [ "$START" -gt "$END" ]; then
   		echo "Wrong position for start and end in cron" >&2
-		return
+  		log_write "Wrong position for start and end in cron"
+		return 1
 	fi
-	$SED '$START,$ENDd' $TMP_CRON_FILE
-	$CRONTAB $TMP_CRON_FILE
+
+
+	$SED "$START,${END}d" "$TMP_CRON_FILE" | $CRONTAB -
+	#$CRONTAB "$TMP_CRON_FILE"
+	rm "$TMP_CRON_FILE"
 
 }
+
+#
+# Aggiunge una schedulazione nel crontab dell'utente
+# $1	tipologia del crontab
+# $2	minuto
+# $3	ora
+# $4	giorno del mese
+# $5	mese
+# $6	giorno della settimana
+# $7	argomento della tipologia
+#
+function cron_add {
+
+	local CRON_TYPE=$1
+	local CRON_M=$2
+	local CRON_H=$3
+	local CRON_DOM=$4
+	local CRON_MON=$5
+	local CRON_DOW=$6
+	local CRON_ARG=$7
+	local CRON_COMMAND=""
+	local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/$NAME_SCRIPT"`
+
+	if [ -z "$CRON_TYPE" ]; then
+		echo "Cron type is empty" >&2
+		log_write "Cron type is empty"
+		return 1
+	fi
+
+	$CRONTAB -l > "$TMP_CRON_FILE"
+	local START=`$GREP -n "# START cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
+	local END=`$GREP -n "# END cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
+	local re='^[0-9]+$'
+
+	local NEW_CRON=0
+	local PREVIUS_CONTENT=""
+
+	if ! [[ $START =~ $re ]] && ! [[ $END =~ $re ]] ; then
+  		NEW_CRON=1
+	else
+		if ! [[ $START =~ $re ]] ; then
+  			echo "Cron start don't find" >&2
+  			log_write "Cron start don't find"
+			return 1
+		fi
+		if ! [[ $END =~ $re ]] ; then
+  			echo "Cron end cron don't find" >&2
+  			log_write "Cron end cron don't find"
+			return 1
+		fi
+		START=$(START + 1)
+		END=$(END - 1)
+
+		if [ "$START" -gt "$END" ]; then
+  			echo "Wrong position for start and end in cron" >&2
+  			log_write "Wrong position for start and end in cron"
+			return 1
+		fi
+		
+		PREVIOUS_CONTENT=`$SED -n '$START,${END}d' `
+	fi
+
+	case "$CRON_TYPE" in
+
+		init)
+			CRON_M="@reboot"
+			CRON_H=""
+			CRON_DOM=""
+			CRON_MON=""
+			CRON_DOW=""
+			CRON_COMMAND="$PATH_SCRIPT init"
+			;;
+
+		start_socket_server)
+			CRON_M="@reboot"
+			CRON_H=""
+			CRON_DOM=""
+			CRON_MON=""
+			CRON_DOW=""
+			CRON_COMMAND="$PATH_SCRIPT start_socket_server"
+			;;
+
+		check_rain_online)
+			CRON_M="*/3"
+			CRON_H="*"
+			CRON_DOM="*"
+			CRON_MON="*"
+			CRON_DOW="*"
+			CRON_COMMAND="$PATH_SCRIPT check_rain_online 2> /tmp/check_rain_online.err"
+			;;
+
+		check_rain_sensor)
+			CRON_M="*"
+			CRON_H="*"
+			CRON_DOM="*"
+			CRON_MON="*"
+			CRON_DOW="*"
+			CRON_COMMAND="$PATH_SCRIPT check_rain_sensor 2> /tmp/check_rain_sensor.err"
+			;;
+
+		close_all_for_rain)
+			CRON_M="*/5"
+			CRON_H="*"
+			CRON_DOM="*"
+			CRON_MON="*"
+			CRON_DOW="*"
+			CRON_COMMAND="$PATH_SCRIPT close_all_for_rain 2> /tmp/close_all_for_rain.err 1> /dev/null"
+			;;
+
+		open)
+			;;
+
+		close)
+			;;
+
+		*)
+			echo "Wrong cron type: $CRON_TYPE"
+			log_write "Wrong cron type: $CRON_TYPE"
+			;;
+
+	esac
+
+	if [ "$NEW_CRON" -eq "0" ]; then
+		cron_del "$CRON_TYPE" "$CRON_ARG"
+	fi
+
+	echo "# START cron $CRON_TYPE $CRON_ARG" >> "$TMP_CRON_FILE"
+	echo -n "$PREVIOUS_CONTENT" >> "$TMP_CRON_FILE"
+	echo "$CRON_M $CRON_H $CRON_DOM $CRON_MON $CRON_DOW $CRON_COMMAND" >> "$TMP_CRON_FILE"
+	echo "# END cron $CRON_TYPE $CRON_ARG" >> "$TMP_CRON_FILE"
+
+	$CRONTAB "$TMP_CRON_FILE"
+	rm "$TMP_CRON_FILE"
+
+}
+
+
+function set_cron_init {
+
+	cron_del "init" 2> /dev/null
+	cron_add "init"
+
+}
+
+function del_cron_init {
+
+	cron_del "init"
+
+}
+
+function set_cron_start_socket_server {
+
+	cron_del "start_socket_server" 2> /dev/null
+	cron_add "start_socket_server"
+
+}
+
+function del_cron_start_socket_server {
+
+	cron_del "start_socket_server"
+}
+
+function set_cron_check_rain_sensor {
+
+	cron_del "check_rain_sensor" 2> /dev/null
+	cron_add "check_rain_sensor"
+}
+
+function del_cron_check_rain_sensor {
+
+	cron_del "check_rain_sensor"
+
+}
+
+function set_cron_check_rain_online {
+
+	cron_del "check_rain_online" 2> /dev/null
+	cron_add "check_rain_online"
+}
+
+function del_cron_check_rain_online {
+
+	cron_del "check_rain_online"
+
+}
+
+function set_cron_close_all_for_rain {
+
+	cron_del "close_all_for_rain" 2> /dev/null
+	cron_add "close_all_for_rain"
+}
+
+function del_cron_close_all_for_rain {
+
+	cron_del "close_all_for_rain"
+
+}
+
+
 
 function show_usage {
 	echo -e "Usage:"
@@ -486,8 +709,18 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT close_all [force]\tclose all solenoid"
 	echo -e "\t$NAME_SCRIPT start_socket_server\tstart socket server"
 	echo -e "\t$NAME_SCRIPT stop_socket_server\tstop socket server"
-	echo -e "\t$NAME_SCRIPT cron_set_check_rain_sensor\tset crontab for check rein from sensor"
-	echo -e "\t$NAME_SCRIPT cron_del_check_rain_sensor\tremove crontab for check rein from sensor"
+	echo -e "\n"
+	echo -e "\t$NAME_SCRIPT set_cron_init\tset crontab for initialize control unit"
+	echo -e "\t$NAME_SCRIPT del_cron_init\tremove crontab for initialize control unit"
+	echo -e "\t$NAME_SCRIPT set_cron_start_socket_server\tset crontab for start socket server"
+	echo -e "\t$NAME_SCRIPT del_cron_start_socket_server\tremove crontab for start socket server"
+	echo -e "\t$NAME_SCRIPT set_cron_check_rain_sensor\tset crontab for check rein from sensor"
+	echo -e "\t$NAME_SCRIPT del_cron_check_rain_sensor\tremove crontab for check rein from sensor"
+	echo -e "\t$NAME_SCRIPT set_cron_check_rain_online\tset crontab for check rein from online service"
+	echo -e "\t$NAME_SCRIPT del_cron_check_rain_online\tremove crontab for check rein from online service"
+	echo -e "\t$NAME_SCRIPT set_cron_close_all_for_rain\tset crontab for close all solenoid when raining"
+	echo -e "\t$NAME_SCRIPT del_cron_close_all_for_rain\tremove crontab for close all solenoid when raining"
+	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT debug1 [parameter]|[parameter]|..]\tRun debug code 1"
 	echo -e "\t$NAME_SCRIPT debug2 [parameter]|[parameter]|..]\tRun debug code 2"
 }
@@ -606,7 +839,7 @@ CONFIG_ETC="/etc/piGarden.conf"
 TCPSERVER_PID_FILE="/tmp/piGardenTcpServer.pid"
 TCPSERVER_PID_SCRIPT=$$
 RUN_FROM_TCPSERVER=0
-TMP_CRON_FILE="/tmp/pigarden.user.cron"
+TMP_CRON_FILE="/tmp/pigarden.user.cron.$$"
 
 if [ -f $CONFIG_ETC ]; then
 	. $CONFIG_ETC
@@ -698,12 +931,44 @@ case "$1" in
 		socket_server_command
 		;;
 
-	cron_set_check_rain_sensor)
-		cron_set_check_rain_sensor
+	set_cron_init)
+		set_cron_init
 		;;
 
-	cron_del_check_rain_sensor)
-		cron_del_check_rain_sensor
+	del_cron_init)
+		del_cron_init
+		;;
+
+	set_cron_start_socket_server)
+		set_cron_start_socket_server
+		;;
+
+	del_cron_start_socket_server)
+		del_cron_start_socket_server
+		;;
+
+	set_cron_check_rain_sensor)
+		set_cron_check_rain_sensor
+		;;
+
+	del_cron_check_rain_sensor)
+		del_cron_check_rain_sensor
+		;;
+
+	set_cron_check_rain_online)
+		set_cron_check_rain_online
+		;;
+
+	del_cron_check_rain_online)
+		del_cron_check_rain_online
+		;;
+
+	set_cron_close_all_for_rain)
+		set_cron_close_all_for_rain
+		;;
+
+	del_cron_close_all_for_rain)
+		del_cron_close_all_for_rain
 		;;
 
 	debug1)
