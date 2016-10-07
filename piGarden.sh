@@ -231,6 +231,24 @@ function ev_alias2number {
 }
 
 #
+# Verifica se un alias di una elettrovalvola esiste
+# $1 alias dell'elettrovalvola
+#
+function alias_exists {
+	local vret='FALSE'
+	for i in $(seq $EV_TOTAL)
+	do
+		a=EV"$i"_ALIAS
+		av=${!a}
+		if [ "$av" == "$1" ]; then
+			vret='TRUE'
+		fi
+	done
+
+	echo $vret
+}
+
+#
 # Recupera il numero di gpio associato ad una elettrovalvola
 # $1 numero elettrovalvola
 #
@@ -516,6 +534,7 @@ function cron_add {
 	local CRON_ARG=$7
 	local CRON_COMMAND=""
 	local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/$NAME_SCRIPT"`
+	local TMP_CRON_FILE2="$TMP_CRON_FILE-2"
 
 	if [ -z "$CRON_TYPE" ]; then
 		echo "Cron type is empty" >&2
@@ -544,8 +563,8 @@ function cron_add {
   			log_write "Cron end cron don't find"
 			return 1
 		fi
-		START=$(START + 1)
-		END=$(END - 1)
+		START=$(($START + 1))
+		END=$(($END - 1))
 
 		if [ "$START" -gt "$END" ]; then
   			echo "Wrong position for start and end in cron" >&2
@@ -553,7 +572,8 @@ function cron_add {
 			return 1
 		fi
 		
-		PREVIOUS_CONTENT=`$SED -n '$START,${END}d' `
+		PREVIOUS_CONTENT=`$SED -n "$START,${END}p" "$TMP_CRON_FILE"`
+
 	fi
 
 	case "$CRON_TYPE" in
@@ -604,9 +624,11 @@ function cron_add {
 			;;
 
 		open)
+			CRON_COMMAND="$PATH_SCRIPT open $CRON_ARG"
 			;;
 
 		close)
+			CRON_COMMAND="$PATH_SCRIPT close $CRON_ARG"
 			;;
 
 		*)
@@ -617,19 +639,27 @@ function cron_add {
 	esac
 
 	if [ "$NEW_CRON" -eq "0" ]; then
-		cron_del "$CRON_TYPE" "$CRON_ARG"
+		START=$(($START - 1))
+		END=$(($END + 1))
+		$SED "$START,${END}d" "$TMP_CRON_FILE" > "$TMP_CRON_FILE2"
+	else
+		cat "$TMP_CRON_FILE" > "$TMP_CRON_FILE2"
 	fi
 
-	echo "# START cron $CRON_TYPE $CRON_ARG" >> "$TMP_CRON_FILE"
-	echo -n "$PREVIOUS_CONTENT" >> "$TMP_CRON_FILE"
-	echo "$CRON_M $CRON_H $CRON_DOM $CRON_MON $CRON_DOW $CRON_COMMAND" >> "$TMP_CRON_FILE"
-	echo "# END cron $CRON_TYPE $CRON_ARG" >> "$TMP_CRON_FILE"
+	if [ "$NEW_CRON" -eq "1" ]; then
+		echo "" >> "$TMP_CRON_FILE2"
+	fi
+	echo "# START cron $CRON_TYPE $CRON_ARG" >> "$TMP_CRON_FILE2"
+	if [ "$NEW_CRON" -eq "0" ]; then
+		echo "$PREVIOUS_CONTENT" >> "$TMP_CRON_FILE2"
+	fi
+	echo "$CRON_M $CRON_H $CRON_DOM $CRON_MON $CRON_DOW $CRON_COMMAND" >> "$TMP_CRON_FILE2"
+	echo "# END cron $CRON_TYPE $CRON_ARG" >> "$TMP_CRON_FILE2"
 
-	$CRONTAB "$TMP_CRON_FILE"
-	rm "$TMP_CRON_FILE"
+	$CRONTAB "$TMP_CRON_FILE2"
+	rm "$TMP_CRON_FILE" "$TMP_CRON_FILE2"
 
 }
-
 
 function set_cron_init {
 
@@ -692,37 +722,120 @@ function del_cron_close_all_for_rain {
 
 }
 
+#
+# Aggiunge una schedulazione cron per aprire una elettrovalvola
+# $1	alias elettrovalvola
+# $2	minuto cron
+# $3	ora cron
+# $4	giorno del mese cron
+# $5	mese cron
+# $6	giorno della settimana cron
+#
+function add_cron_open {
+
+	local exists=`alias_exists $1`
+	if [ "check $exists" = "check FALSE" ]; then
+		log_write "Alias $1 not found"
+		echo "Alias $1 not found"
+		return 1
+	fi
+
+	cron_add "open" $2 $3 $4 $5 $6 $1
+
+}
+
+#
+# Cancella tutte le schedulazioni cron per aprire una elettrovalvola
+# $1	alias elettrovalvola
+#
+function del_cron_open {
+
+	local exists=`alias_exists $1`
+	if [ "check $exists" = "check FALSE" ]; then
+		log_write "Alias $1 not found"
+		echo "Alias $1 not found"
+		return 1
+	fi
+
+	cron_del "open" $1	
+
+}
+
+#
+# Aggiunge una schedulazione cron per chiudere una elettrovalvola
+# $1	alias elettrovalvola
+# $2	minuto cron
+# $3	ora cron
+# $4	giorno del mese cron
+# $5	mese cron
+# $6	giorno della settimana cron
+#
+function add_cron_close {
+
+	local exists=`alias_exists $1`
+	if [ "check $exists" = "check FALSE" ]; then
+		log_write "Alias $1 not found"
+		echo "Alias $1 not found"
+		return 1
+	fi
+
+	cron_add "close" $2 $3 $4 $5 $6 $1
+
+}
+
+#
+# Cancella tutte le schedulazioni cron per chiudere una elettrovalvola
+# $1	alias elettrovalvola
+#
+function del_cron_close {
+
+	local exists=`alias_exists $1`
+	if [ "check $exists" = "check FALSE" ]; then
+		log_write "Alias $1 not found"
+		echo "Alias $1 not found"
+		return 1
+	fi
+
+	cron_del "close" $1	
+
+}
+
 
 
 function show_usage {
 	echo -e "Usage:"
-	echo -e "\t$NAME_SCRIPT init\t\tinitialize supply and solenoid in closed state"
-	echo -e "\t$NAME_SCRIPT open alias [force]\topen a solenoid"
-	echo -e "\t$NAME_SCRIPT close alias\t\tclose a solenoid"
-	echo -e "\t$NAME_SCRIPT list_alias\t\tview list of aliases solenoid"
-	echo -e "\t$NAME_SCRIPT ev_status alias\tshow status solenoid"
-	echo -e "\t$NAME_SCRIPT ev_status_all \tshow status solenoids"
-	echo -e "\t$NAME_SCRIPT json_status \tshow status in json format"
-	echo -e "\t$NAME_SCRIPT check_rain_online \tcheck rain from http://api.wunderground.com/"
-	echo -e "\t$NAME_SCRIPT check_rain_sensor \tcheck rain from hardware sensor"
-	echo -e "\t$NAME_SCRIPT close_all_for_rain \tclose all solenoid if it's raining"
-	echo -e "\t$NAME_SCRIPT close_all [force]\tclose all solenoid"
-	echo -e "\t$NAME_SCRIPT start_socket_server\tstart socket server"
-	echo -e "\t$NAME_SCRIPT stop_socket_server\tstop socket server"
+	echo -e "\t$NAME_SCRIPT init                                         initialize supply and solenoid in closed state"
+	echo -e "\t$NAME_SCRIPT open alias [force]                           open a solenoid"
+	echo -e "\t$NAME_SCRIPT close alias                                  close a solenoid"
+	echo -e "\t$NAME_SCRIPT list_alias                                   view list of aliases solenoid"
+	echo -e "\t$NAME_SCRIPT ev_status alias                              show status solenoid"
+	echo -e "\t$NAME_SCRIPT ev_status_all                                show status solenoids"
+	echo -e "\t$NAME_SCRIPT json_status                                  show status in json format"
+	echo -e "\t$NAME_SCRIPT check_rain_online                            check rain from http://api.wunderground.com/"
+	echo -e "\t$NAME_SCRIPT check_rain_sensor                            check rain from hardware sensor"
+	echo -e "\t$NAME_SCRIPT close_all_for_rain                           close all solenoid if it's raining"
+	echo -e "\t$NAME_SCRIPT close_all [force]                            close all solenoid"
+	echo -e "\t$NAME_SCRIPT start_socket_server                          start socket server"
+	echo -e "\t$NAME_SCRIPT stop_socket_server                           stop socket server"
 	echo -e "\n"
-	echo -e "\t$NAME_SCRIPT set_cron_init\tset crontab for initialize control unit"
-	echo -e "\t$NAME_SCRIPT del_cron_init\tremove crontab for initialize control unit"
-	echo -e "\t$NAME_SCRIPT set_cron_start_socket_server\tset crontab for start socket server"
-	echo -e "\t$NAME_SCRIPT del_cron_start_socket_server\tremove crontab for start socket server"
-	echo -e "\t$NAME_SCRIPT set_cron_check_rain_sensor\tset crontab for check rein from sensor"
-	echo -e "\t$NAME_SCRIPT del_cron_check_rain_sensor\tremove crontab for check rein from sensor"
-	echo -e "\t$NAME_SCRIPT set_cron_check_rain_online\tset crontab for check rein from online service"
-	echo -e "\t$NAME_SCRIPT del_cron_check_rain_online\tremove crontab for check rein from online service"
-	echo -e "\t$NAME_SCRIPT set_cron_close_all_for_rain\tset crontab for close all solenoid when raining"
-	echo -e "\t$NAME_SCRIPT del_cron_close_all_for_rain\tremove crontab for close all solenoid when raining"
+	echo -e "\t$NAME_SCRIPT set_cron_init                                set crontab for initialize control unit"
+	echo -e "\t$NAME_SCRIPT del_cron_init                                remove crontab for initialize control unit"
+	echo -e "\t$NAME_SCRIPT set_cron_start_socket_server                 set crontab for start socket server"
+	echo -e "\t$NAME_SCRIPT del_cron_start_socket_server                 remove crontab for start socket server"
+	echo -e "\t$NAME_SCRIPT set_cron_check_rain_sensor                   set crontab for check rein from sensor"
+	echo -e "\t$NAME_SCRIPT del_cron_check_rain_sensor                   remove crontab for check rein from sensor"
+	echo -e "\t$NAME_SCRIPT set_cron_check_rain_online                   set crontab for check rein from online service"
+	echo -e "\t$NAME_SCRIPT del_cron_check_rain_online                   remove crontab for check rein from online service"
+	echo -e "\t$NAME_SCRIPT set_cron_close_all_for_rain                  set crontab for close all solenoid when raining"
+	echo -e "\t$NAME_SCRIPT del_cron_close_all_for_rain                  remove crontab for close all solenoid when raining"
+
+	echo -e "\t$NAME_SCRIPT add_cron_open alias m h dom mon dow          add crontab for open a solenoid"
+	echo -e "\t$NAME_SCRIPT del_cron_open alias m h dom mon dow          remove all crontab for open a solenoid"
+	echo -e "\t$NAME_SCRIPT add_cron_close alias m h dom mon dow         add crontab for close a solenoid"
+	echo -e "\t$NAME_SCRIPT del_cron_close alias m h dom mon dow         remove all crontab for close a solenoid"
 	echo -e "\n"
-	echo -e "\t$NAME_SCRIPT debug1 [parameter]|[parameter]|..]\tRun debug code 1"
-	echo -e "\t$NAME_SCRIPT debug2 [parameter]|[parameter]|..]\tRun debug code 2"
+	echo -e "\t$NAME_SCRIPT debug1 [parameter]|[parameter]|..]           Run debug code 1"
+	echo -e "\t$NAME_SCRIPT debug2 [parameter]|[parameter]|..]           Run debug code 2"
 }
 
 function start_socket_server {
@@ -756,6 +869,7 @@ function stop_socket_server {
         kill -9 `cat "$TCPSERVER_PID_FILE"` 2> /dev/null
         rm -f "$TCPSERVER_PID_FILE"
 
+	Garden.shecho -e "\t$NAME_SCRIPT set_cron_close_all_for_rain\tset crontab for close all solenoid when raining"
 }
 
 function socket_server_command {
@@ -969,6 +1083,22 @@ case "$1" in
 
 	del_cron_close_all_for_rain)
 		del_cron_close_all_for_rain
+		;;
+
+	add_cron_open)
+		add_cron_open $2 $3 $4 $5 $6 $7
+		;;
+
+	del_cron_open)
+		del_cron_open $2 
+		;;
+
+	add_cron_close)
+		add_cron_close $2 $3 $4 $5 $6 $7
+		;;
+
+	del_cron_close)
+		del_cron_close $2 
 		;;
 
 	debug1)
