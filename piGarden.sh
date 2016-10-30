@@ -661,6 +661,58 @@ function cron_add {
 
 }
 
+#
+# Legge una tipoliga di schedulazione dal crontab dell'utente
+# $1	tipologia del crontab
+# $2	argomento della tipologia
+#
+function cron_get {
+
+	local CRON_TYPE=$1
+	local CRON_ARG=$2
+
+	if [ -z "$CRON_TYPE" ]; then
+		echo "Cron type is empty" >&2
+		log_write "Cron type is empty"
+		return 1
+	fi
+
+	$CRONTAB -l > "$TMP_CRON_FILE"
+	local START=`$GREP -n "# START cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
+	local END=`$GREP -n "# END cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
+	local re='^[0-9]+$'
+
+	local PREVIUS_CONTENT=""
+
+	if ! [[ $START =~ $re ]] && ! [[ $END =~ $re ]] ; then
+  		PREVIUS_CONTENT=""
+	else
+		if ! [[ $START =~ $re ]] ; then
+  			echo "Cron start don't find" >&2
+  			log_write "Cron start don't find"
+			return 1
+		fi
+		if ! [[ $END =~ $re ]] ; then
+  			echo "Cron end cron don't find" >&2
+  			log_write "Cron end cron don't find"
+			return 1
+		fi
+		START=$(($START + 1))
+		END=$(($END - 1))
+
+		if [ "$START" -gt "$END" ]; then
+  			echo "Wrong position for start and end in cron" >&2
+  			log_write "Wrong position for start and end in cron"
+			return 1
+		fi
+		
+		PREVIOUS_CONTENT=`$SED -n "$START,${END}p" "$TMP_CRON_FILE"`
+	fi
+
+	echo $PREVIOUS_CONTENT
+
+}
+
 function set_cron_init {
 
 	cron_del "init" 2> /dev/null
@@ -740,7 +792,7 @@ function add_cron_open {
 		return 1
 	fi
 
-	cron_add "open" $2 $3 $4 $5 $6 $1
+	cron_add "open" "$2" "$3" "$4" "$5" "$6" "$1"
 
 }
 
@@ -762,6 +814,23 @@ function del_cron_open {
 }
 
 #
+# Legge tutte le schedulazioni cron per aprire una elettrovalvola
+# $1	alias elettrovalvola
+#
+function get_cron_open {
+
+	local exists=`alias_exists $1`
+	if [ "check $exists" = "check FALSE" ]; then
+		log_write "Alias $1 not found"
+		echo "Alias $1 not found"
+		return 1
+	fi
+
+	cron_get "open" $1	
+
+}
+
+#
 # Aggiunge una schedulazione cron per chiudere una elettrovalvola
 # $1	alias elettrovalvola
 # $2	minuto cron
@@ -779,7 +848,7 @@ function add_cron_close {
 		return 1
 	fi
 
-	cron_add "close" $2 $3 $4 $5 $6 $1
+	cron_add "close" "$2" "$3" "$4" "$5" "$6" "$1"
 
 }
 
@@ -830,9 +899,10 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT del_cron_close_all_for_rain                  remove crontab for close all solenoid when raining"
 
 	echo -e "\t$NAME_SCRIPT add_cron_open alias m h dom mon dow          add crontab for open a solenoid"
-	echo -e "\t$NAME_SCRIPT del_cron_open alias m h dom mon dow          remove all crontab for open a solenoid"
+	echo -e "\t$NAME_SCRIPT del_cron_open alias                          remove all crontab for open a solenoid"
+	echo -e "\t$NAME_SCRIPT get_cron_open alias                          get all crontab for open a solenoid"
 	echo -e "\t$NAME_SCRIPT add_cron_close alias m h dom mon dow         add crontab for close a solenoid"
-	echo -e "\t$NAME_SCRIPT del_cron_close alias m h dom mon dow         remove all crontab for close a solenoid"
+	echo -e "\t$NAME_SCRIPT del_cron_close alias                         remove all crontab for close a solenoid"
 	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT debug1 [parameter]|[parameter]|..]           Run debug code 1"
 	echo -e "\t$NAME_SCRIPT debug2 [parameter]|[parameter]|..]           Run debug code 2"
@@ -884,8 +954,10 @@ function socket_server_command {
 	arg3=$(echo "$line " | $CUT -d ' ' -f3)
 	arg4=$(echo "$line " | $CUT -d ' ' -f4)
 	arg5=$(echo "$line " | $CUT -d ' ' -f5)
+	arg6=$(echo "$line " | $CUT -d ' ' -f6)
+	arg7=$(echo "$line " | $CUT -d ' ' -f7)
 
-	log_write "socket connection from: $TCPREMOTEIP - command: $arg1 $arg2 $arg3 $arg4 $arg5"
+	log_write "socket connection from: $TCPREMOTEIP - command: $arg1 $arg2 $arg3 $arg4 $arg5 $arg6 $arg7"
 	
 	reset_messages &> /dev/null
 
@@ -910,6 +982,88 @@ function socket_server_command {
                 		ev_close $arg2 &> /dev/null
 				json_status
                 	fi
+			;;
+
+		set_general_cron)
+			local vret=""
+			for i in $arg2 $arg3 $arg4 $arg5 $arg6 $arg7
+		        do
+				if [ $i = "set_cron_init" ]; then
+					vret="$(vret)`set_cron_init`"
+				elif [ $i = "set_cron_start_socket_server" ]; then
+					vret="$(vret)`set_cron_start_socket_server`"
+				elif [ $i = "set_cron_check_rain_sensor" ]; then
+					vret="$(vret)`set_cron_check_rain_sensor`"
+				elif [ $i = "set_cron_check_rain_online" ]; then
+					vret="$(vret)`set_cron_check_rain_online`"
+				elif [ $i = "set_cron_close_all_for_rain" ]; then
+					vret="$(vret)`set_cron_close_all_for_rain`"
+				fi
+			done
+
+			if [[ ! -z $vret ]]; then
+				json_error 0 "Cron set failed"
+				log_write "Cron set failed: $vret"
+			else
+				message_write "success" "Cron set successfull"
+			fi
+
+			;;
+
+		del_cron_open)
+			local vret=""
+
+			vret=`del_cron_open $arg2`
+
+			if [[ ! -z $vret ]]; then
+				json_error 0 "Cron set failed"
+				log_write "Cron set failed: $vret"
+			else
+				message_write "success" "Cron set successfull"
+			fi
+
+			;;
+
+		del_cron_close)
+			local vret=""
+
+			vret=`del_cron_close $arg2`
+
+			if [[ ! -z $vret ]]; then
+				json_error 0 "Cron set failed"
+				log_write "Cron set failed: $vret"
+			else
+				message_write "success" "Cron set successfull"
+			fi
+
+			;;
+
+		add_cron_open)
+			local vret=""
+
+			vret=`add_cron_open "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7"`
+
+			if [[ ! -z $vret ]]; then
+				json_error 0 "Cron set failed"
+				log_write "Cron set failed: $vret"
+			else
+				message_write "success" "Cron set successfull"
+			fi
+
+			;;
+
+		add_cron_close)
+			local vret=""
+
+			vret=`add_cron_close "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7"`
+
+			if [[ ! -z $vret ]]; then
+				json_error 0 "Cron set failed"
+				log_write "Cron set failed: $vret"
+			else
+				message_write "success" "Cron set successfull"
+			fi
+
 			;;
 
 		*)
@@ -1086,15 +1240,19 @@ case "$1" in
 		;;
 
 	add_cron_open)
-		add_cron_open $2 $3 $4 $5 $6 $7
+		add_cron_open "$2" "$3" "$4" "$5" "$6" "$7"
 		;;
 
 	del_cron_open)
 		del_cron_open $2 
 		;;
 
+	get_cron_open)
+		get_cron_open $2
+		;;
+
 	add_cron_close)
-		add_cron_close $2 $3 $4 $5 $6 $7
+		add_cron_close "$2" "$3" "$4" "$5" "$6" "$7"
 		;;
 
 	del_cron_close)
