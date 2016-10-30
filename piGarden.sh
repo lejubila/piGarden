@@ -709,7 +709,7 @@ function cron_get {
 		PREVIOUS_CONTENT=`$SED -n "$START,${END}p" "$TMP_CRON_FILE"`
 	fi
 
-	echo $PREVIOUS_CONTENT
+	echo "$PREVIOUS_CONTENT"
 
 }
 
