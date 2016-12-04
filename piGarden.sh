@@ -412,6 +412,9 @@ function list_alias {
 
 }
 
+#
+# $1 .. $6 parametri opzionali
+#
 function json_status {
 	local json=""
 	local json_last_weather_online="\"\""
@@ -421,6 +424,16 @@ function json_status {
 	local last_info=""
 	local last_warning=""
 	local last_success=""
+	local with_get_cron="0"
+
+	local vret=""
+	for i in $1 $2 $3 $4 $5 $6
+        do
+		if [ $i = "get_cron" ]; then
+			with_get_cron="1"
+		fi
+	done
+
 	for i in $(seq $EV_TOTAL)
 	do
 		local a=EV"$i"_ALIAS
@@ -457,9 +470,29 @@ function json_status {
 	local json_last_warning="\"warning\":\"$last_warning\""	
 	local json_last_success="\"success\":\"$last_success\""	
 
-	json="{$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor}"
+	local json_get_cron=""			
+	if [ $with_get_cron = "1" ]; then
+		local values_open="" 
+		local values_close="" 
+		for i in $(seq $EV_TOTAL)
+		do
+			local a=EV"$i"_ALIAS
+			local av=${!a}
+			local crn="$(cron_get "open" $av)"
+			crn=`echo "$crn" | sed ':a;N;$!ba;s/\n/%%/g'`
+			values_open="\"$av\": \"$crn\", $values_open"
+			local crn="$(cron_get "close" $av)"
+			crn=`echo "$crn" | sed ':a;N;$!ba;s/\n/%%/g'`
+			values_close="\"$av\": \"$crn\", $values_close"
+		done
 
-	echo $json
+		json_get_cron="\"open\": {$values_open},\"close\": {$values_close}"
+	fi
+	local json_cron="\"cron\":{$json_get_cron}"			
+
+	json="{$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron}"
+
+	echo "$json"
 
 	# {"zones":{"1":{"name":"Zona_1","state":1},"2":{"name":"Zona_2","state":0}}}
 
@@ -831,6 +864,23 @@ function get_cron_open {
 }
 
 #
+# Legge tutte le schedulazioni cron per chiudere una elettrovalvola
+# $1	alias elettrovalvola
+#
+function get_cron_close {
+
+	local exists=`alias_exists $1`
+	if [ "check $exists" = "check FALSE" ]; then
+		log_write "Alias $1 not found"
+		echo "Alias $1 not found"
+		return 1
+	fi
+
+	cron_get "close" $1	
+
+}
+
+#
 # Aggiunge una schedulazione cron per chiudere una elettrovalvola
 # $1	alias elettrovalvola
 # $2	minuto cron
@@ -879,7 +929,7 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT list_alias                                   view list of aliases solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status alias                              show status solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status_all                                show status solenoids"
-	echo -e "\t$NAME_SCRIPT json_status                                  show status in json format"
+	echo -e "\t$NAME_SCRIPT json_status [get_cron]                       show status in json format"
 	echo -e "\t$NAME_SCRIPT check_rain_online                            check rain from http://api.wunderground.com/"
 	echo -e "\t$NAME_SCRIPT check_rain_sensor                            check rain from hardware sensor"
 	echo -e "\t$NAME_SCRIPT close_all_for_rain                           close all solenoid if it's raining"
@@ -903,6 +953,7 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT get_cron_open alias                          get all crontab for open a solenoid"
 	echo -e "\t$NAME_SCRIPT add_cron_close alias m h dom mon dow         add crontab for close a solenoid"
 	echo -e "\t$NAME_SCRIPT del_cron_close alias                         remove all crontab for close a solenoid"
+	echo -e "\t$NAME_SCRIPT get_cron_close alias                         get all crontab for close a solenoid"
 	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT debug1 [parameter]|[parameter]|..]           Run debug code 1"
 	echo -e "\t$NAME_SCRIPT debug2 [parameter]|[parameter]|..]           Run debug code 2"
@@ -939,7 +990,6 @@ function stop_socket_server {
         kill -9 `cat "$TCPSERVER_PID_FILE"` 2> /dev/null
         rm -f "$TCPSERVER_PID_FILE"
 
-	Garden.shecho -e "\t$NAME_SCRIPT set_cron_close_all_for_rain\tset crontab for close all solenoid when raining"
 }
 
 function socket_server_command {
@@ -963,7 +1013,7 @@ function socket_server_command {
 
 	case "$arg1" in
         	status)
-			json_status
+			json_status $arg2 $arg3 $arg4 $arg5 $arg6 $arg7
 			;;
 
 		open)
@@ -1152,7 +1202,7 @@ case "$1" in
 		;;
 
 	json_status)
-		json_status
+		json_status $2 $3 $4 $5 $6
 		;;
 
 	check_rain_online)
@@ -1257,6 +1307,10 @@ case "$1" in
 
 	del_cron_close)
 		del_cron_close $2 
+		;;
+
+	get_cron_close)
+		get_cron_close $2
 		;;
 
 	debug1)
