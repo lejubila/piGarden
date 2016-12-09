@@ -485,6 +485,12 @@ function json_status {
 			crn=`echo "$crn" | sed ':a;N;$!ba;s/\n/%%/g'`
 			values_close="\"$av\": \"$crn\", $values_close"
 		done
+		if [[ !  -z  $values_open ]]; then
+			values_open="${values_open::-2}"
+		fi
+		if [[ !  -z  $values_close ]]; then
+			values_close="${values_close::-2}"
+		fi
 
 		json_get_cron="\"open\": {$values_open},\"close\": {$values_close}"
 	fi
