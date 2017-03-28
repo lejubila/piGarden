@@ -1062,6 +1062,7 @@ function socket_server_command {
 				log_write "Cron set failed: $vret"
 			else
 				message_write "success" "Cron set successfull"
+				json_status
 			fi
 
 			;;
@@ -1076,6 +1077,7 @@ function socket_server_command {
 				log_write "Cron set failed: $vret"
 			else
 				message_write "success" "Cron set successfull"
+				json_status
 			fi
 
 			;;
@@ -1090,6 +1092,7 @@ function socket_server_command {
 				log_write "Cron set failed: $vret"
 			else
 				message_write "success" "Cron set successfull"
+				json_status
 			fi
 
 			;;
@@ -1104,6 +1107,7 @@ function socket_server_command {
 				log_write "Cron set failed: $vret"
 			else
 				message_write "success" "Cron set successfull"
+				json_status
 			fi
 
 			;;
@@ -1118,6 +1122,7 @@ function socket_server_command {
 				log_write "Cron set failed: $vret"
 			else
 				message_write "success" "Cron set successfull"
+				json_status
 			fi
 
 			;;
