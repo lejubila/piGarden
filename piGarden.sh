@@ -632,7 +632,7 @@ function cron_add {
 			CRON_DOM=""
 			CRON_MON=""
 			CRON_DOW=""
-			CRON_COMMAND="$PATH_SCRIPT start_socket_server"
+			CRON_COMMAND="$PATH_SCRIPT start_socket_server force"
 			;;
 
 		check_rain_online)
@@ -940,7 +940,7 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT check_rain_sensor                            check rain from hardware sensor"
 	echo -e "\t$NAME_SCRIPT close_all_for_rain                           close all solenoid if it's raining"
 	echo -e "\t$NAME_SCRIPT close_all [force]                            close all solenoid"
-	echo -e "\t$NAME_SCRIPT start_socket_server                          start socket server"
+	echo -e "\t$NAME_SCRIPT start_socket_server [force]                  start socket server, with 'force' parameter force close socket server if already open"
 	echo -e "\t$NAME_SCRIPT stop_socket_server                           stop socket server"
 	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT set_cron_init                                set crontab for initialize control unit"
@@ -1235,17 +1235,19 @@ case "$1" in
         start_socket_server)
                 if [ -f "$TCPSERVER_PID_FILE" ]; then
                         echo "Daemon is already running, use \"$0 stop_socket_server\" to stop the service"
-                        exit 1
+
+			if [ "x$2" == "xforce" ]; then
+				sleep 5
+				stop_socket_server
+			else
+                        	exit 1
+			fi
                 fi
 
                 nohup $0 start_socket_server_daemon > /dev/null 2>&1 &
 
-	        #if [ -f "$TCPSERVER_PID_FILE" ]; then
                 echo "Daemon is started widh pid $!"
 		log_write "start socket server with pid $!"
-		#else
-		#	echo "start socket server failed";
-		#fi
                 ;;
 
 	start_socket_server_daemon)
