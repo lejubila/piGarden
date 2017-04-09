@@ -418,6 +418,7 @@ function list_alias {
 function json_status {
 	local json=""
 	local json_last_weather_online="\"\""
+	local json_version="\"version\":{\"ver\":$VERSION,\"sub\":$SUB_VERSION,\"rel\":$RELEASE_VERSION}"
 	local json_error="\"error\":{\"code\":0,\"description\":\"\"}"
 	local last_rain_sensor="";
 	local last_rain_online="";
@@ -496,7 +497,7 @@ function json_status {
 	fi
 	local json_cron="\"cron\":{$json_get_cron}"			
 
-	json="{$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron}"
+	json="{$json_version,$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron}"
 
 	echo "$json"
 
@@ -1097,8 +1098,8 @@ function socket_server_command {
 
 			;;
 
-		add_cron_open)
-			local vret=""
+			add_cron_open)
+				local vret=""
 
 			vret=`add_cron_open "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7"`
 
@@ -1161,6 +1162,10 @@ function debug1 {
 function debug2 {
 	. "$DIR_SCRIPT/debug/debug1.sh"	
 }
+
+VERSION=0
+SUB_VERSION=2
+RELEASE_VERSION=0
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
