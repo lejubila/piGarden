@@ -1,5 +1,5 @@
-## 0.2 - xx/xx/2017
-Implementation of socket server fot communicate with piGardenWeb
+## 0.2 (Easter egg) - 17/04/2017
+Implementation of socket server for communicate with piGardenWeb
 Implementation of messages (error, warning, success) passed to piGardenWeb
 Added many information in json status to be passed to piGardenWeb
 Added management cron for scheduling open and closed solenoid, for initialize control unit, for rain control
