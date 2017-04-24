@@ -1,4 +1,4 @@
-## piGarden
+# piGarden
 
 Bash script to manage an irrigation system built with a Raspberry Pi
 
@@ -10,7 +10,7 @@ Documentation of piGarden and build system irrigation with Raspberry Pi can be f
 
 This script is open-sourced software under GNU GENERAL PUBLIC LICENSE Version 2
 
-## Installagtion
+## Installation
 
 1) Installs the necessary packages on your terminal:
 

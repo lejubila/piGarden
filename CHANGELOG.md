@@ -1,3 +1,6 @@
+## 0.2.2 - 25/04/2017
+Fix bug: if it's reining, the solenoid valves were also closed even if they were pushed open in "force" mode
+
 ## 0.2.1 - 22/04/2017
 Add installation instructions in README.md file  
 

@@ -89,10 +89,14 @@ function ev_open {
 		fi
 	fi
 
+	local state=1
+	if [ "$2" = "force" ]; then
+		state=2
+	fi
+
 	log_write "Solenoid '$1' open"
 	message_write "success" "Solenoid open"
 	supply_positive
-	#gpio_alias2number $1
 	ev_alias2number $1
 	EVNUM=$?
 	ev_number2gpio $EVNUM
@@ -100,7 +104,7 @@ function ev_open {
 	$GPIO -g write $g $RELE_GPIO_CLOSE
 	sleep 1
 	$GPIO -g write $g $RELE_GPIO_OPEN
-	ev_set_state $EVNUM 1 
+	ev_set_state $EVNUM $state
 }
 
 #
@@ -393,7 +397,7 @@ function close_all {
 			ev_status $al
 			local state=$?
 			#echo "$al = $state"
-			if [[ "$state" = "1" || "$1" = "force" ]]; then
+			if [[ "$state" -gt "0" || "$1" = "force" ]]; then
 				ev_close $al
 				log_write "close_all - Close solenoid '$al' for rain"
 			fi
@@ -932,6 +936,7 @@ function show_usage {
 	echo -e "Usage:"
 	echo -e "\t$NAME_SCRIPT init                                         initialize supply and solenoid in closed state"
 	echo -e "\t$NAME_SCRIPT open alias [force]                           open a solenoid"
+	#echo -e "\t$NAME_SCRIPT open_for time alias [force]                  open a solenoid for specified time (in minute)"
 	echo -e "\t$NAME_SCRIPT close alias                                  close a solenoid"
 	echo -e "\t$NAME_SCRIPT list_alias                                   view list of aliases solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status alias                              show status solenoid"
@@ -1194,8 +1199,23 @@ case "$1" in
 	open)
 		if [ "empty$2" == "empty" ]; then
 			echo -e "Alias solenoid not specified"
+			exit 1
 		fi
 		ev_open $2 $3
+		;;
+
+	open_for)
+		re='^[0-9]+$'
+		if ! [[ $2 =~ $re ]] ; then
+			echo -e "Time of irrigation is wrong or not specified"
+			exit 1
+		fi
+
+		if [ "empty$3" == "empty" ]; then
+			echo -e "Alias solenoid not specified"
+			exit 1
+		fi
+		ev_open $3 $4
 		;;
 
 	close)
