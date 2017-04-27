@@ -1,3 +1,7 @@
+## 0.x.x - xx/xx/2017
+Add command "open_within" for scheduling on the fly the opens/close a solenoid
+Fix minor bug on command "open"
+
 ## 0.2.2 - 25/04/2017
 Fix bug: if it's reining, the solenoid valves were also closed even if they were pushed open in "force" mode
 

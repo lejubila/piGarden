@@ -105,7 +105,68 @@ function ev_open {
 	sleep 1
 	$GPIO -g write $g $RELE_GPIO_OPEN
 	ev_set_state $EVNUM $state
+
+	cron_del open_in $alias > /dev/null 2>&1
 }
+
+#
+# Commuta un elettrovalvola nello stato aperto
+# $1 minute_start
+# $2 minute_stop
+# $3 alias elettrovalvola
+# $4 se specificata la string "force" apre l'elettrovalvola anche se c'é pioggia
+#
+function ev_open_in {
+
+	local minute_start=$1
+	local minute_stop=$2
+	local alias=$3
+	local force=$4
+
+	re='^[0-9]+$'
+	if ! [[ $minute_start =~ $re ]] ; then
+		echo -e "Time start of irrigation is wrong or not specified"
+		message_write "error" "Time start of irrigation is wrong or not specified"
+		return
+	fi
+	if ! [[ $minute_stop =~ $re ]] ; then
+		echo -e "Time stop of irrigation is wrong or not specified"
+		message_write "error" "Time stop of irrigation is wrong or not specified"
+		return
+	fi
+	if [ $minute_stop -lt "1" ] ; then
+		echo -e "Time stop of irrigation is wrong"
+		message_write "error" "Time stop of irrigation is wrong"
+		return
+	fi
+	if [ "empty$alias" == "empty" ]; then
+		echo -e "Alias solenoid not specified"
+		message_write "error" "Alias solenoid not specified"
+		return
+	fi
+	gpio_alias2number $alias > /dev/null 2>&1
+
+	minute_start=$(($minute_start + 1))
+	minute_stop=$(($minute_start + $minute_stop))
+	local cron_start=`date -d "today + $minute_start minutes" +"%M %H %d %m %u"`
+
+	cron_del open_in $alias > /dev/null 2>&1
+	cron_del open_in_stop $alias > /dev/null 2>&1
+
+	if [ $minute_start -eq "0" ]; then
+		ev_open $alias $force
+	else
+		cron_add open_in $cron_start "$alias" "$force"
+	fi
+	
+	local cron_stop=`date -d "today + $minute_stop minutes" +"%M %H %d %m %u"`
+	cron_add open_in_stop $cron_stop "$alias" 
+
+	#echo $cron_start
+	#echo $cron_stop
+
+}
+
 
 #
 # Commuta un elettrovalvola nello stato chiuso
@@ -124,6 +185,8 @@ function ev_close {
 	sleep 1
 	$GPIO -g write $g $RELE_GPIO_OPEN
 	ev_set_state $EVNUM 0
+
+	cron_del open_in_stop $alias > /dev/null 2>&1
 }
 
 #
@@ -566,6 +629,7 @@ function cron_del {
 # $5	mese
 # $6	giorno della settimana
 # $7	argomento della tipologia
+# $8	secondo argomento della tipologia
 #
 function cron_add {
 
@@ -576,6 +640,7 @@ function cron_add {
 	local CRON_MON=$5
 	local CRON_DOW=$6
 	local CRON_ARG=$7
+	local CRON_ARG2=$8
 	local CRON_COMMAND=""
 	local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/$NAME_SCRIPT"`
 	local TMP_CRON_FILE2="$TMP_CRON_FILE-2"
@@ -669,6 +734,14 @@ function cron_add {
 
 		open)
 			CRON_COMMAND="$PATH_SCRIPT open $CRON_ARG"
+			;;
+
+		open_in)
+			CRON_COMMAND="$PATH_SCRIPT open $CRON_ARG $CRON_ARG2"
+			;;
+
+		open_in_stop)
+			CRON_COMMAND="$PATH_SCRIPT close $CRON_ARG"
 			;;
 
 		close)
@@ -933,10 +1006,12 @@ function del_cron_close {
 
 
 function show_usage {
+	echo -e "piGarden v. $VERSION.$SUB_VERSION.$RELEASE_VERSION"
+	echo -e ""
 	echo -e "Usage:"
 	echo -e "\t$NAME_SCRIPT init                                         initialize supply and solenoid in closed state"
 	echo -e "\t$NAME_SCRIPT open alias [force]                           open a solenoid"
-	#echo -e "\t$NAME_SCRIPT open_for time alias [force]                  open a solenoid for specified time (in minute)"
+	echo -e "\t$NAME_SCRIPT open_in minute_start minute_stop alias [force]  open a solenoid in minute_start for minute_stop"
 	echo -e "\t$NAME_SCRIPT close alias                                  close a solenoid"
 	echo -e "\t$NAME_SCRIPT list_alias                                   view list of aliases solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status alias                              show status solenoid"
@@ -1170,7 +1245,7 @@ function debug2 {
 
 VERSION=0
 SUB_VERSION=2
-RELEASE_VERSION=0
+RELEASE_VERSION=3
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
@@ -1204,18 +1279,8 @@ case "$1" in
 		ev_open $2 $3
 		;;
 
-	open_for)
-		re='^[0-9]+$'
-		if ! [[ $2 =~ $re ]] ; then
-			echo -e "Time of irrigation is wrong or not specified"
-			exit 1
-		fi
-
-		if [ "empty$3" == "empty" ]; then
-			echo -e "Alias solenoid not specified"
-			exit 1
-		fi
-		ev_open $3 $4
+	open_in)
+		ev_open_in $2 $3 $4 $5
 		;;
 
 	close)
