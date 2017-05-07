@@ -62,6 +62,9 @@ function reset_messages {
 # $2 se specificata la string "force" apre l'elettrovalvola anche se c'é pioggia
 #
 function ev_open {
+	
+	cron_del open_in $1 > /dev/null 2>&1
+
 	if [ ! "$2" = "force" ]; then
 		if [[ "$NOT_IRRIGATE_IF_RAIN_ONLINE" -gt 0 && -f $STATUS_DIR/last_rain_online ]]; then
 			local last_rain=`cat $STATUS_DIR/last_rain_online`
@@ -106,7 +109,6 @@ function ev_open {
 	$GPIO -g write $g $RELE_GPIO_OPEN
 	ev_set_state $EVNUM $state
 
-	cron_del open_in $alias > /dev/null 2>&1
 }
 
 #
@@ -126,23 +128,23 @@ function ev_open_in {
 	re='^[0-9]+$'
 	if ! [[ $minute_start =~ $re ]] ; then
 		echo -e "Time start of irrigation is wrong or not specified"
-		message_write "error" "Time start of irrigation is wrong or not specified"
-		return
+		message_write "warning" "Time start of irrigation is wrong or not specified"
+		return 1
 	fi
 	if ! [[ $minute_stop =~ $re ]] ; then
 		echo -e "Time stop of irrigation is wrong or not specified"
-		message_write "error" "Time stop of irrigation is wrong or not specified"
-		return
+		message_write "warning" "Time stop of irrigation is wrong or not specified"
+		return 1
 	fi
 	if [ $minute_stop -lt "1" ] ; then
 		echo -e "Time stop of irrigation is wrong"
-		message_write "error" "Time stop of irrigation is wrong"
-		return
+		message_write "warning" "Time stop of irrigation is wrong"
+		return 1
 	fi
 	if [ "empty$alias" == "empty" ]; then
 		echo -e "Alias solenoid not specified"
-		message_write "error" "Alias solenoid not specified"
-		return
+		message_write "warning" "Alias solenoid not specified"
+		return 1
 	fi
 	gpio_alias2number $alias > /dev/null 2>&1
 
@@ -153,7 +155,7 @@ function ev_open_in {
 	cron_del open_in $alias > /dev/null 2>&1
 	cron_del open_in_stop $alias > /dev/null 2>&1
 
-	if [ $minute_start -eq "0" ]; then
+	if [ "$minute_start" -eq "1" ]; then
 		ev_open $alias $force
 	else
 		cron_add open_in $cron_start "$alias" "$force"
@@ -161,6 +163,8 @@ function ev_open_in {
 	
 	local cron_stop=`date -d "today + $minute_stop minutes" +"%M %H %d %m %u"`
 	cron_add open_in_stop $cron_stop "$alias" 
+
+	message_write "success" "Scheduled start successfully performed"
 
 	#echo $cron_start
 	#echo $cron_stop
@@ -186,7 +190,7 @@ function ev_close {
 	$GPIO -g write $g $RELE_GPIO_OPEN
 	ev_set_state $EVNUM 0
 
-	cron_del open_in_stop $alias > /dev/null 2>&1
+	cron_del open_in_stop $1 > /dev/null 2>&1
 }
 
 #
@@ -274,7 +278,7 @@ function gpio_alias2number {
 	done
 
 	log_write "ERROR solenoid alias not found: $1"
-	message_write "error" "Solenoid alias not found"
+	message_write "warning" "Solenoid alias not found"
 	exit 1
 }
 
@@ -293,7 +297,7 @@ function ev_alias2number {
 	done
 
 	log_write "ERROR solenoid alias not found: $1"
-	message_write "error" "Solenoid alias not found"
+	message_write "warning" "Solenoid alias not found"
 	exit 1
 }
 
@@ -359,10 +363,10 @@ function ev_status {
 #
 function check_rain_online {
 	# http://www.wunderground.com/weather/api/d/docs?d=resources/phrase-glossary&MR=1
-	$CURL http://api.wunderground.com/api/$WUNDERGROUND_KEY/conditions/q/$WUNDERGROUND_LOCATION.json > /tmp/check_rain_online.json
-	local weather=`cat /tmp/check_rain_online.json | $JQ -M ".current_observation.weather"`
-	local current_observation=`cat /tmp/check_rain_online.json | $JQ -M ".current_observation"`
-	local local_epoch=`cat /tmp/check_rain_online.json | $JQ -M -r ".current_observation.local_epoch"`
+	$CURL http://api.wunderground.com/api/$WUNDERGROUND_KEY/conditions/q/$WUNDERGROUND_LOCATION.json > $TMP_PATH/check_rain_online.json
+	local weather=`cat $TMP_PATH/check_rain_online.json | $JQ -M ".current_observation.weather"`
+	local current_observation=`cat $TMP_PATH/check_rain_online.json | $JQ -M ".current_observation"`
+	local local_epoch=`cat $TMP_PATH/check_rain_online.json | $JQ -M -r ".current_observation.local_epoch"`
 	#echo $weather
 	#weather="[Light/Heavy] Drizzle"
 	if [ "$weather" = "null" ]; then
@@ -493,12 +497,16 @@ function json_status {
 	local last_warning=""
 	local last_success=""
 	local with_get_cron="0"
+	local with_get_cron_open_in="0"
 
 	local vret=""
 	for i in $1 $2 $3 $4 $5 $6
         do
 		if [ $i = "get_cron" ]; then
 			with_get_cron="1"
+		fi
+		if [ $i = "get_cron_open_in" ]; then
+			with_get_cron_open_in="1"
 		fi
 	done
 
@@ -564,7 +572,33 @@ function json_status {
 	fi
 	local json_cron="\"cron\":{$json_get_cron}"			
 
-	json="{$json_version,$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron}"
+	local json_get_cron_open_in=""			
+	if [ $with_get_cron_open_in = "1" ]; then
+		local values_open_in="" 
+		local values_open_in_stop="" 
+		for i in $(seq $EV_TOTAL)
+		do
+			local a=EV"$i"_ALIAS
+			local av=${!a}
+			local crn="$(cron_get "open_in" $av)"
+			crn=`echo "$crn" | sed ':a;N;$!ba;s/\n/%%/g'`
+			values_open_in="\"$av\": \"$crn\", $values_open_in"
+			local crn="$(cron_get "open_in_stop" $av)"
+			crn=`echo "$crn" | sed ':a;N;$!ba;s/\n/%%/g'`
+			values_open_in_stop="\"$av\": \"$crn\", $values_open_in_stop"
+		done
+		if [[ !  -z  $values_open_in ]]; then
+			values_open_in="${values_open_in::-2}"
+		fi
+		if [[ !  -z  $values_open_in_stop ]]; then
+			values_open_in_stop="${values_open_in_stop::-2}"
+		fi
+
+		json_get_cron_open_in="\"open_in\": {$values_open_in},\"open_in_stop\": {$values_open_in_stop}"
+	fi
+	local json_cron_open_in="\"cron_open_in\":{$json_get_cron_open_in}"			
+
+	json="{$json_version,$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron,$json_cron_open_in}"
 
 	echo "$json"
 
@@ -948,6 +982,24 @@ function get_cron_open {
 }
 
 #
+# Cancella tutte le schedulazioni cron per aprire/chiudere una elettrovalvola in modo ritardato
+# $1	alias elettrovalvola
+#
+function del_cron_open_in {
+
+	local exists=`alias_exists $1`
+	if [ "check $exists" = "check FALSE" ]; then
+		log_write "Alias $1 not found"
+		echo "Alias $1 not found"
+		return 1
+	fi
+
+	cron_del "open_in" $1	
+	cron_del "open_in_stop" $1	
+
+}
+
+#
 # Legge tutte le schedulazioni cron per chiudere una elettrovalvola
 # $1	alias elettrovalvola
 #
@@ -1016,7 +1068,7 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT list_alias                                   view list of aliases solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status alias                              show status solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status_all                                show status solenoids"
-	echo -e "\t$NAME_SCRIPT json_status [get_cron]                       show status in json format"
+	echo -e "\t$NAME_SCRIPT json_status [get_cron|get_cron_open_in]      show status in json format"
 	echo -e "\t$NAME_SCRIPT check_rain_online                            check rain from http://api.wunderground.com/"
 	echo -e "\t$NAME_SCRIPT check_rain_sensor                            check rain from hardware sensor"
 	echo -e "\t$NAME_SCRIPT close_all_for_rain                           close all solenoid if it's raining"
@@ -1038,6 +1090,7 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT add_cron_open alias m h dom mon dow          add crontab for open a solenoid"
 	echo -e "\t$NAME_SCRIPT del_cron_open alias                          remove all crontab for open a solenoid"
 	echo -e "\t$NAME_SCRIPT get_cron_open alias                          get all crontab for open a solenoid"
+	echo -e "\t$NAME_SCRIPT del_cron_open_in alias                       remove all crontab for open_in a solenoid"
 	echo -e "\t$NAME_SCRIPT add_cron_close alias m h dom mon dow         add crontab for close a solenoid"
 	echo -e "\t$NAME_SCRIPT del_cron_close alias                         remove all crontab for close a solenoid"
 	echo -e "\t$NAME_SCRIPT get_cron_close alias                         get all crontab for close a solenoid"
@@ -1112,6 +1165,11 @@ function socket_server_command {
 			fi
 			;;
 
+		open_in)
+			ev_open_in $arg2 $arg3 $arg4 $arg5 &> /dev/null
+			json_status "get_cron_open_in"
+			;;	
+
 		close)
 	                if [ "empty$arg2" == "empty" ]; then
         	                json_error 0 "Alias solenoid not specified"
@@ -1155,13 +1213,29 @@ function socket_server_command {
 
 			if [[ ! -z $vret ]]; then
 				json_error 0 "Cron set failed"
-				log_write "Cron set failed: $vret"
+				log_write "Cron del failed: $vret"
 			else
 				message_write "success" "Cron set successfull"
 				json_status
 			fi
 
 			;;
+
+		del_cron_open_in)
+			local vret=""
+
+			vret=`del_cron_open_in $arg2`
+
+			if [[ ! -z $vret ]]; then
+				json_error 0 "Cron del failed"
+				log_write "Cron del failed: $vret"
+			else
+				message_write "success" "Scheduled start successfully deleted"
+				json_status "get_cron_open_in"
+			fi
+
+			;;
+
 
 		del_cron_close)
 			local vret=""
@@ -1250,10 +1324,14 @@ RELEASE_VERSION=3
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
 CONFIG_ETC="/etc/piGarden.conf"
-TCPSERVER_PID_FILE="/tmp/piGardenTcpServer.pid"
+TMP_PATH="/run/shm"
+if [ ! -d "$TMP_PATH" ]; then
+	TMP_PATH="/tmp"
+fi
+TCPSERVER_PID_FILE="$TMP_PATH/piGardenTcpServer.pid"
 TCPSERVER_PID_SCRIPT=$$
 RUN_FROM_TCPSERVER=0
-TMP_CRON_FILE="/tmp/pigarden.user.cron.$$"
+TMP_CRON_FILE="$TMP_PATH/pigarden.user.cron.$$"
 
 if [ -f $CONFIG_ETC ]; then
 	. $CONFIG_ETC
@@ -1400,6 +1478,10 @@ case "$1" in
 		del_cron_open $2 
 		;;
 
+	del_cron_open_in)
+		del_cron_open_in $2 
+		;;
+
 	get_cron_open)
 		get_cron_open $2
 		;;
@@ -1431,5 +1513,7 @@ case "$1" in
 		;;
 esac
 
-
+# Elimina eventuali file temporane utilizzati per la gestione dei cron
+rm "$TMP_CRON_FILE" 2> /dev/null
+rm "$TMP_CRON_FILE-2" 2> /dev/null
 

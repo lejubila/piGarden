@@ -1,6 +1,9 @@
 ## 0.x.x - xx/xx/2017
-Add command "open_within" for scheduling on the fly the opens/close a solenoid
+Add command "open_in" for scheduling on the fly the opens/close a solenoid
+Add command "del_cron_open_in" for delete scheduling the fly the opens/close a solenoid
+Add api in socket server for command open_in and delete_cron_open_in
 Fix minor bug on command "open"
+Changed the path of some temporary files to prevent sd card faults
 
 ## 0.2.2 - 25/04/2017
 Fix bug: if it's reining, the solenoid valves were also closed even if they were pushed open in "force" mode
