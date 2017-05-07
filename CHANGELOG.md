@@ -1,4 +1,4 @@
-## 0.x.x - xx/xx/2017
+## 0.3.0 - xx/xx/2017
 Add command "open_in" for scheduling on the fly the opens/close a solenoid
 Add command "del_cron_open_in" for delete scheduling the fly the opens/close a solenoid
 Add api in socket server for command open_in and delete_cron_open_in

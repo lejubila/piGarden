@@ -648,7 +648,7 @@ function cron_del {
 	fi
 
 
-	$SED "$START,${END}d" "$TMP_CRON_FILE" | $CRONTAB -
+	$SED "$START,${END}d" "$TMP_CRON_FILE" | $SED '$!N; /^\(.*\)\n\1$/!P; D' | $CRONTAB -
 	#$CRONTAB "$TMP_CRON_FILE"
 	rm "$TMP_CRON_FILE"
 
@@ -1161,7 +1161,7 @@ function socket_server_command {
         	                json_error 0 "Alias solenoid not specified"
 			else
                 		ev_open $arg2 $arg3 &> /dev/null
-				json_status
+				json_status "get_cron_open_in"
 			fi
 			;;
 
@@ -1175,7 +1175,7 @@ function socket_server_command {
         	                json_error 0 "Alias solenoid not specified"
 			else
                 		ev_close $arg2 &> /dev/null
-				json_status
+				json_status "get_cron_open_in"
                 	fi
 			;;
 
@@ -1318,8 +1318,8 @@ function debug2 {
 }
 
 VERSION=0
-SUB_VERSION=2
-RELEASE_VERSION=3
+SUB_VERSION=3
+RELEASE_VERSION=0
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
