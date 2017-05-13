@@ -1,3 +1,8 @@
+## 0.3.1 - 13/05/2017
+Add experimental support for monostable solenoid valve:
+- define in your config file the variable EV_MONOSTABLE and assign value 1
+- if the solenoid valves close instead of opening and vice versa, reverse the values of the RELE_GPIO_CLOSE and RELE_GPIO_OPEN variables in your configuration file
+
 ## 0.3.0 - 07/05/2017
 Add command "open_in" for scheduling on the fly the opens/close a solenoid
 Add command "del_cron_open_in" for delete scheduling the fly the opens/close a solenoid

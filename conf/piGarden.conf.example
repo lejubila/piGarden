@@ -44,6 +44,10 @@ SED="/bin/sed"
 # Percorso readlink
 READLINK="/bin/readlink"
 
+# Se impostato con il valore 1, indica che il sistema gestisce elettrovalvole monostabili, 
+# se impostato a 0 il sistema gestirà elettrovalvole bisstabili
+EV_MONOSTABLE=0
+
 # Id gpio usati per simulare il doppio deviatore con cui eseguire l'alimentazione alle elettrovalvole
 SUPPLY_GPIO_1=2
 SUPPLY_GPIO_2=3

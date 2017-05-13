@@ -12,11 +12,13 @@ function initialize {
 
 	log_write "Run initialize"
 
-	# Imposta l'alimentazione con voltaggio negativo e setta i gpio in scrittura
-	$GPIO -g write $SUPPLY_GPIO_1 0
-	$GPIO -g write $SUPPLY_GPIO_2 0
-	$GPIO -g mode $SUPPLY_GPIO_1 out
-	$GPIO -g mode $SUPPLY_GPIO_2 out
+	# Imposta l'alimentazione con voltaggio negativo e setta i gpio in scrittura per le elettrovalvole bistabili
+	if [ "$EV_MONOSTABLE" != "1" ]; then
+		$GPIO -g write $SUPPLY_GPIO_1 0
+		$GPIO -g write $SUPPLY_GPIO_2 0
+		$GPIO -g mode $SUPPLY_GPIO_1 out
+		$GPIO -g mode $SUPPLY_GPIO_2 out
+	fi
 
 	# Elimina tutti gli stati delle elettrovalvole preesistenti
 	rm -f "$STATUS_DIR"/*
@@ -26,7 +28,7 @@ function initialize {
 	do
 		g=EV"$i"_GPIO
 		$GPIO -g write ${!g} RELE_GPIO_OPEN 	# chiude l'alimentazione all'elettrovalvole
-		$GPIO -g mode ${!g} out				# setta il gpio nella modalita di scrittura
+		$GPIO -g mode ${!g} out			# setta il gpio nella modalita di scrittura
 		ev_set_state $i 0
 	done
 
@@ -97,18 +99,26 @@ function ev_open {
 		state=2
 	fi
 
-	log_write "Solenoid '$1' open"
-	message_write "success" "Solenoid open"
-	supply_positive
+	# Dall'alias dell'elettrovalvola recupero il numero e dal numero recupero gpio da usare
 	ev_alias2number $1
 	EVNUM=$?
 	ev_number2gpio $EVNUM
 	g=$?
-	$GPIO -g write $g $RELE_GPIO_CLOSE
-	sleep 1
-	$GPIO -g write $g $RELE_GPIO_OPEN
+
+	# Gestisce l'apertura dell'elettrovalvola in base alla tipologia (monostabile / bistabile) 
+	if [ "$EV_MONOSTABLE" == "1" ]; then
+		$GPIO -g write $g $RELE_GPIO_CLOSE
+	else
+		supply_positive
+		$GPIO -g write $g $RELE_GPIO_CLOSE
+		sleep 1
+		$GPIO -g write $g $RELE_GPIO_OPEN
+	fi
+
 	ev_set_state $EVNUM $state
 
+	log_write "Solenoid '$1' open"
+	message_write "success" "Solenoid open"
 }
 
 #
@@ -177,18 +187,27 @@ function ev_open_in {
 # $1 alias elettrovalvola
 #
 function ev_close {
-	log_write "Solenoid '$1' close"
-	message_write "success" "Solenoid close"
-	supply_negative
-	#$GPIO_alias2number $1
+
+	# Dall'alias dell'elettrovalvola recupero il numero e dal numero recupero gpio da usare
 	ev_alias2number $1
 	EVNUM=$?
 	ev_number2gpio $EVNUM
 	g=$?
-	$GPIO -g write $g $RELE_GPIO_CLOSE
-	sleep 1
-	$GPIO -g write $g $RELE_GPIO_OPEN
+
+	# Gestisce l'apertura dell'elettrovalvola in base alla tipologia (monostabile / bistabile) 
+	if [ "$EV_MONOSTABLE" == "1" ]; then
+		$GPIO -g write $g $RELE_GPIO_OPEN
+	else
+		supply_negative
+		$GPIO -g write $g $RELE_GPIO_CLOSE
+		sleep 1
+		$GPIO -g write $g $RELE_GPIO_OPEN
+	fi
+
 	ev_set_state $EVNUM 0
+
+	log_write "Solenoid '$1' close"
+	message_write "success" "Solenoid close"
 
 	cron_del open_in_stop $1 > /dev/null 2>&1
 }
