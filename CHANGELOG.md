@@ -1,3 +1,6 @@
+## 0.3.2 - xx/xx/2017
+Add management lock/unlock for prevent concurrente call to open/close solenoid
+
 ## 0.3.1 - 13/05/2017
 Add experimental support for monostable solenoid valve:
 - define in your config file the variable EV_MONOSTABLE and assign value 1

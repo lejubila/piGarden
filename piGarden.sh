@@ -10,6 +10,8 @@
 #
 function initialize {
 
+	lock
+
 	log_write "Run initialize"
 
 	# Imposta l'alimentazione con voltaggio negativo e setta i gpio in scrittura per le elettrovalvole bistabili
@@ -50,8 +52,13 @@ function initialize {
 
 	log_write "End initialize"
 
+	unlock
+
 }
 
+#
+# Elimina i file contenente i messaggi da inserire nel json status
+#
 function reset_messages {
 	rm -f "$LAST_INFO_FILE.$!"
 	rm -f "$LAST_WARNING_FILE.$!"
@@ -64,7 +71,7 @@ function reset_messages {
 # $2 se specificata la string "force" apre l'elettrovalvola anche se c'é pioggia
 #
 function ev_open {
-	
+
 	cron_del open_in $1 > /dev/null 2>&1
 
 	if [ ! "$2" = "force" ]; then
@@ -105,6 +112,8 @@ function ev_open {
 	ev_number2gpio $EVNUM
 	g=$?
 
+	lock
+
 	# Gestisce l'apertura dell'elettrovalvola in base alla tipologia (monostabile / bistabile) 
 	if [ "$EV_MONOSTABLE" == "1" ]; then
 		$GPIO -g write $g $RELE_GPIO_CLOSE
@@ -116,6 +125,8 @@ function ev_open {
 	fi
 
 	ev_set_state $EVNUM $state
+
+	unlock
 
 	log_write "Solenoid '$1' open"
 	message_write "success" "Solenoid open"
@@ -194,6 +205,8 @@ function ev_close {
 	ev_number2gpio $EVNUM
 	g=$?
 
+	lock
+
 	# Gestisce l'apertura dell'elettrovalvola in base alla tipologia (monostabile / bistabile) 
 	if [ "$EV_MONOSTABLE" == "1" ]; then
 		$GPIO -g write $g $RELE_GPIO_OPEN
@@ -205,6 +218,8 @@ function ev_close {
 	fi
 
 	ev_set_state $EVNUM 0
+
+	unlock
 
 	log_write "Solenoid '$1' close"
 	message_write "success" "Solenoid close"
@@ -474,6 +489,10 @@ function close_all_for_rain {
 
 }
 
+#
+# Chiude tutte le elettrovalvole
+# $1 indica se forzare la chiusura anche per le elettrovalvole con stato di inattività
+#
 function close_all {
 
 		for i in $(seq $EV_TOTAL)
@@ -491,6 +510,9 @@ function close_all {
 
 }
 
+#
+# Stampa la lista degli alias delle elettrovalvole
+#
 function list_alias {
 
 		for i in $(seq $EV_TOTAL)
@@ -503,7 +525,10 @@ function list_alias {
 }
 
 #
+# Stampa un json contanente lo status della centralina
 # $1 .. $6 parametri opzionali
+# 	- get_cron: aggiunge i dati relativi ai crontab delle scehdulazioni di apertura/chisura delle elettrovalvole
+#	- get_cron_open_in: aggiunge i dati relativi ai crontab degli avvii ritardati eseguiti con il comando open_in
 #
 function json_status {
 	local json=""
@@ -883,6 +908,9 @@ function cron_get {
 
 }
 
+#
+# Imposta il cron di inizializzazione della centralina
+#
 function set_cron_init {
 
 	cron_del "init" 2> /dev/null
@@ -890,12 +918,18 @@ function set_cron_init {
 
 }
 
+#
+# Elimina il cron di inizializzazione della centralina
+#
 function del_cron_init {
 
 	cron_del "init"
 
 }
 
+#
+# Imposta il cron per l'avvio del socket server
+#
 function set_cron_start_socket_server {
 
 	cron_del "start_socket_server" 2> /dev/null
@@ -903,41 +937,62 @@ function set_cron_start_socket_server {
 
 }
 
+#
+# Elimina il cron per l'avvio del socket server
+#
 function del_cron_start_socket_server {
 
 	cron_del "start_socket_server"
 }
 
+#
+# Imposta il cron che esegue il controllo di presenza pioggia tramite sensore
+#
 function set_cron_check_rain_sensor {
 
 	cron_del "check_rain_sensor" 2> /dev/null
 	cron_add "check_rain_sensor"
 }
 
+#
+# Elimina il cron che esegue il controllo di presenza pioggia tramite sensore
+#
 function del_cron_check_rain_sensor {
 
 	cron_del "check_rain_sensor"
 
 }
 
+#
+# Imposta il cron che esegue il controllo di presenza pioggia tramite servizio online
+#
 function set_cron_check_rain_online {
 
 	cron_del "check_rain_online" 2> /dev/null
 	cron_add "check_rain_online"
 }
 
+#
+# Elimina il cron che esegue il controllo di presenza pioggia tramite servizio online
+#
 function del_cron_check_rain_online {
 
 	cron_del "check_rain_online"
 
 }
 
+#
+# Imposta il cron che gestisce la chiusura delle elettrovalvole in caso di pioggia
+#
 function set_cron_close_all_for_rain {
 
 	cron_del "close_all_for_rain" 2> /dev/null
 	cron_add "close_all_for_rain"
 }
 
+#
+# Elimina il cron che gestisce la chiusura delle elettrovalvole in caso di pioggia
+#
 function del_cron_close_all_for_rain {
 
 	cron_del "close_all_for_rain"
@@ -1074,8 +1129,9 @@ function del_cron_close {
 
 }
 
-
-
+#
+# Mostra il i parametri dello script
+#
 function show_usage {
 	echo -e "piGarden v. $VERSION.$SUB_VERSION.$RELEASE_VERSION"
 	echo -e ""
@@ -1118,24 +1174,20 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT debug2 [parameter]|[parameter]|..]           Run debug code 2"
 }
 
+#
+# Avvia il socket server
+#
 function start_socket_server {
 
 	rm -f "$TCPSERVER_PID_FILE"
 	echo $TCPSERVER_PID_SCRIPT > "$TCPSERVER_PID_FILE"
 	$TCPSERVER -v -RHl0 $TCPSERVER_IP $TCPSERVER_PORT $0 socket_server_command 
 
-	#if [ $? -eq 0 ]; then
-	#	echo $TCPSERVER_PID_SCRIPT > "$TCPSERVER_PID_FILE"
-	#	trap stop_socket_server EXIT
-
-	#	log_write "start socket server ";
-	#	return 0
-	#else
-	#	log_write "start socket server failed";
-	#	return 1
-	#fi
 }
 
+#
+# Ferma il socket server
+#
 function stop_socket_server {
 
         if [ ! -f "$TCPSERVER_PID_FILE" ]; then
@@ -1151,6 +1203,9 @@ function stop_socket_server {
 
 }
 
+#
+# Esegue un comando ricevuto dal socket server
+#
 function socket_server_command {
 
 	RUN_FROM_TCPSERVER=1
@@ -1311,6 +1366,11 @@ function socket_server_command {
 
 }
 
+#
+# Mostra un json per una risposta di errore
+# $1	codice errore
+# $2	messaggio di errore
+#
 json_error()
 {
 	echo "{\"error\":{\"code\":$1,\"description\":\"$2\"}}"
@@ -1328,17 +1388,52 @@ list_descendants ()
   echo "$children"
 }
 
+#
+# Gestisce l'apertura di un lock
+#
+function lock {
+
+	local max_time=10
+	local current_time=$(($1 + 1))
+
+	local lock_content=`cat "$LOCK_FILE" 2> /dev/null`
+	if [ -z $lock_content ]; then
+		lock_content="0"
+	fi
+	if [ "$lock_content" -eq "1" ]; then
+		if [ "$current_time" -gt "$max_time" ]; then
+			log_write "Maximum locked time reached"
+			exit 1
+		fi
+		log_write "Sleep 1 second for locked state"
+		sleep 1
+		lock $current_time
+		return
+	fi
+	echo "1" > "$LOCK_FILE"
+
+}
+
+#
+# Chidue un lock
+# 
+function unlock {
+
+	echo "0" > "$LOCK_FILE"
+
+}
+
 function debug1 {
 	. "$DIR_SCRIPT/debug/debug1.sh"	
 }
 
 function debug2 {
-	. "$DIR_SCRIPT/debug/debug1.sh"	
+	. "$DIR_SCRIPT/debug/debug2.sh"	
 }
 
 VERSION=0
 SUB_VERSION=3
-RELEASE_VERSION=1
+RELEASE_VERSION=2
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
@@ -1351,6 +1446,7 @@ TCPSERVER_PID_FILE="$TMP_PATH/piGardenTcpServer.pid"
 TCPSERVER_PID_SCRIPT=$$
 RUN_FROM_TCPSERVER=0
 TMP_CRON_FILE="$TMP_PATH/pigarden.user.cron.$$"
+LOCK_FILE="$TMP_PATH/piGarden.lock"
 
 if [ -f $CONFIG_ETC ]; then
 	. $CONFIG_ETC
@@ -1362,6 +1458,17 @@ fi
 LAST_INFO_FILE="$STATUS_DIR/last_info"
 LAST_WARNING_FILE="$STATUS_DIR/last_worning"
 LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
+
+
+if [ -f "$LOCK_FILE" ]; then
+	max_age_lock_file=11
+	time_lock_file=`$STAT -c %Y "$LOCK_FILE"`
+	age_lock_file=$((`date +"%s"` - $time_lock_file ))
+	if [ "$age_lock_file" -gt "$max_age_lock_file" ]; then
+		rm -f "$age_lock_file"
+	fi
+fi
+
 
 case "$1" in
 	init) 
