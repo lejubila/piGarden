@@ -1211,6 +1211,21 @@ function socket_server_command {
 	RUN_FROM_TCPSERVER=1
 
 	local line=""
+
+	if [ ! -z "$TCPSERVER_USER" ] && [ ! -z "$TCPSERVER_PWD" ]; then
+		local user=""
+		local password=""
+		read -t 3 user
+		read -t 3 password	
+		user=$(echo "$user" | $TR -d '[\r\n]')
+		password=$(echo "$password" | $TR -d '[\r\n]')
+		if [ "$user" != "$TCPSERVER_USER" ] || [ "$password" != "$TCPSERVER_PWD" ]; then
+			log_write "socket connection from: $TCPREMOTEIP - Bad socket server credentials - user:$user"
+			json_error 0 "Bad socket server credentials"
+			return
+		fi
+	fi
+
 	read line
 	line=$(echo "$line " | $TR -d '[\r\n]')
 	arg1=$(echo "$line " | $CUT -d ' ' -f1)
@@ -1432,8 +1447,8 @@ function debug2 {
 }
 
 VERSION=0
-SUB_VERSION=3
-RELEASE_VERSION=2
+SUB_VERSION=4
+RELEASE_VERSION=0
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}

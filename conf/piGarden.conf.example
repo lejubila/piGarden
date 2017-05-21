@@ -114,3 +114,6 @@ NOT_IRRIGATE_IF_RAIN_SENSOR=86400
 TCPSERVER_IP="127.0.0.1"
 TCPSERVER_PORT="8084"
 
+# Utente e password che i clients devono utilizzare per stabilire una connessione tramite socket server
+TCPSERVER_USER=""
+TCPSERVER_PWD=""

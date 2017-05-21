@@ -1,4 +1,5 @@
-## 0.3.2 - xx/xx/2017
+## 0.4.0 - xx/xx/2017
+Add credentials support to socket server (define TCPSERVER_USER and TCPSERVER_PWD in your config file)
 Add management lock/unlock for prevent concurrente call to open/close solenoid
 
 ## 0.3.1 - 13/05/2017
