@@ -720,6 +720,7 @@ function cron_add {
 	local CRON_ARG=$7
 	local CRON_ARG2=$8
 	local CRON_COMMAND=""
+	local CRON_DISABLED=""
 	local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/$NAME_SCRIPT"`
 	local TMP_CRON_FILE2="$TMP_CRON_FILE-2"
 
@@ -812,6 +813,9 @@ function cron_add {
 
 		open)
 			CRON_COMMAND="$PATH_SCRIPT open $CRON_ARG"
+			if [ "$CRON_ARG2" == "disabled" ]; then
+				CRON_DISABLED="#"
+			fi
 			;;
 
 		open_in)
@@ -824,6 +828,9 @@ function cron_add {
 
 		close)
 			CRON_COMMAND="$PATH_SCRIPT close $CRON_ARG"
+			if [ "$CRON_ARG2" == "disabled" ]; then
+				CRON_DISABLED="#"
+			fi
 			;;
 
 		*)
@@ -848,7 +855,7 @@ function cron_add {
 	if [ "$NEW_CRON" -eq "0" ]; then
 		echo "$PREVIOUS_CONTENT" >> "$TMP_CRON_FILE2"
 	fi
-	echo "$CRON_M $CRON_H $CRON_DOM $CRON_MON $CRON_DOW $CRON_COMMAND" >> "$TMP_CRON_FILE2"
+	echo "$CRON_DISABLED$CRON_M $CRON_H $CRON_DOM $CRON_MON $CRON_DOW $CRON_COMMAND" >> "$TMP_CRON_FILE2"
 	echo "# END cron $CRON_TYPE $CRON_ARG" >> "$TMP_CRON_FILE2"
 
 	$CRONTAB "$TMP_CRON_FILE2"
@@ -1007,6 +1014,7 @@ function del_cron_close_all_for_rain {
 # $4	giorno del mese cron
 # $5	mese cron
 # $6	giorno della settimana cron
+# $7	disabled
 #
 function add_cron_open {
 
@@ -1017,7 +1025,7 @@ function add_cron_open {
 		return 1
 	fi
 
-	cron_add "open" "$2" "$3" "$4" "$5" "$6" "$1"
+	cron_add "open" "$2" "$3" "$4" "$5" "$6" "$1" "$7"
 
 }
 
@@ -1098,6 +1106,7 @@ function get_cron_close {
 # $4	giorno del mese cron
 # $5	mese cron
 # $6	giorno della settimana cron
+# $7	disabled
 #
 function add_cron_close {
 
@@ -1108,7 +1117,7 @@ function add_cron_close {
 		return 1
 	fi
 
-	cron_add "close" "$2" "$3" "$4" "$5" "$6" "$1"
+	cron_add "close" "$2" "$3" "$4" "$5" "$6" "$1" "$7"
 
 }
 
@@ -1162,11 +1171,11 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT set_cron_close_all_for_rain                  set crontab for close all solenoid when raining"
 	echo -e "\t$NAME_SCRIPT del_cron_close_all_for_rain                  remove crontab for close all solenoid when raining"
 
-	echo -e "\t$NAME_SCRIPT add_cron_open alias m h dom mon dow          add crontab for open a solenoid"
+	echo -e "\t$NAME_SCRIPT add_cron_open alias m h dom mon dow [disbled]	add crontab for open a solenoid"
 	echo -e "\t$NAME_SCRIPT del_cron_open alias                          remove all crontab for open a solenoid"
 	echo -e "\t$NAME_SCRIPT get_cron_open alias                          get all crontab for open a solenoid"
 	echo -e "\t$NAME_SCRIPT del_cron_open_in alias                       remove all crontab for open_in a solenoid"
-	echo -e "\t$NAME_SCRIPT add_cron_close alias m h dom mon dow         add crontab for close a solenoid"
+	echo -e "\t$NAME_SCRIPT add_cron_close alias m h dom mon dow [disabled]	add crontab for close a solenoid"
 	echo -e "\t$NAME_SCRIPT del_cron_close alias                         remove all crontab for close a solenoid"
 	echo -e "\t$NAME_SCRIPT get_cron_close alias                         get all crontab for close a solenoid"
 	echo -e "\n"
@@ -1612,7 +1621,7 @@ case "$1" in
 		;;
 
 	add_cron_open)
-		add_cron_open "$2" "$3" "$4" "$5" "$6" "$7"
+		add_cron_open "$2" "$3" "$4" "$5" "$6" "$7" "$8"
 		;;
 
 	del_cron_open)
@@ -1628,7 +1637,7 @@ case "$1" in
 		;;
 
 	add_cron_close)
-		add_cron_close "$2" "$3" "$4" "$5" "$6" "$7"
+		add_cron_close "$2" "$3" "$4" "$5" "$6" "$7" "$8"
 		;;
 
 	del_cron_close)
