@@ -1244,8 +1244,9 @@ function socket_server_command {
 	arg5=$(echo "$line " | $CUT -d ' ' -f5)
 	arg6=$(echo "$line " | $CUT -d ' ' -f6)
 	arg7=$(echo "$line " | $CUT -d ' ' -f7)
+	arg8=$(echo "$line " | $CUT -d ' ' -f8)
 
-	log_write "socket connection from: $TCPREMOTEIP - command: $arg1 $arg2 $arg3 $arg4 $arg5 $arg6 $arg7"
+	log_write "socket connection from: $TCPREMOTEIP - command: $arg1 $arg2 $arg3 $arg4 $arg5 $arg6 $arg7 $arg8"
 	
 	reset_messages &> /dev/null
 
@@ -1350,10 +1351,10 @@ function socket_server_command {
 
 			;;
 
-			add_cron_open)
+		add_cron_open)
 				local vret=""
 
-			vret=`add_cron_open "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7"`
+			vret=`add_cron_open "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" $arg8`
 
 			if [[ ! -z $vret ]]; then
 				json_error 0 "Cron set failed"
@@ -1368,7 +1369,7 @@ function socket_server_command {
 		add_cron_close)
 			local vret=""
 
-			vret=`add_cron_close "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7"`
+			vret=`add_cron_close "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" $arg8`
 
 			if [[ ! -z $vret ]]; then
 				json_error 0 "Cron set failed"
