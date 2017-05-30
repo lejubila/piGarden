@@ -1418,6 +1418,8 @@ list_descendants ()
 #
 function lock {
 
+	sleep 0.$((100 * $RANDOM / 32767)) | sed 's/..$/.&/'
+
 	local max_time=10
 	local current_time=$(($1 + 1))
 
