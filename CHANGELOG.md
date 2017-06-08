@@ -2,6 +2,7 @@
 Add credentials support to socket server (define TCPSERVER_USER and TCPSERVER_PWD in your config file)
 Add management lock/unlock for prevent concurrente call to open/close solenoid
 Added the ability to enter an open / close schedule in disabled mode
+Add send statistic information to remote server
 
 ## 0.3.1 - 13/05/2017
 Add experimental support for monostable solenoid valve:

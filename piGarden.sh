@@ -1441,6 +1441,34 @@ function lock {
 
 }
 
+function send_identifier {
+
+	if [ "$NO_SEND_IDENTIFIER" == "1" ]; then
+		return
+	fi
+
+	local FILE_ID="/tmp/pigarden.id"
+
+	if [ -f "$FILE_ID" ]; then
+		# Se il file è più vecchio di un giorno esce
+		local max_age_file=86400
+		local time_file=`$STAT -c %Y "$FILE_ID"`
+		local age_file=$((`date +"%s"` - $time_file ))
+		if [ "$age_file" -lt "$max_age_file" ]; then
+			return
+		fi
+	else
+		local ID=`ifconfig | $GREP --color=never -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}' | head -1 | md5sum | $CUT -d" " -f 1`
+		if [ -z "$ID" ]; then
+			return;
+		fi
+		echo "$ID" > "$FILE_ID"
+	fi
+
+	#$CURL https://www.lejubila.net/statistic/usage/piGarden/$ID/$VERSION/$SUB_VERSION/$RELEASE_VERSION > /dev/null
+
+}
+
 #
 # Chidue un lock
 # 
@@ -1487,6 +1515,7 @@ LAST_WARNING_FILE="$STATUS_DIR/last_worning"
 LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
 
 
+# Elimina il file di lock se più vecchio di 11 secondi
 if [ -f "$LOCK_FILE" ]; then
 	max_age_lock_file=11
 	time_lock_file=`$STAT -c %Y "$LOCK_FILE"`
@@ -1496,6 +1525,7 @@ if [ -f "$LOCK_FILE" ]; then
 	fi
 fi
 
+send_identifier &
 
 case "$1" in
 	init) 

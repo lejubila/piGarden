@@ -117,3 +117,7 @@ TCPSERVER_PORT="8084"
 # Utente e password che i clients devono utilizzare per stabilire una connessione tramite socket server
 TCPSERVER_USER=""
 TCPSERVER_PWD=""
+
+# Con impostato il valore 1 non invia l'identificativi per statistiche di utilizzo
+NO_SEND_IDENTIFIER=0
+
