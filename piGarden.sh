@@ -23,7 +23,7 @@ function initialize {
 	fi
 
 	# Elimina tutti gli stati delle elettrovalvole preesistenti
-	rm -f "$STATUS_DIR"/*
+	rm -f "$STATUS_DIR"/ev*
 
 	# Inizializza i gpio delle elettrovalvole e ne chiude l'alimentazione
 	for i in $(seq $EV_TOTAL)
@@ -1430,6 +1430,8 @@ function lock {
 	if [ "$lock_content" -eq "1" ]; then
 		if [ "$current_time" -gt "$max_time" ]; then
 			log_write "Maximum locked time reached"
+			sleep $max_time
+			unlock
 			exit 1
 		fi
 		log_write "Sleep 1 second for locked state"
@@ -1441,6 +1443,18 @@ function lock {
 
 }
 
+#
+# Chidue un lock
+# 
+function unlock {
+
+	echo "0" > "$LOCK_FILE"
+
+}
+
+#
+# Invia l'identificativo univoco ad uso statistico di utilizzo
+#
 function send_identifier {
 
 	if [ "$NO_SEND_IDENTIFIER" == "1" ]; then
@@ -1465,16 +1479,7 @@ function send_identifier {
 		echo "$ID" > "$FILE_ID"
 	fi
 
-	#$CURL https://www.lejubila.net/statistic/usage/piGarden/$ID/$VERSION/$SUB_VERSION/$RELEASE_VERSION > /dev/null
-
-}
-
-#
-# Chidue un lock
-# 
-function unlock {
-
-	echo "0" > "$LOCK_FILE"
+	$CURL https://www.lejubila.net/statistic/collect_usage/piGarden/$ID/$VERSION/$SUB_VERSION/$RELEASE_VERSION > /dev/null
 
 }
 
