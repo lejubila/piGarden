@@ -1479,7 +1479,7 @@ function send_identifier {
 		echo "$ID" > "$FILE_ID"
 	fi
 
-	$CURL https://www.lejubila.net/statistic/collect_usage/piGarden/$ID/$VERSION/$SUB_VERSION/$RELEASE_VERSION > /dev/null
+	$CURL https://www.lejubila.net/statistic/collect_usage/piGarden/$ID/$VERSION/$SUB_VERSION/$RELEASE_VERSION > /dev/null 2>&1
 
 }
 
