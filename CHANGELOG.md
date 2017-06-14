@@ -1,3 +1,6 @@
+## 0.4.1 - 14/06/2017
+Fix problem on send identifier installation for statistic
+
 ## 0.4.0 - 14/06/2017
 Add credentials support to socket server (define TCPSERVER_USER and TCPSERVER_PWD in your config file)
 Add management lock/unlock for prevent concurrente call to open/close solenoid
