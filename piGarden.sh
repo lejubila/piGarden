@@ -1464,20 +1464,23 @@ function send_identifier {
 	local FILE_ID="/tmp/pigarden.id"
 
 	if [ -f "$FILE_ID" ]; then
-		# Se il file è più vecchio di un giorno esce
+		# Se il file non è più vecchio di un giorno esce
 		local max_age_file=86400
 		local time_file=`$STAT -c %Y "$FILE_ID"`
 		local age_file=$((`date +"%s"` - $time_file ))
+		#log_write "age_file=$age_file - max_age_file=$max_age_file"
 		if [ "$age_file" -lt "$max_age_file" ]; then
+			#log_write "Id troppo giovane ($age_file) esce e non esegue l'invio"
 			return
 		fi
-	else
-		local ID=`ifconfig | $GREP --color=never -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}' | head -1 | md5sum | $CUT -d" " -f 1`
-		if [ -z "$ID" ]; then
-			return;
-		fi
-		echo "$ID" > "$FILE_ID"
 	fi
+	local ID=`ifconfig | $GREP --color=never -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}' | head -1 | md5sum | $CUT -d" " -f 1`
+	if [ -z "$ID" ]; then
+		return;
+	fi
+	echo "$ID" > "$FILE_ID"
+
+	log_write "Send installation identifier to collect usage"
 
 	$CURL https://www.lejubila.net/statistic/collect_usage/piGarden/$ID/$VERSION/$SUB_VERSION/$RELEASE_VERSION > /dev/null 2>&1
 
@@ -1493,7 +1496,7 @@ function debug2 {
 
 VERSION=0
 SUB_VERSION=4
-RELEASE_VERSION=0
+RELEASE_VERSION=1
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
