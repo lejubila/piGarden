@@ -1,3 +1,6 @@
+## 0.4.2 - 16/06/2017
+Fix another problem on generate installation identifier to sendo for statistic
+
 ## 0.4.1 - 14/06/2017
 Fix problem on send identifier installation for statistic
 

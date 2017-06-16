@@ -1474,7 +1474,7 @@ function send_identifier {
 			return
 		fi
 	fi
-	local ID=`ifconfig | $GREP --color=never -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}' | head -1 | md5sum | $CUT -d" " -f 1`
+	local ID=`/sbin/ifconfig | $GREP --color=never -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}' | /usr/bin/head -1 | /usr/bin/md5sum | $CUT -d" " -f 1`
 	if [ -z "$ID" ]; then
 		return;
 	fi
@@ -1496,7 +1496,7 @@ function debug2 {
 
 VERSION=0
 SUB_VERSION=4
-RELEASE_VERSION=1
+RELEASE_VERSION=2
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
