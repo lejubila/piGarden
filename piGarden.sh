@@ -1418,7 +1418,7 @@ list_descendants ()
 #
 function lock {
 
-	sleep 0.$((100 * $RANDOM / 32767)) | sed 's/..$/.&/'
+	sleep 0.$((100 * $RANDOM / 32767)) | $SED 's/..$/.&/'
 
 	local max_time=10
 	local current_time=$(($1 + 1))
@@ -1496,7 +1496,7 @@ function debug2 {
 
 VERSION=0
 SUB_VERSION=4
-RELEASE_VERSION=2
+RELEASE_VERSION=3
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}

@@ -1,3 +1,6 @@
+## 0.4.3 - 17/06/2017
+Fix path of sed in lock function
+
 ## 0.4.2 - 16/06/2017
 Fix another problem on generate installation identifier to sendo for statistic
 
