@@ -1,3 +1,6 @@
+## 0.4.4 - 17/06/2017
+Remove lock/unlock from init function for resove bug
+
 ## 0.4.3 - 17/06/2017
 Fix path of sed in lock function
 

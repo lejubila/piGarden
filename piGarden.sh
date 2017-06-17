@@ -10,7 +10,7 @@
 #
 function initialize {
 
-	lock
+	#lock
 
 	log_write "Run initialize"
 
@@ -52,7 +52,7 @@ function initialize {
 
 	log_write "End initialize"
 
-	unlock
+	#unlock
 
 }
 
