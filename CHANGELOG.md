@@ -1,3 +1,6 @@
+## 0.x.x - xx/xx/2017
+Add kicad electric schemas
+
 ## 0.4.4 - 17/06/2017
 Remove lock/unlock from init function for resove bug
 

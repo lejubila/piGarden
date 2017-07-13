@@ -1,0 +1,634 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:garden-cache
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title "Centralina impianto di irrigazione per elettrovalvole \\nmonostabili comandata da Raspeberry PI"
+Date "2017-05-20"
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L GPIO-Rev.2.0 P?
+U 1 1 55DE3A84
+P 1900 2250
+F 0 "P?" H 2400 1450 60  0000 C CNN
+F 1 "GPIO-Rev.2.0" H 2100 2850 60  0000 C CNN
+F 2 "" H 1900 2250 60  0000 C CNN
+F 3 "" H 1900 2250 60  0000 C CNN
+	1    1900 2250
+	1    0    0    -1  
+$EndComp
+Entry Wire Line
+	3800 1750 3900 1850
+Entry Wire Line
+	3800 1950 3900 2050
+Entry Wire Line
+	3800 2150 3900 2250
+Entry Wire Line
+	3800 2350 3900 2450
+Entry Wire Line
+	3800 2550 3900 2650
+Entry Wire Line
+	3800 2750 3900 2850
+Text Label 3950 2850 0    60   ~ 0
+1-GND
+Text Label 3950 2650 0    60   ~ 0
+2-IN4
+Text Label 3950 2450 0    60   ~ 0
+3-IN3
+Text Label 3950 2250 0    60   ~ 0
+4-IN2
+Text Label 3950 2050 0    60   ~ 0
+5-IN1
+Text Label 3950 1850 0    60   ~ 0
+5-VCC
+Text Label 3550 1750 0    60   ~ 0
++5v
+Text Label 3550 2750 0    60   ~ 0
+GND
+Text Label 3500 1950 0    60   ~ 0
+DEV+
+Text Label 3500 2150 0    60   ~ 0
+DEV-
+Text Label 3500 2350 0    60   ~ 0
+EV-1
+Text Label 3500 2550 0    60   ~ 0
+EV-2
+$Comp
+L SWITCH_INV SW2
+U 1 1 55DE49C3
+P 5600 2200
+F 0 "SW2" H 5400 2350 50  0000 C CNN
+F 1 "K2" H 5450 2050 50  0000 C CNN
+F 2 "" H 5600 2200 60  0000 C CNN
+F 3 "" H 5600 2200 60  0000 C CNN
+	1    5600 2200
+	1    0    0    -1  
+$EndComp
+$Comp
+L SWITCH_INV SW3
+U 1 1 55DE4A0D
+P 5600 2950
+F 0 "SW3" H 5400 3100 50  0000 C CNN
+F 1 "K3" H 5450 2800 50  0000 C CNN
+F 2 "" H 5600 2950 60  0000 C CNN
+F 3 "" H 5600 2950 60  0000 C CNN
+	1    5600 2950
+	1    0    0    -1  
+$EndComp
+$Comp
+L SWITCH_INV SW4
+U 1 1 55DE4A5B
+P 5600 3450
+F 0 "SW4" H 5400 3600 50  0000 C CNN
+F 1 "K4" H 5450 3300 50  0000 C CNN
+F 2 "" H 5600 3450 60  0000 C CNN
+F 3 "" H 5600 3450 60  0000 C CNN
+	1    5600 3450
+	1    0    0    -1  
+$EndComp
+Text Label 8450 800  0    60   ~ 0
+ALIMENTAZIONE-ELETTROVALVOLA+
+Text Label 10250 2000 3    60   ~ 0
+ALIMENTAZIONE-ELETTROVALVOLA-
+$Comp
+L STABI EV1
+U 1 1 55DE54D9
+P 9500 2450
+F 0 "EV1" H 9700 2675 50  0000 C CNN
+F 1 "STABI" H 9725 2225 50  0000 C CNN
+F 2 "VALVE-MINI_P" H 9500 2600 50  0001 C CNN
+F 3 "" H 9500 2450 60  0000 C CNN
+	1    9500 2450
+	1    0    0    -1  
+$EndComp
+$Comp
+L STABI EV2
+U 1 1 55DE58C1
+P 9500 3500
+F 0 "EV2" H 9700 3725 50  0000 C CNN
+F 1 "STABI" H 9725 3275 50  0000 C CNN
+F 2 "VALVE-MINI_P" H 9500 3650 50  0001 C CNN
+F 3 "" H 9500 3500 60  0000 C CNN
+	1    9500 3500
+	1    0    0    -1  
+$EndComp
+Entry Wire Line
+	3800 4400 3900 4500
+Entry Wire Line
+	3800 4600 3900 4700
+Entry Wire Line
+	3800 4800 3900 4900
+Entry Wire Line
+	3800 5000 3900 5100
+Entry Wire Line
+	3800 5200 3900 5300
+Entry Wire Line
+	3800 5400 3900 5500
+Text Label 3950 5500 0    60   ~ 0
+1-GND
+Text Label 3950 5300 0    60   ~ 0
+2-IN4
+Text Label 3950 5100 0    60   ~ 0
+3-IN3
+Text Label 3950 4900 0    60   ~ 0
+4-IN2
+Text Label 3950 4700 0    60   ~ 0
+5-IN1
+Text Label 3950 4500 0    60   ~ 0
+5-VCC
+$Comp
+L SWITCH_INV SW7
+U 1 1 55DF289D
+P 5600 5600
+F 0 "SW7" H 5400 5750 50  0000 C CNN
+F 1 "K3" H 5450 5450 50  0000 C CNN
+F 2 "" H 5600 5600 60  0000 C CNN
+F 3 "" H 5600 5600 60  0000 C CNN
+	1    5600 5600
+	1    0    0    -1  
+$EndComp
+$Comp
+L SWITCH_INV SW8
+U 1 1 55DF28A3
+P 5600 6100
+F 0 "SW8" H 5400 6250 50  0000 C CNN
+F 1 "K4" H 5450 5950 50  0000 C CNN
+F 2 "" H 5600 6100 60  0000 C CNN
+F 3 "" H 5600 6100 60  0000 C CNN
+	1    5600 6100
+	1    0    0    -1  
+$EndComp
+$Comp
+L STABI EV5
+U 1 1 55DF28B3
+P 9500 5250
+F 0 "EV5" H 9700 5475 50  0000 C CNN
+F 1 "STABI" H 9725 5025 50  0000 C CNN
+F 2 "VALVE-MINI_P" H 9500 5400 50  0001 C CNN
+F 3 "" H 9500 5250 60  0000 C CNN
+	1    9500 5250
+	1    0    0    -1  
+$EndComp
+$Comp
+L STABI EV6
+U 1 1 55DF28B9
+P 9500 6150
+F 0 "EV6" H 9700 6375 50  0000 C CNN
+F 1 "STABI" H 9725 5925 50  0000 C CNN
+F 2 "VALVE-MINI_P" H 9500 6300 50  0001 C CNN
+F 3 "" H 9500 6150 60  0000 C CNN
+	1    9500 6150
+	1    0    0    -1  
+$EndComp
+$Comp
+L SWITCH_INV SW6
+U 1 1 55DF2897
+P 5600 4850
+F 0 "SW6" H 5400 5000 50  0000 C CNN
+F 1 "K2" H 5450 4700 50  0000 C CNN
+F 2 "" H 5600 4850 60  0000 C CNN
+F 3 "" H 5600 4850 60  0000 C CNN
+	1    5600 4850
+	1    0    0    -1  
+$EndComp
+$Comp
+L SWITCH_INV SW5
+U 1 1 55DF2891
+P 5600 4350
+F 0 "SW5" H 5400 4500 50  0000 C CNN
+F 1 "K1" H 5450 4200 50  0000 C CNN
+F 2 "" H 5600 4350 60  0000 C CNN
+F 3 "" H 5600 4350 60  0000 C CNN
+	1    5600 4350
+	1    0    0    -1  
+$EndComp
+$Comp
+L STABI EV3
+U 1 1 55DF5576
+P 7850 4200
+F 0 "EV3" H 8050 4425 50  0000 C CNN
+F 1 "STABI" H 8075 3975 50  0000 C CNN
+F 2 "VALVE-MINI_P" H 7850 4350 50  0001 C CNN
+F 3 "" H 7850 4200 60  0000 C CNN
+	1    7850 4200
+	1    0    0    -1  
+$EndComp
+$Comp
+L STABI EV4
+U 1 1 55DF5990
+P 7850 5050
+F 0 "EV4" H 8050 5275 50  0000 C CNN
+F 1 "STABI" H 8075 4825 50  0000 C CNN
+F 2 "VALVE-MINI_P" H 7850 5200 50  0001 C CNN
+F 3 "" H 7850 5050 60  0000 C CNN
+	1    7850 5050
+	1    0    0    -1  
+$EndComp
+Text Label 2850 1750 0    60   ~ 0
+ROSSO
+Text Label 2850 1500 0    60   ~ 0
+BIANCO
+Text Label 2850 1300 0    60   ~ 0
+GRIGIO
+Text Label 2850 1950 0    60   ~ 0
+NERO
+Text Label 1700 3550 0    60   ~ 0
+VIOLA
+Text Label 1700 3350 0    60   ~ 0
+VERDE
+Text Label 3200 4600 0    60   ~ 0
+GRIGIO
+Text Label 3200 5400 0    60   ~ 0
+NERO
+Text Label 3600 4400 0    60   ~ 0
++5v
+Text Label 3550 4600 0    60   ~ 0
+EV-3
+Text Label 3550 4800 0    60   ~ 0
+EV-4
+Text Label 3550 5000 0    60   ~ 0
+EV-5
+Text Label 3550 5200 0    60   ~ 0
+EV-6
+Text Label 3600 5400 0    60   ~ 0
+GND
+Text Label 3200 4400 0    60   ~ 0
+ROSSO
+Text Label 3300 4800 0    60   ~ 0
+BLU
+Text Label 3050 5000 0    60   ~ 0
+MARRONE
+Text Label 3200 5200 0    60   ~ 0
+VIOLA
+Text Label 7250 2550 0    60   ~ 0
+ARANCIONE
+Text Label 10250 4600 1    60   ~ 0
+NERO
+Text Label 4800 5000 1    60   ~ 0
+ARANCIONE
+Text Label 7400 3050 0    60   ~ 0
+GIALLO
+Text Label 7400 3550 0    60   ~ 0
+GIALLO
+Text Label 6750 4450 0    60   ~ 0
+GIALLO
+Text Label 6750 4950 0    60   ~ 0
+GIALLO
+Text Label 6750 5700 0    60   ~ 0
+GIALLO
+Text Label 6750 6200 0    60   ~ 0
+GIALLO
+$Comp
+L SWITCH_INV SW1
+U 1 1 55DE4874
+P 5600 1700
+F 0 "SW1" H 5400 1850 50  0000 C CNN
+F 1 "K1" H 5450 1550 50  0000 C CNN
+F 2 "" H 5600 1700 60  0000 C CNN
+F 3 "" H 5600 1700 60  0000 C CNN
+	1    5600 1700
+	1    0    0    -1  
+$EndComp
+Text Notes 9450 2100 0    79   ~ 0
++
+Text Notes 9450 3200 0    79   ~ 0
++
+Text Notes 7800 3750 0    79   ~ 0
++
+Text Notes 7800 4750 0    79   ~ 0
++
+Text Notes 9450 4950 0    79   ~ 0
++
+Text Notes 9450 5850 0    79   ~ 0
++
+Text Notes 9450 2950 0    79   ~ 0
+-
+Text Notes 9450 3900 0    79   ~ 0
+-
+Text Notes 7800 4600 0    79   ~ 0
+-
+Text Notes 7800 5450 0    79   ~ 0
+-
+Text Notes 9450 5750 0    79   ~ 0
+-
+Text Notes 9450 6550 0    79   ~ 0
+-
+Text Label 4550 2500 1    79   ~ 0
+MSW1
+Text Label 4550 5150 1    79   ~ 0
+MSW2
+Text Label 1850 6400 0    60   ~ 0
+GND
+Text Label 1850 6550 0    60   ~ 0
+DO
+Text Label 1850 6700 0    60   ~ 0
+AO
+Text Label 1850 6850 0    60   ~ 0
+VCC
+Entry Wire Line
+	1650 6300 1750 6400
+Entry Wire Line
+	1650 6450 1750 6550
+Entry Wire Line
+	1650 6600 1750 6700
+Entry Wire Line
+	1650 6750 1750 6850
+Wire Bus Line
+	3900 1650 3900 2950
+Wire Bus Line
+	3900 2950 4350 2950
+Wire Bus Line
+	4350 1650 3900 1650
+Wire Wire Line
+	2750 1750 3800 1750
+Wire Wire Line
+	2750 1950 3250 1950
+Wire Wire Line
+	3250 1950 3250 2750
+Wire Wire Line
+	3250 2750 3800 2750
+Wire Wire Line
+	1000 1850 800  1850
+Wire Wire Line
+	800  1850 800  1500
+Wire Wire Line
+	800  1500 3450 1500
+Wire Wire Line
+	3450 1500 3450 1950
+Wire Wire Line
+	3450 1950 3800 1950
+Wire Wire Line
+	1000 1950 700  1950
+Wire Wire Line
+	700  1950 700  1300
+Wire Wire Line
+	700  1300 3350 1300
+Wire Wire Line
+	3350 1300 3350 2150
+Wire Wire Line
+	3350 2150 3800 2150
+Wire Wire Line
+	1000 2250 700  2250
+Wire Wire Line
+	700  2250 700  3550
+Wire Wire Line
+	700  3550 3350 3550
+Wire Wire Line
+	3350 3550 3350 2350
+Wire Wire Line
+	3350 2350 3800 2350
+Wire Wire Line
+	1000 2350 800  2350
+Wire Wire Line
+	800  2350 800  3350
+Wire Wire Line
+	800  3350 3450 3350
+Wire Wire Line
+	3450 3350 3450 2550
+Wire Wire Line
+	3450 2550 3800 2550
+Wire Bus Line
+	4350 1650 4350 1400
+Wire Bus Line
+	4350 1400 6400 1400
+Wire Bus Line
+	6400 1400 6400 3800
+Wire Bus Line
+	6400 3800 4350 3800
+Wire Bus Line
+	4350 3800 4350 2950
+Wire Wire Line
+	9050 2100 9050 3050
+Wire Wire Line
+	8050 2600 4800 2600
+Wire Wire Line
+	4800 2600 4800 6100
+Wire Wire Line
+	4800 2950 5100 2950
+Wire Wire Line
+	4800 3450 5100 3450
+Connection ~ 4800 2950
+Wire Wire Line
+	9050 2100 9500 2100
+Wire Wire Line
+	9500 2100 9500 2150
+Wire Wire Line
+	10100 3800 9500 3800
+Wire Wire Line
+	10100 2850 9500 2850
+Wire Wire Line
+	9500 2850 9500 2750
+Connection ~ 10100 2850
+Wire Bus Line
+	3900 4300 3900 5600
+Wire Bus Line
+	3900 5600 4350 5600
+Wire Bus Line
+	4350 4300 3900 4300
+Wire Bus Line
+	4350 4300 4350 4050
+Wire Bus Line
+	4350 4050 6400 4050
+Wire Bus Line
+	6400 4050 6400 6450
+Wire Bus Line
+	6400 6450 4350 6450
+Wire Bus Line
+	4350 6450 4350 5600
+Wire Wire Line
+	9050 4950 9050 5700
+Wire Wire Line
+	9500 5850 9500 6100
+Wire Wire Line
+	4800 5600 5100 5600
+Wire Wire Line
+	4800 6100 5100 6100
+Connection ~ 4800 5600
+Wire Wire Line
+	9050 4950 9500 4950
+Wire Wire Line
+	10100 6450 9500 6450
+Wire Wire Line
+	10100 5650 9500 5650
+Wire Wire Line
+	9500 5650 9500 5550
+Connection ~ 10100 5650
+Connection ~ 4800 3450
+Wire Wire Line
+	5100 4350 4800 4350
+Connection ~ 4800 4350
+Wire Wire Line
+	5100 4850 4800 4850
+Connection ~ 4800 4850
+Wire Wire Line
+	7500 3750 7500 4450
+Wire Wire Line
+	7500 3750 7850 3750
+Wire Wire Line
+	7850 3750 7850 3900
+Connection ~ 10100 3800
+Wire Wire Line
+	10100 4500 7850 4500
+Connection ~ 10100 4500
+Wire Wire Line
+	7850 5350 8700 5350
+Wire Wire Line
+	8700 5350 8700 4750
+Wire Wire Line
+	10100 4750 8700 4750
+Connection ~ 10100 4750
+Wire Wire Line
+	9050 5850 9500 5850
+Wire Wire Line
+	2750 1850 3150 1850
+Wire Wire Line
+	3150 1850 3150 4400
+Wire Wire Line
+	3150 4400 3800 4400
+Wire Wire Line
+	1000 2950 1000 5400
+Wire Wire Line
+	1000 5400 3800 5400
+Wire Wire Line
+	1000 2450 900  2450
+Wire Wire Line
+	900  2450 900  4600
+Wire Wire Line
+	900  4600 3800 4600
+Wire Wire Line
+	2750 2250 3050 2250
+Wire Wire Line
+	3050 2250 3050 4800
+Wire Wire Line
+	3050 4800 3800 4800
+Wire Wire Line
+	2750 2450 2950 2450
+Wire Wire Line
+	2950 2450 2950 5000
+Wire Wire Line
+	2950 5000 3800 5000
+Wire Wire Line
+	2750 2550 2850 2550
+Wire Wire Line
+	2850 2550 2850 5200
+Wire Wire Line
+	2850 5200 3800 5200
+Wire Wire Line
+	9050 3200 9500 3200
+Wire Wire Line
+	9050 3550 9050 3200
+Wire Wire Line
+	9050 3550 6100 3550
+Wire Wire Line
+	9050 3050 6100 3050
+Wire Wire Line
+	7500 4450 6100 4450
+Wire Wire Line
+	7850 4750 7500 4750
+Wire Wire Line
+	7500 4750 7500 4950
+Wire Wire Line
+	7500 4950 6100 4950
+Wire Wire Line
+	9050 5700 6100 5700
+Wire Wire Line
+	9050 6200 9050 5850
+Wire Wire Line
+	9050 6200 6100 6200
+Wire Bus Line
+	1750 6250 1750 6950
+Wire Bus Line
+	1750 6950 2300 6950
+Wire Bus Line
+	2300 6950 2300 6250
+Wire Bus Line
+	2300 6250 1750 6250
+Wire Wire Line
+	1000 2150 600  2150
+Wire Wire Line
+	600  2150 600  6300
+Wire Wire Line
+	600  6300 1650 6300
+Wire Wire Line
+	1000 1750 550  1750
+Wire Wire Line
+	550  1750 550  6750
+Wire Wire Line
+	550  6750 1650 6750
+Wire Wire Line
+	2750 2750 2800 2750
+Wire Wire Line
+	2800 2750 2800 6000
+Wire Wire Line
+	2800 6000 700  6000
+Wire Wire Line
+	700  6000 700  6450
+Wire Wire Line
+	700  6450 1650 6450
+Text Label 800  6750 0    60   ~ 0
+MARRONE
+Text Label 800  6300 0    60   ~ 0
+VERDE
+Text Label 800  6450 0    60   ~ 0
+BIANCO
+Text Label 1600 6000 0    60   ~ 0
+BIANCO
+Text Label 2850 6550 2    79   ~ 0
+SENSORE
+Text Label 2800 6700 2    79   ~ 0
+PIOGGIA
+$Comp
+L TRANSFO T1
+U 1 1 59200C5E
+P 10500 1050
+F 0 "T1" H 10500 1300 50  0000 C CNN
+F 1 "Trasformatore AC/DC 24V/12V/9V" H 10500 750 50  0000 C CNN
+F 2 "" H 10500 1050 50  0000 C CNN
+F 3 "" H 10500 1050 50  0000 C CNN
+	1    10500 1050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10100 1250 10100 6450
+Wire Wire Line
+	8050 2600 8050 850 
+Wire Wire Line
+	8050 850  10100 850 
+$EndSCHEMATC
