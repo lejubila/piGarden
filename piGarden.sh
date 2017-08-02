@@ -1518,6 +1518,9 @@ else
 	exit 1
 fi
 
+. "$DIR_SCRIPT/include/drv.include.sh"
+
+
 LAST_INFO_FILE="$STATUS_DIR/last_info"
 LAST_WARNING_FILE="$STATUS_DIR/last_worning"
 LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
@@ -1534,6 +1537,7 @@ if [ -f "$LOCK_FILE" ]; then
 fi
 
 send_identifier &
+setup_drv
 
 case "$1" in
 	init) 
