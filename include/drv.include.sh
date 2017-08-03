@@ -1,3 +1,5 @@
+declare -A drv_avalible
+
 function setup_drv { 
 
 	declare -a list_drv
@@ -21,10 +23,12 @@ function setup_drv {
 	local file_drv
 	for drv in "${list_drv[@]}"
 	do
-		for callback in init open close status
+		for callback in init releopenclose status
 		do
 			file_drv="$DIR_SCRIPT/drv/$drv/$callback.include.sh"
 			if [ -f "$file_drv" ]; then
+				drv_avalible[$drv]="${drv_avalible[$drv]}#$callback#"
+				#echo ${drv_avalible[$drv]}
 				. "$file_drv"
 			fi
 		done
