@@ -1,4 +1,15 @@
 #
+# Inizializzazione rele 
+#
+# $1 identificativo relè da inizializzare
+#
+function drv_sample_rele_init {
+
+	echo "$(date) drv_sample_rele_init $1" >> /tmp/piGarden.drv.sample
+
+}
+
+#
 # Apertura rele 
 #
 # $1 identificativo relè da aprire 
