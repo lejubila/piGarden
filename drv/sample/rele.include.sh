@@ -5,7 +5,7 @@
 #
 function drv_sample_rele_init {
 
-	echo "$(date) drv_sample_rele_init $1" >> /tmp/piGarden.drv.sample
+	local FOO="bar"
 
 }
 
@@ -16,7 +16,7 @@ function drv_sample_rele_init {
 #
 function drv_sample_rele_open {
 
-	echo "$(date) drv_sample_rele_open $1" >> /tmp/piGarden.drv.sample
+	local FOO="bar"
 
 }
 
@@ -27,7 +27,7 @@ function drv_sample_rele_open {
 #
 function drv_sample_rele_close {
 
-	echo "$(date) drv_sample_rele_close $1" >> /tmp/piGarden.drv.sample
+	local FOO="bar"
 
 }
 

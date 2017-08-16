@@ -3,7 +3,7 @@
 #
 function drv_sample_init {
 
-	echo "$(date) drv_sample_init" >> /tmp/piGarden.drv.sample
+	local FOO="bar"
 
 }
 

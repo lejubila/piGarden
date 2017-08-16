@@ -6,7 +6,8 @@
 #
 function drv_sample_supply_bistable_init {
 
-	echo "$(date) drv_sample_supply_bistable_init $1 $2" >> /tmp/piGarden.drv.sample
+	local FOO="bar"
+
 }
 
 #
@@ -17,7 +18,7 @@ function drv_sample_supply_bistable_init {
 #
 function drv_sample_supply_positive {
 
-	echo "$(date) drv_sample_supply_positive $1 $2" >> /tmp/piGarden.drv.sample
+	local FOO="bar"
 
 }
 
@@ -29,7 +30,7 @@ function drv_sample_supply_positive {
 #
 function drv_sample_supply_negative {
 
-	echo "$(date) drv_sample_supply_negative $1 $2" >> /tmp/piGarden.drv.sample
+	local FOO="bar"
 
 }
 

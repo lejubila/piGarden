@@ -5,7 +5,7 @@
 #
 function drv_sample_rain_sensor_init {
 
-	echo "$(date) drv_sample_rain_sensor_init $1" >> /tmp/piGarden.drv.sample
+	local FOO="bar"
 
 }
 
@@ -16,7 +16,7 @@ function drv_sample_rain_sensor_init {
 #
 function drv_sample_rain_sensor_get {
 
-	echo "$(date) drv_sample_rain_sensor_get $1" >> /tmp/piGarden.drv.sample
+	local FOO="bar"
 
 }
 

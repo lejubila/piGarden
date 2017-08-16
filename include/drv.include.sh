@@ -85,7 +85,8 @@ function drv_rele_init {
 	        log_write "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 	else
-		$fnc "$idx"
+		echo "$(date) $fnc arg:$idx" > "$LOG_OUTPUT_DRV_FILE"
+		$fnc "$idx" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
 	fi
 }
 
@@ -106,7 +107,8 @@ function drv_rele_close {
 	        log_write "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 	else
-		$fnc "$idx"
+		echo "$(date) $fnc arg:$idx" >> "$LOG_OUTPUT_DRV_FILE"
+		$fnc "$idx" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
 	fi
 }
 
@@ -127,7 +129,8 @@ function drv_rele_open {
 	        log_write "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 	else
-		$fnc "$idx"
+		echo "$(date) $fnc arg:$idx" >> "$LOG_OUTPUT_DRV_FILE"
+		$fnc "$idx" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
 	fi
 }
 
@@ -153,7 +156,8 @@ function drv_supply_bistable_init {
         	message_write "warning" "Driver not found: $idx1"
 		return
 	else
-		$fnc1 "$idx1"
+		echo "$(date) $fnc1 arg:$idx1" >> "$LOG_OUTPUT_DRV_FILE"
+		$fnc1 "$idx1" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
 	fi
 
 	# Nessun driver definito, esegue l'operazione tramite gpio del raspberry
@@ -165,7 +169,8 @@ function drv_supply_bistable_init {
 	        log_write "Driver not found: $idx2"
         	message_write "warning" "Driver not found: $idx2"
 	else
-		$fnc2 "$idx2"
+		echo "$(date) $fnc2 arg:$idx2" >> "$LOG_OUTPUT_DRV_FILE"
+		$fnc2 "$idx2" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
 	fi
 
 }
@@ -191,7 +196,8 @@ function drv_supply_positive {
         	message_write "warning" "Driver not found: $idx1"
 		return
 	else
-		$fnc1 "$idx1"
+		echo "$(date) $fnc1 arg:$idx1" >> "$LOG_OUTPUT_DRV_FILE"
+		$fnc1 "$idx1" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
 	fi
 
 	# Nessun driver definito, esegue l'operazione tramite gpio del raspberry
@@ -202,7 +208,8 @@ function drv_supply_positive {
 	        log_write "Driver not found: $idx2"
         	message_write "warning" "Driver not found: $idx2"
 	else
-		$fnc2 "$idx2"
+		echo "$(date) $fnc2 arg:$idx2" >> "$LOG_OUTPUT_DRV_FILE"
+		$fnc2 "$idx2" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
 	fi
 
 }
@@ -228,7 +235,8 @@ function drv_supply_negative {
         	message_write "warning" "Driver not found: $idx1"
 		return
 	else
-		$fnc1 "$idx1"
+		echo "$(date) $fnc1 arg:$idx1" >> "$LOG_OUTPUT_DRV_FILE"
+		$fnc1 "$idx1" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
 	fi
 
 	# Nessun driver definito, esegue l'operazione tramite gpio del raspberry
@@ -239,7 +247,8 @@ function drv_supply_negative {
 	        log_write "Driver not found: $idx2"
         	message_write "warning" "Driver not found: $idx2"
 	else
-		$fnc2 "$idx2"
+		echo "$(date) $fnc2 arg:$idx2" >> "$LOG_OUTPUT_DRV_FILE"
+		$fnc2 "$idx2" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
 	fi
 
 }
@@ -262,7 +271,8 @@ function drv_rain_sensor_init {
 	        log_write "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 	else
-		$fnc "$idx"
+		echo "$(date) $fnc arg:$idx" >> "$LOG_OUTPUT_DRV_FILE"
+		$fnc "$idx" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
 	fi
 
 }
@@ -285,6 +295,7 @@ function drv_rain_sensor_get {
 	        log_write "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 	else
+		echo "$(date) $fnc arg:$idx" >> "$LOG_OUTPUT_DRV_FILE"
 		vret=`$fnc "$idx"`
 	fi
 
