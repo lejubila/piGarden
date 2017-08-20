@@ -17,8 +17,9 @@ function initialize {
 	# Iniziazlizza i driver gpio
         for drv in "${list_drv[@]}"
         do
+		echo "$(date) drv_${drv}_init"
 		drv_${drv}_init
-        done
+        done &> "$LOG_OUTPUT_DRV_FILE"
 
 	# Imposta l'alimentazione con voltaggio negativo e setta i gpio in scrittura per le elettrovalvole bistabili
 	if [ "$EV_MONOSTABLE" != "1" ]; then

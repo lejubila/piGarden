@@ -3,9 +3,9 @@
 #
 # $1    identificativo relè 
 #
-function drv_sample_supply_bistable_init {
+function drv_spb16ch_supply_bistable_init {
 
-	local FOO="bar"
+	drv_spb16ch_supply_negative "$1"
 
 }
 
@@ -14,9 +14,9 @@ function drv_sample_supply_bistable_init {
 #
 # $1    identificativo relè 
 #
-function drv_sample_supply_positive {
+function drv_spb16ch_supply_positive {
 
-	local FOO="bar"
+	drv_spb16ch_rele_open "$1"
 
 }
 
@@ -25,9 +25,9 @@ function drv_sample_supply_positive {
 #
 # $1    identificativo relè 
 #
-function drv_sample_supply_negative {
+function drv_spb16ch_supply_negative {
 
-	local FOO="bar"
+	drv_spb16ch_rele_close "$1"
 
 }
 

@@ -33,7 +33,7 @@ function setup_drv {
 	local file_drv
 	for drv in "${list_drv[@]}"
 	do
-		for callback in init rele supply rainsensor
+		for callback in config init rele supply rainsensor
 		do
 			file_drv="$DIR_SCRIPT/drv/$drv/$callback.include.sh"
 			if [ -f "$file_drv" ]; then
@@ -78,14 +78,14 @@ function drv_rele_init {
 
 	# Nessun driver definito, esegue la chiusura del relè tramite gpio del raspberry
 	if [ -z "$fnc" ]; then
-                $GPIO -g write $idx RELE_GPIO_OPEN    # chiude l'alimentazione all'elettrovalvole
+                $GPIO -g write $idx $RELE_GPIO_OPEN   # chiude l'alimentazione all'elettrovalvole
                 $GPIO -g mode $idx out                # setta il gpio nella modalita di scrittura
 	# Il driver definito non è stato trovato
 	elif [ "$fnc" == "drvnotfound" ]; then
 	        log_write "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 	else
-		echo "$(date) $fnc arg:$idx" > "$LOG_OUTPUT_DRV_FILE"
+		echo "$(date) $fnc arg:$idx" >> "$LOG_OUTPUT_DRV_FILE"
 		$fnc "$idx" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
 	fi
 }

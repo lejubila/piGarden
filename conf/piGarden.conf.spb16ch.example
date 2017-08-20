@@ -1,0 +1,156 @@
+# Log file
+LOG_FILE="/home/pi/piGarden/log/piGarden.log"
+LOG_FILE_MAX_SIZE=1048576 # 1MB
+
+# Log file for driver output
+LOG_OUTPUT_DRV_FILE="/tmp/piGarden.drv.log"
+
+# Status directory
+STATUS_DIR="/home/pi/piGarden/state"
+
+# Posizione gpio
+GPIO="/usr/local/bin/gpio"
+
+# Posizione js
+JQ="/usr/local/bin/jq"
+
+# Percorso curl
+CURL="/usr/bin/curl"
+
+# Percorso wc
+WC="/usr/bin/wc"
+
+# Percorso gzip
+GZIP="/bin/gzip"
+
+# Percorso mv
+MV="/bin/mv"
+
+# Percorso di tr
+TR="/usr/bin/tr"
+
+# Percorso di cut
+CUT="/usr/bin/cut"
+
+# Percorso tcpserver
+TCPSERVER="/usr/bin/tcpserver"
+
+# Percorso cron
+CRONTAB="/usr/bin/crontab"
+
+# Percorso grep
+GREP="/bin/grep"
+
+# Percorsp sed
+SED="/bin/sed"
+
+# Percorso readlink
+READLINK="/bin/readlink"
+
+# Percorso stat
+STAT="/usr/bin/stat"
+
+# Se impostato con il valore 1, indica che il sistema gestisce elettrovalvole monostabili, 
+# se impostato a 0 il sistema gestirà elettrovalvole bisstabili
+EV_MONOSTABLE=1
+
+# Id gpio usati per simulare il doppio deviatore con cui eseguire l'alimentazione alle elettrovalvole
+SUPPLY_GPIO_1="drv:spb16ch:15"
+SUPPLY_GPIO_2="drv:spb16ch:16"
+
+# Stato dei due gpio per impartire l'alimentazione positiva alle elettrovalvole (aperta)
+SUPPLY_GPIO_POS=0
+
+# Stato dei due gpio per impartire l'alimentazione negativa alle elettrovalvole (chiusa)
+SUPPLY_GPIO_NEG=1
+
+# Stato di ingresso da assegnare al gpio per chiudere il rele
+RELE_GPIO_CLOSE=0
+
+# Stato di ingresso da assegnare al gpio per aprire il rele
+RELE_GPIO_OPEN=1
+
+# Id del gpio usato per collegare il sensore di rilevamento pioggia
+RAIN_GPIO=
+
+# Valore in ingresso sul gpio definito in RAIN_GPIO che indica lo stato di pioggia
+RAIN_GPIO_STATE=0
+
+
+
+
+# Numero totale di elettrovalvole
+EV_TOTAL=16
+
+# Definizione delle elettrovalvole
+EV1_ALIAS="Zona_1" #
+EV1_GPIO="drv:spb16ch:1"
+
+EV2_ALIAS="Zona_2" #
+EV2_GPIO="drv:spb16ch:2"
+
+EV3_ALIAS="Zona_3" #
+EV3_GPIO="drv:spb16ch:3"
+
+EV4_ALIAS="Zona_4" #
+EV4_GPIO="drv:spb16ch:4"
+
+EV5_ALIAS="Zona_5" #
+EV5_GPIO="drv:spb16ch:5"
+
+EV6_ALIAS="Zona_6" #
+EV6_GPIO="drv:spb16ch:6"
+
+EV7_ALIAS="Zona_7" #
+EV7_GPIO="drv:spb16ch:7"
+
+EV8_ALIAS="Zona_8" #
+EV8_GPIO="drv:spb16ch:8"
+
+EV9_ALIAS="Zona_9" #
+EV9_GPIO="drv:spb16ch:9"
+
+EV10_ALIAS="Zona_10" #
+EV10_GPIO="drv:spb16ch:10"
+
+EV11_ALIAS="Zona_11" #
+EV11_GPIO="drv:spb16ch:11"
+
+EV12_ALIAS="Zona_12" #
+EV12_GPIO="drv:spb16ch:12"
+
+EV13_ALIAS="Zona_13" #
+EV13_GPIO="drv:spb16ch:13"
+
+EV14_ALIAS="Zona_14" #
+EV14_GPIO="drv:spb16ch:14"
+
+EV15_ALIAS="Zona_15" #
+EV15_GPIO="drv:spb16ch:15"
+
+EV16_ALIAS="Zona_16" #
+EV16_GPIO="drv:spb16ch:16"
+
+
+# Definisce l'api key e il luogo per recuperare lo stato meteo online
+WUNDERGROUND_KEY=""
+WUNDERGROUND_LOCATION="IY/Monsummano"	# http://www.wunderground.com/weather/api/d/docs?d=resources/country-to-iso-matching&MR=1
+
+# Blocca l'irrigazione se l'ultima pioggia rilevata online è avvenuta nell'ultima quantità di tempo inserita.
+# Il tempo è espresso in secondi. Quindi inserendo 86400, se nelle ultime 24 ore ha piovuto viene bloccata l'irrigazione. Inserendo il valore zero non viene eseguito nessun controllo.
+NOT_IRRIGATE_IF_RAIN_ONLINE=86400
+
+# Il parametro è simile a quello precedente, il controllo però anziché essere fatto attingendo a wunderground, viene eseguito direttamente sul sensore se installato. Inserendo il valore zero non viene eseguito nessun controllo.
+NOT_IRRIGATE_IF_RAIN_SENSOR=86400
+
+# Indirizzo ip e porta di ascolto del socket server
+TCPSERVER_IP="127.0.0.1"
+TCPSERVER_PORT="8084"
+
+# Utente e password che i clients devono utilizzare per stabilire una connessione tramite socket server
+TCPSERVER_USER=""
+TCPSERVER_PWD=""
+
+# Con impostato il valore 1 non invia l'identificativi per statistiche di utilizzo
+NO_SEND_IDENTIFIER=0
+
