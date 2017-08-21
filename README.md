@@ -10,7 +10,7 @@ Documentation of piGarden and build system irrigation with Raspberry Pi can be f
 
 This script is open-sourced software under GNU GENERAL PUBLIC LICENSE Version 2
 
-## Installation
+## Installation to Raspbian Jessie
 
 1) Installs the necessary packages on your terminal:
 
@@ -26,7 +26,7 @@ sudo apt-get install flex -y
 sudo apt-get install bison -y 
 sudo apt-get install gcc -y 
 sudo apt-get install make -y 
-sudo apt-get install autotools -y 
+sudo apt-get install libtool autoconf automake gettext autotools-dev -y 
 sudo apt-get install dh-autoreconf -y 
 wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-1.5.tar.gz
 tar xfvz jq-1.5.tar.gz
