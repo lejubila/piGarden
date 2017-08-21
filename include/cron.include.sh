@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #
 # Elimina una tipoliga di schedulazione dal crontab dell'utente
 # $1	tipologia del crontab

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #
 # Avvia il socket server
 #

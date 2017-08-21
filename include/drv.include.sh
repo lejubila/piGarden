@@ -1,4 +1,3 @@
-#declare -A drv_avalible
 declare -a list_drv
 
 function setup_drv { 
