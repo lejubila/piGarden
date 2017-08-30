@@ -23,12 +23,12 @@ function drv_spb16ch_rele_open {
 		message_write "warning" "$message"
 	fi
 	local channel_num=${rele_data:0:2}
-	local rele_num=${rele_data:2:2}
+	local rele_num=${rele_data:2:3}
 
 	echo channel_num=$channel_num
 	echo rele_num=$rele_num
 	$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py 72 $channel_num
-	$DIR_SCRIPT/drv/spb16ch/scripts/gpo_active.py 72 $rele_num 0
+	$DIR_SCRIPT/drv/spb16ch/scripts/gpo_init.py 72 $rele_num 0
 
 }
 
@@ -47,12 +47,12 @@ function drv_spb16ch_rele_close {
 		message_write "warning" "$message"
 	fi
 	local channel_num=${rele_data:0:2}
-	local rele_num=${rele_data:2:2}
+	local rele_num=${rele_data:2:3}
 
 	echo channel_num=$channel_num
 	echo rele_num=$rele_num
 	$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py 72 $channel_num
-	$DIR_SCRIPT/drv/spb16ch/scripts/gpo_active.py 72 $rele_num 1
+	$DIR_SCRIPT/drv/spb16ch/scripts/gpo_init.py 72 $rele_num 1
 
 }
 
