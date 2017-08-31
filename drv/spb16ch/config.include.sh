@@ -1,6 +1,6 @@
 #
 # Mapping rele spb16ch: l'indice indica il relè, ogni elemento deve essere lungo quattro caratteri, 
-# i primi due indicano il mux channel, mentre gli ultimi due caratteri indicano il numero del rele sul canale
+# i primi due indicano il mux channel, mentre gli ultimi tre caratteri indicano il numero del rele sul canale
 #
 SPB16CH_RELE_MAP[1]=" 0  1"
 SPB16CH_RELE_MAP[2]=" 0  2"
