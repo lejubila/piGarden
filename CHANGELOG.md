@@ -1,6 +1,7 @@
 ## 0.4.5 - xx/08/2017
 - Implemented driver subsystem for interfacing with other board
 - Added driver spb16ch for interfacing with "Smart Power Board 16 channel with RTC"
+- Fix problem with cron management on similar type cron
 
 ## 0.4.4 - 17/06/2017
 Remove lock/unlock from init function for resove bug

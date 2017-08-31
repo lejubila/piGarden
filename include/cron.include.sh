@@ -15,8 +15,8 @@ function cron_del {
 	fi
 
 	$CRONTAB -l > "$TMP_CRON_FILE"
-	local START=`$GREP -n "# START cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
-	local END=`$GREP -n "# END cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
+	local START=`$GREP -n "^# START cron $CRON_TYPE $CRON_ARG$" "$TMP_CRON_FILE"| $CUT -d : -f 1`
+	local END=`$GREP -n "^# END cron $CRON_TYPE $CRON_ARG$" "$TMP_CRON_FILE"| $CUT -d : -f 1`
 	local re='^[0-9]+$'
 
 	if ! [[ "$START" =~ $re ]] && ! [[ "$END" =~ $re ]] ; then
@@ -79,8 +79,8 @@ function cron_add {
 	fi
 
 	$CRONTAB -l > "$TMP_CRON_FILE"
-	local START=`$GREP -n "# START cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
-	local END=`$GREP -n "# END cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
+	local START=`$GREP -n "^# START cron $CRON_TYPE $CRON_ARG$" "$TMP_CRON_FILE"| $CUT -d : -f 1`
+	local END=`$GREP -n "^# END cron $CRON_TYPE $CRON_ARG$" "$TMP_CRON_FILE"| $CUT -d : -f 1`
 	local re='^[0-9]+$'
 
 	local NEW_CRON=0
@@ -228,8 +228,8 @@ function cron_get {
 	fi
 
 	$CRONTAB -l > "$TMP_CRON_FILE"
-	local START=`$GREP -n "# START cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
-	local END=`$GREP -n "# END cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
+	local START=`$GREP -n "^# START cron $CRON_TYPE $CRON_ARG$" "$TMP_CRON_FILE"| $CUT -d : -f 1`
+	local END=`$GREP -n "^# END cron $CRON_TYPE $CRON_ARG$" "$TMP_CRON_FILE"| $CUT -d : -f 1`
 	local re='^[0-9]+$'
 
 	local PREVIUS_CONTENT=""
