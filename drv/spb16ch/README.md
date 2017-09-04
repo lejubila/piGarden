@@ -5,3 +5,6 @@ Questo driver richiede l'interprete python e la libreria python-smbus. Inoltre l
 sudo apt-get install python python-smbus
 sudo usermod -a -G i2c pi
 
+Oltre a quanto sopra indicato, il raspberry deve avere caricato i moduli di gestione del bus i2c:
+sudo raspi-config
+Interfacing Options / I2C / Yes
