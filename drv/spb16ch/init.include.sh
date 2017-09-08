@@ -16,8 +16,8 @@ function drv_spb16ch_init {
                 if [[ "$gpio" == drv:spb16ch:* ]]; then
 		        local rele_id=`echo $gpio | $CUT -d':' -f3,3`
 		        local rele_data=${SPB16CH_RELE_MAP[$rele_id]}
-			local address_num=${rele_data:0:2}
 		        if [[ ! -z $rele_data ]]; then
+				local address_num=${rele_data:0:2}
 				if [[ ! " ${address_used[@]} " =~ " ${address_num} " ]]; then
 					address_used+=("$address_num")
 				fi
@@ -25,14 +25,14 @@ function drv_spb16ch_init {
                 fi
         done
 
-        # Cerca gli indirizzi delle schede spb16ch utilizzate per i rele utilizzate per la gestione alimentazione 
+        # Cerca gli indirizzi delle schede spb16ch utilizzate per i rele che gestiscono alimentazione delle elettrovalvole bistabili
         for gpio in "$SUPPLY_GPIO_1" "$SUPPLY_GPIO_2"
         do
                 if [[ "$gpio" == drv:spb16ch:* ]]; then
 		        local rele_id=`echo $gpio | $CUT -d':' -f3,3`
 		        local rele_data=${SPB16CH_RELE_MAP[$rele_id]}
-			local address_num=${rele_data:0:2}
 		        if [[ ! -z $rele_data ]]; then
+				local address_num=${rele_data:0:2}
 				if [[ ! " ${address_used[@]} " =~ " ${address_num} " ]]; then
 					address_used+=("$address_num")
 				fi
@@ -43,7 +43,7 @@ function drv_spb16ch_init {
 	# Esegue l'inizializzazione delle schede spb16ch trovate
 	for address_num in ${address_used[@]}
 	do
-		echo "****** address_num = $address_num *******"
+		echo "****** Inizializzazione address_num = $address_num *******"
 		$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py $address_num 0
 		$DIR_SCRIPT/drv/spb16ch/scripts/gpo_init.py 25 255 0
 		$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py $address_num 1
