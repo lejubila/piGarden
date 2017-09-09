@@ -1,7 +1,7 @@
 ## 0.4.5 - xx/08/2017
 - Implemented driver subsystem for interfacing with other board
 - Added driver spb16ch for interfacing with "Smart Power Board 16 channel with RTC"
-- Fix bug of possible overlapping of solenoid valves (es: "Zone_1" and "Zone_10"
+- Fix problem with cron management on similar type cron
 - Fix bug: in case of rain the weather data were not updated 
 
 ## 0.4.4 - 17/06/2017

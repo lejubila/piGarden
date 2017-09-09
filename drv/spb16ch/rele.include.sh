@@ -22,13 +22,15 @@ function drv_spb16ch_rele_open {
 		log_write "$message"
 		message_write "warning" "$message"
 	fi
-	local channel_num=${rele_data:0:2}
-	local rele_num=${rele_data:2:2}
+	local address_num=${rele_data:0:2}
+	local channel_num=${rele_data:3:1}
+	local rele_num=${rele_data:5:3}
 
+	echo address_num=$address_num
 	echo channel_num=$channel_num
 	echo rele_num=$rele_num
-	$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py 72 $channel_num
-	$DIR_SCRIPT/drv/spb16ch/scripts/gpo_active.py 72 $rele_num 0
+	$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py $address_num $channel_num
+	$DIR_SCRIPT/drv/spb16ch/scripts/gpo_init.py $address_num $rele_num 0
 
 }
 
@@ -46,13 +48,15 @@ function drv_spb16ch_rele_close {
 		log_write "$message"
 		message_write "warning" "$message"
 	fi
-	local channel_num=${rele_data:0:2}
-	local rele_num=${rele_data:2:2}
+	local address_num=${rele_data:0:2}
+	local channel_num=${rele_data:3:1}
+	local rele_num=${rele_data:5:3}
 
+	echo address_num=$address_num
 	echo channel_num=$channel_num
 	echo rele_num=$rele_num
-	$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py 72 $channel_num
-	$DIR_SCRIPT/drv/spb16ch/scripts/gpo_active.py 72 $rele_num 1
+	$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py $address_num $channel_num
+	$DIR_SCRIPT/drv/spb16ch/scripts/gpo_init.py $address_num $rele_num 1
 
 }
 

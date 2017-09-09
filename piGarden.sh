@@ -10,11 +10,9 @@
 #
 function initialize {
 
-	#lock
-
 	log_write "Run initialize"
 
-	# Iniziazlizza i driver gpio
+	# Inizializza i driver gpio
         for drv in "${list_drv[@]}"
         do
 		echo "$(date) drv_${drv}_init"
@@ -61,8 +59,6 @@ function initialize {
 	fi
 
 	log_write "End initialize"
-
-	#unlock
 
 }
 
@@ -588,6 +584,7 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT check_rain_sensor                            check rain from hardware sensor"
 	echo -e "\t$NAME_SCRIPT close_all_for_rain                           close all solenoid if it's raining"
 	echo -e "\t$NAME_SCRIPT close_all [force]                            close all solenoid"
+	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT start_socket_server [force]                  start socket server, with 'force' parameter force close socket server if already open"
 	echo -e "\t$NAME_SCRIPT stop_socket_server                           stop socket server"
 	echo -e "\n"
@@ -750,6 +747,9 @@ LAST_INFO_FILE="$STATUS_DIR/last_info"
 LAST_WARNING_FILE="$STATUS_DIR/last_worning"
 LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
 
+if [ -z $LOG_OUTPUT_DRV_FILE ]; then
+	$LOG_OUTPUT_DRV_FILE="/dev/null"
+fi
 
 # Elimina il file di lock se più vecchio di 11 secondi
 if [ -f "$LOCK_FILE" ]; then
