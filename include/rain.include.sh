@@ -24,7 +24,7 @@ function check_rain_online {
 		then
 			#echo "ECCOMI!!!!!"
 			echo $local_epoch > "$STATUS_DIR/last_rain_online"
-			return $local_epoch	
+			#return $local_epoch	
 		fi
 		echo "$current_observation" > "$STATUS_DIR/last_weather_online"
 	fi
