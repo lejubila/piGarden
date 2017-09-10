@@ -93,6 +93,15 @@ function socket_server_command {
                 	fi
 			;;
 
+		close_all)
+			if [ "$arg2" == "disable_scheduling" ]; then
+				cron_disable_all_open_close &> /dev/null
+			fi
+			close_all &> /dev/null
+			message_write "success" "All solenoid closed"
+			json_status
+			;;
+
 		set_general_cron)
 			local vret=""
 			for i in $arg2 $arg3 $arg4 $arg5 $arg6 $arg7
