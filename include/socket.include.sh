@@ -205,6 +205,20 @@ function socket_server_command {
 
 			;;
 
+		reboot)
+			message_write "warning" "System reboot is started"
+			json_status
+			local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/$NAME_SCRIPT"`
+			nohup $PATH_SCRIPT reboot > /dev/null 2>&1 &
+			;;
+
+		poweroff)
+			message_write "warning" "System shutdown is started"
+			json_status
+			local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/$NAME_SCRIPT"`
+			nohup $PATH_SCRIPT poweroff > /dev/null 2>&1 &
+			;;
+
 		*)
 			json_error 0 "invalid command"
 			;;

@@ -1,9 +1,11 @@
-## 0.4.5 - xx/08/2017
+## 0.5.0 - xx/08/2017
 - Implemented driver subsystem for interfacing with other board
 - Added driver spb16ch for interfacing with "Smart Power Board 16 channel with RTC"
 - Added socket server api for close all zones and disable all scheduling
+- Implement command and socket server api to perform system shutdown and reboot
 - Fix problem with cron management on similar type cron
 - Fix bug: in case of rain the weather data were not updated 
+- Fix bug: delete the temporary files for managing the socket server messages that were kept on the system
 
 ## 0.4.4 - 17/06/2017
 - Remove lock/unlock from init function for resove bug

@@ -588,6 +588,9 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT start_socket_server [force]                  start socket server, with 'force' parameter force close socket server if already open"
 	echo -e "\t$NAME_SCRIPT stop_socket_server                           stop socket server"
 	echo -e "\n"
+	echo -e "\t$NAME_SCRIPT reboot                                       reboot system"
+	echo -e "\t$NAME_SCRIPT poweroff                                     shutdown system"
+	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT set_cron_init                                set crontab for initialize control unit"
 	echo -e "\t$NAME_SCRIPT del_cron_init                                remove crontab for initialize control unit"
 	echo -e "\t$NAME_SCRIPT set_cron_start_socket_server                 set crontab for start socket server"
@@ -706,6 +709,25 @@ function send_identifier {
 
 }
 
+#
+# Spenge il sistema 
+#
+function exec_poweroff {
+	local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/scripts/poweroff.sh"`
+echo "$PATH_SCRIPT" > tmp/prova.txt
+        sleep 15
+	. $PATH_SCRIPT
+}
+
+#
+# Spenge il sistema 
+#
+function exec_reboot {
+	local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/scripts/reboot.sh"`
+        sleep 15
+	. $PATH_SCRIPT
+}
+
 function debug1 {
 	. "$DIR_SCRIPT/debug/debug1.sh"	
 }
@@ -715,8 +737,8 @@ function debug2 {
 }
 
 VERSION=0
-SUB_VERSION=4
-RELEASE_VERSION=5
+SUB_VERSION=5
+RELEASE_VERSION=0
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
@@ -917,6 +939,14 @@ case "$1" in
 	get_cron_close)
 		get_cron_close $2
 		;;
+	
+	reboot)
+		exec_reboot
+		;;
+
+	poweroff)
+		exec_poweroff
+		;;
 
 	debug1)
 		debug1 $2 $3 $4 $5
@@ -933,7 +963,8 @@ case "$1" in
 		;;
 esac
 
-# Elimina eventuali file temporane utilizzati per la gestione dei cron
+# Elimina eventuali file temporani utilizzati per la gestione dei cron e i messaggi per il sockt server
 rm "$TMP_CRON_FILE" 2> /dev/null
 rm "$TMP_CRON_FILE-2" 2> /dev/null
 
+reset_messages &> /dev/null
