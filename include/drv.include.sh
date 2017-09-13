@@ -32,13 +32,19 @@ function setup_drv {
 	local file_drv
 	for drv in "${list_drv[@]}"
 	do
-		for callback in config init rele supply rainsensor
+		for callback in config common init rele supply rainsensor setup
 		do
 			file_drv="$DIR_SCRIPT/drv/$drv/$callback.include.sh"
 			if [ -f "$file_drv" ]; then
 				#drv_avalible[$drv]="${drv_avalible[$drv]}#$callback#"
 				#echo ${drv_avalible[$drv]}
 				. "$file_drv"
+
+				if [ $callback == "setup" ]; then
+					local fnc="drv_${drv}_setup"
+					echo "$(date) $fnc" >> "$LOG_OUTPUT_DRV_FILE"
+					$fnc >> "$LOG_OUTPUT_DRV_FILE" 2>&1
+				fi
 			fi
 		done
 	done

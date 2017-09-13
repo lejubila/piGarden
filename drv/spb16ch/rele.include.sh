@@ -25,6 +25,9 @@ function drv_spb16ch_rele_open {
 	local address_num=${rele_data:0:2}
 	local channel_num=${rele_data:3:1}
 	local rele_num=${rele_data:5:3}
+	local board_id=${rele_data:9:1}
+
+	drv_spb16ch_board_enable $board_id
 
 	echo address_num=$address_num
 	echo channel_num=$channel_num
@@ -51,6 +54,9 @@ function drv_spb16ch_rele_close {
 	local address_num=${rele_data:0:2}
 	local channel_num=${rele_data:3:1}
 	local rele_num=${rele_data:5:3}
+	local board_id=${rele_data:9:1}
+
+	drv_spb16ch_board_enable $board_id
 
 	echo address_num=$address_num
 	echo channel_num=$channel_num
