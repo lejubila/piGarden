@@ -80,7 +80,7 @@ RAIN_GPIO_STATE=0
 
 
 # Numero totale di elettrovalvole
-EV_TOTAL=64
+EV_TOTAL=128
 
 # Definizione delle elettrovalvole
 EV1_ALIAS="Zona_1" #
