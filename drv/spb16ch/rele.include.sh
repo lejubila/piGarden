@@ -35,6 +35,8 @@ function drv_spb16ch_rele_open {
 	$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py $address_num $channel_num
 	$DIR_SCRIPT/drv/spb16ch/scripts/gpo_init.py $address_num $rele_num 0
 
+	drv_spb16ch_board_disable $board_id
+
 }
 
 #
@@ -63,6 +65,8 @@ function drv_spb16ch_rele_close {
 	echo rele_num=$rele_num
 	$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py $address_num $channel_num
 	$DIR_SCRIPT/drv/spb16ch/scripts/gpo_init.py $address_num $rele_num 1
+
+	drv_spb16ch_board_disable $board_id
 
 }
 

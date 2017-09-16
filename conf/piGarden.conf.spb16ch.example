@@ -496,8 +496,8 @@ NO_SEND_IDENTIFIER=0
 #
 
 # Stato da assegnare ai gpio per abilitare/disabilitare le schede spb16ch
-SPB16CH_GPIO_ON=0
-SPB16CH_GPIO_OFF=1
+SPB16CH_GPIO_ON=1
+SPB16CH_GPIO_OFF=0
 
 # Gpio di per gestire l'abilitazione/disabilitazione delle chede spb16ch
 SPB16CH1_GPIO=17	# Physical 11 - wPi 0

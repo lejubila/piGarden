@@ -155,4 +155,6 @@ SPB16CH_RELE_MAP[128]="77|1|128|8"
 declare -g -a SPB16CH_USED_ID
 SPB16CH_USED_ID=()
 
-
+# Nome del file dove memorizzare gli id delle schede utilizzate
+declare -g SPB16CH_BOARD_ID_STORE_FILE
+SPB16CH_BOARD_ID_STORE_FILE="$STATUS_DIR/spb16ch_board_id_store"
