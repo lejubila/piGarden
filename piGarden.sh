@@ -463,9 +463,12 @@ function json_status {
         do
 		if [ $i = "get_cron" ]; then
 			with_get_cron="1"
-		fi
-		if [ $i = "get_cron_open_in" ]; then
+		elif [[ "$i" == get_cron:* ]]; then
+			with_get_cron="${i#get_cron:}"
+		elif [ $i = "get_cron_open_in" ]; then
 			with_get_cron_open_in="1"
+		elif [[ "$i" == get_cron_open_in:* ]]; then
+			with_get_cron_open_in="${i#get_cron_open_in:}"
 		fi
 	done
 
@@ -506,10 +509,17 @@ function json_status {
 	local json_last_success="\"success\":\"$last_success\""	
 
 	local json_get_cron=""			
-	if [ $with_get_cron = "1" ]; then
+	if [ $with_get_cron != "0" ]; then
 		local values_open="" 
 		local values_close="" 
-		for i in $(seq $EV_TOTAL)
+		local element_for=""
+		if [ "$with_get_cron" == "1" ]; then
+			element_for="$(seq $EV_TOTAL)"
+		else
+			ev_alias2number $with_get_cron
+			element_for=$?
+		fi
+		for i in $element_for
 		do
 			local a=EV"$i"_ALIAS
 			local av=${!a}
@@ -532,10 +542,17 @@ function json_status {
 	local json_cron="\"cron\":{$json_get_cron}"			
 
 	local json_get_cron_open_in=""			
-	if [ $with_get_cron_open_in = "1" ]; then
+	if [ $with_get_cron_open_in != "0" ]; then
 		local values_open_in="" 
 		local values_open_in_stop="" 
-		for i in $(seq $EV_TOTAL)
+		local element_for=""
+		if [ "$with_get_cron_open_in" == "1" ]; then
+			element_for="$(seq $EV_TOTAL)"
+		else
+			ev_alias2number $with_get_cron_open_in
+			element_for=$?
+		fi
+		for i in $element_for
 		do
 			local a=EV"$i"_ALIAS
 			local av=${!a}

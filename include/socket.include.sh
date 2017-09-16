@@ -75,13 +75,13 @@ function socket_server_command {
         	                json_error 0 "Alias solenoid not specified"
 			else
                 		ev_open $arg2 $arg3 &> /dev/null
-				json_status "get_cron_open_in"
+				json_status "get_cron_open_in:$arg2"
 			fi
 			;;
 
 		open_in)
 			ev_open_in $arg2 $arg3 $arg4 $arg5 &> /dev/null
-			json_status "get_cron_open_in"
+			json_status "get_cron_open_in:$arg4"
 			;;	
 
 		close)
@@ -89,7 +89,7 @@ function socket_server_command {
         	                json_error 0 "Alias solenoid not specified"
 			else
                 		ev_close $arg2 &> /dev/null
-				json_status "get_cron_open_in"
+				json_status "get_cron_open_in:$arg2"
                 	fi
 			;;
 
@@ -154,7 +154,7 @@ function socket_server_command {
 				log_write "Cron del failed: $vret"
 			else
 				message_write "success" "Scheduled start successfully deleted"
-				json_status "get_cron_open_in"
+				json_status "get_cron_open_in:$arg2"
 			fi
 
 			;;
