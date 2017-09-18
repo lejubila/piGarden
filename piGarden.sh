@@ -658,16 +658,12 @@ list_descendants ()
 #
 function lock {
 
-	sleep 0.$((100 * $RANDOM / 32767)) | $SED 's/..$/.&/'
-
 	local max_time=10
 	local current_time=$(($1 + 1))
 
-	local lock_content=`cat "$LOCK_FILE" 2> /dev/null`
-	if [ -z $lock_content ]; then
-		lock_content="0"
-	fi
-	if [ "$lock_content" -eq "1" ]; then
+	if mkdir "${LOCK_FILE}" &>/dev/null; then
+		local foo=bar
+	else
 		if [ "$current_time" -gt "$max_time" ]; then
 			log_write "Maximum locked time reached"
 			sleep $max_time
@@ -679,18 +675,21 @@ function lock {
 		lock $current_time
 		return
 	fi
-	echo "1" > "$LOCK_FILE"
 
 }
+
+
 
 #
 # Chidue un lock
 # 
 function unlock {
 
-	echo "0" > "$LOCK_FILE"
+	rmdir "${LOCK_FILE}" &>/dev/null
 
 }
+
+
 
 #
 # Invia l'identificativo univoco ad uso statistico di utilizzo

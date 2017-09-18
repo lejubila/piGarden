@@ -6,6 +6,7 @@
 - Fix problem with cron management on similar type cron
 - Fix bug: in case of rain the weather data were not updated 
 - Fix bug: delete the temporary files for managing the socket server messages that were kept on the system
+- Change manage of the lock/unlock function for encrase performance (do you need manualy remove the file /var/shm/piGarden.lock or /tmp/piGarden.lock)
 
 ## 0.4.4 - 17/06/2017
 - Remove lock/unlock from init function for resove bug
