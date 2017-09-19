@@ -59,7 +59,7 @@ function drv_spb16ch_init {
 		echo "******** Number used board: $board_id - inizializzazione gpio $gpio_n"
 		$GPIO -g mode $gpio_n out
 	done
-	drv_spb16ch_board_disable_all	
+	#drv_spb16ch_board_disable_all	
 
 	# Esegue l'inizializzazione delle schede spb16ch trovate
 	local address_num=""
@@ -68,14 +68,16 @@ function drv_spb16ch_init {
 	do
 		address_num=${address_used[$i]}
 		board_num=${SPB16CH_USED_ID[$i]}
-		drv_spb16ch_board_enable $board_num
+		drv_spb16ch_board_enable $board_num # Porto alto il reset della scheda e lo mantengo sempre alto
 		echo "****** Inizializzazione address_num = $address_num - board_num = $board_num *******"
 		$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py $address_num 0
 		$DIR_SCRIPT/drv/spb16ch/scripts/gpo_init.py 25 255 0
 		$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py $address_num 1
 		$DIR_SCRIPT/drv/spb16ch/scripts/gpo_init.py 25 255 0
 		$DIR_SCRIPT/drv/spb16ch/scripts/mux_channel.py $address_num 0
-		drv_spb16ch_board_disable $board_id
+		# Disabilito il mux
+		$DIR_SCRIPT/drv/spb16ch/scripts/mux_disable.py $address_num
+		#drv_spb16ch_board_disable $board_id
 	done
 
 }
