@@ -1,4 +1,4 @@
-## 0.5.0 - xx/08/2017
+## 0.5.0 - 12/10/2017
 - Implemented driver subsystem for interfacing with other board
 - Added driver spb16ch for interfacing with "Smart Power Board 16 channel with RTC"
 - Added socket server api for close all zones and disable all scheduling

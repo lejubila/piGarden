@@ -12,6 +12,8 @@ function initialize {
 
 	log_write "Run initialize"
 
+	unlock
+
 	# Inizializza i driver gpio
         for drv in "${list_drv[@]}"
         do
@@ -767,7 +769,7 @@ TCPSERVER_PID_FILE="$TMP_PATH/piGardenTcpServer.pid"
 TCPSERVER_PID_SCRIPT=$$
 RUN_FROM_TCPSERVER=0
 TMP_CRON_FILE="$TMP_PATH/pigarden.user.cron.$$"
-LOCK_FILE="$TMP_PATH/piGarden.lock"
+LOCK_FILE="$TMP_PATH/piGarden.dir.lock"
 
 if [ -f $CONFIG_ETC ]; then
 	. $CONFIG_ETC
