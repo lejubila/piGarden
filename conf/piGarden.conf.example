@@ -2,6 +2,9 @@
 LOG_FILE="/home/pi/piGarden/log/piGarden.log"
 LOG_FILE_MAX_SIZE=1048576 # 1MB
 
+# Log file for driver output
+LOG_OUTPUT_DRV_FILE="/tmp/piGarden.drv.log"
+
 # Status directory
 STATUS_DIR="/home/pi/piGarden/state"
 
@@ -52,8 +55,8 @@ STAT="/usr/bin/stat"
 EV_MONOSTABLE=0
 
 # Id gpio usati per simulare il doppio deviatore con cui eseguire l'alimentazione alle elettrovalvole
-SUPPLY_GPIO_1=2
-SUPPLY_GPIO_2=3
+SUPPLY_GPIO_1=2		# Physical 3 - wPi 8
+SUPPLY_GPIO_2=3		# Physical 5 - wPi 9
 
 # Stato dei due gpio per impartire l'alimentazione positiva alle elettrovalvole (aperta)
 SUPPLY_GPIO_POS=0
@@ -68,7 +71,7 @@ RELE_GPIO_CLOSE=0
 RELE_GPIO_OPEN=1
 
 # Id del gpio usato per collegare il sensore di rilevamento pioggia
-RAIN_GPIO=25
+RAIN_GPIO=25		# Physical 22 - wPi 6
 
 # Valore in ingresso sul gpio definito in RAIN_GPIO che indica lo stato di pioggia
 RAIN_GPIO_STATE=0
@@ -82,22 +85,22 @@ EV_TOTAL=6
 
 # Definizione delle elettrovalvole
 EV1_ALIAS="1" #
-EV1_GPIO=17
+EV1_GPIO=17   #		Physical 11 - wPi 0
 
 EV2_ALIAS="2" #
-EV2_GPIO=27
+EV2_GPIO=27   #		Physical 13 - wPi 2
 
 EV3_ALIAS="3" #
-EV3_GPIO=22
+EV3_GPIO=22   #		Physical 15 - wPi 3
 
 EV4_ALIAS="4" #
-EV4_GPIO=18
+EV4_GPIO=18   #		Physical 12 - wPi 1
 
 EV5_ALIAS="5" #
-EV5_GPIO=23
+EV5_GPIO=23   #		Physical 16 - wPi 4
 
 EV6_ALIAS="6" #
-EV6_GPIO=24
+EV6_GPIO=24   #		Physical 18 - wPi 5
 
 # Definisce l'api key e il luogo per recuperare lo stato meteo online
 WUNDERGROUND_KEY=""

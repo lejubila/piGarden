@@ -1,0 +1,510 @@
+# Log file
+LOG_FILE="/home/pi/piGarden/log/piGarden.log"
+LOG_FILE_MAX_SIZE=1048576 # 1MB
+
+# Log file for driver output
+#LOG_OUTPUT_DRV_FILE="/tmp/piGarden.drv.log"
+
+# Status directory
+STATUS_DIR="/home/pi/piGarden/state"
+
+# Posizione gpio
+GPIO="/usr/local/bin/gpio"
+
+# Posizione js
+JQ="/usr/local/bin/jq"
+
+# Percorso curl
+CURL="/usr/bin/curl"
+
+# Percorso wc
+WC="/usr/bin/wc"
+
+# Percorso gzip
+GZIP="/bin/gzip"
+
+# Percorso mv
+MV="/bin/mv"
+
+# Percorso di tr
+TR="/usr/bin/tr"
+
+# Percorso di cut
+CUT="/usr/bin/cut"
+
+# Percorso tcpserver
+TCPSERVER="/usr/bin/tcpserver"
+
+# Percorso cron
+CRONTAB="/usr/bin/crontab"
+
+# Percorso grep
+GREP="/bin/grep"
+
+# Percorsp sed
+SED="/bin/sed"
+
+# Percorso readlink
+READLINK="/bin/readlink"
+
+# Percorso stat
+STAT="/usr/bin/stat"
+
+# Se impostato con il valore 1, indica che il sistema gestisce elettrovalvole monostabili, 
+# se impostato a 0 il sistema gestirà elettrovalvole bisstabili
+EV_MONOSTABLE=1
+
+# Id gpio usati per simulare il doppio deviatore con cui eseguire l'alimentazione alle elettrovalvole
+SUPPLY_GPIO_1="drv:spb16ch:15"
+SUPPLY_GPIO_2="drv:spb16ch:16"
+
+# Stato dei due gpio per impartire l'alimentazione positiva alle elettrovalvole (aperta)
+SUPPLY_GPIO_POS=0
+
+# Stato dei due gpio per impartire l'alimentazione negativa alle elettrovalvole (chiusa)
+SUPPLY_GPIO_NEG=1
+
+# Stato di ingresso da assegnare al gpio per chiudere il rele
+RELE_GPIO_CLOSE=0
+
+# Stato di ingresso da assegnare al gpio per aprire il rele
+RELE_GPIO_OPEN=1
+
+# Id del gpio usato per collegare il sensore di rilevamento pioggia
+RAIN_GPIO=
+
+# Valore in ingresso sul gpio definito in RAIN_GPIO che indica lo stato di pioggia
+RAIN_GPIO_STATE=0
+
+
+
+
+# Numero totale di elettrovalvole
+EV_TOTAL=128
+
+# Definizione delle elettrovalvole
+EV1_ALIAS="Zona_1" #
+EV1_GPIO="drv:spb16ch:1"
+
+EV2_ALIAS="Zona_2" #
+EV2_GPIO="drv:spb16ch:2"
+
+EV3_ALIAS="Zona_3" #
+EV3_GPIO="drv:spb16ch:3"
+
+EV4_ALIAS="Zona_4" #
+EV4_GPIO="drv:spb16ch:4"
+
+EV5_ALIAS="Zona_5" #
+EV5_GPIO="drv:spb16ch:5"
+
+EV6_ALIAS="Zona_6" #
+EV6_GPIO="drv:spb16ch:6"
+
+EV7_ALIAS="Zona_7" #
+EV7_GPIO="drv:spb16ch:7"
+
+EV8_ALIAS="Zona_8" #
+EV8_GPIO="drv:spb16ch:8"
+
+EV9_ALIAS="Zona_9" #
+EV9_GPIO="drv:spb16ch:9"
+
+EV10_ALIAS="Zona_10" #
+EV10_GPIO="drv:spb16ch:10"
+
+EV11_ALIAS="Zona_11" #
+EV11_GPIO="drv:spb16ch:11"
+
+EV12_ALIAS="Zona_12" #
+EV12_GPIO="drv:spb16ch:12"
+
+EV13_ALIAS="Zona_13" #
+EV13_GPIO="drv:spb16ch:13"
+
+EV14_ALIAS="Zona_14" #
+EV14_GPIO="drv:spb16ch:14"
+
+EV15_ALIAS="Zona_15" #
+EV15_GPIO="drv:spb16ch:15"
+
+EV16_ALIAS="Zona_16" #
+EV16_GPIO="drv:spb16ch:16"
+
+EV17_ALIAS="Zona_17" #
+EV17_GPIO="drv:spb16ch:17"
+
+EV18_ALIAS="Zona_18" #
+EV18_GPIO="drv:spb16ch:18"
+
+EV19_ALIAS="Zona_19" #
+EV19_GPIO="drv:spb16ch:19"
+
+EV20_ALIAS="Zona_20" #
+EV20_GPIO="drv:spb16ch:20"
+
+EV21_ALIAS="Zona_21" #
+EV21_GPIO="drv:spb16ch:21"
+
+EV22_ALIAS="Zona_22" #
+EV22_GPIO="drv:spb16ch:22"
+
+EV23_ALIAS="Zona_23" #
+EV23_GPIO="drv:spb16ch:23"
+
+EV24_ALIAS="Zona_24" #
+EV24_GPIO="drv:spb16ch:24"
+
+EV25_ALIAS="Zona_25" #
+EV25_GPIO="drv:spb16ch:25"
+
+EV26_ALIAS="Zona_26" #
+EV26_GPIO="drv:spb16ch:26"
+
+EV27_ALIAS="Zona_27" #
+EV27_GPIO="drv:spb16ch:27"
+
+EV28_ALIAS="Zona_28" #
+EV28_GPIO="drv:spb16ch:28"
+
+EV29_ALIAS="Zona_29" #
+EV29_GPIO="drv:spb16ch:29"
+
+EV30_ALIAS="Zona_30" #
+EV30_GPIO="drv:spb16ch:30"
+
+EV31_ALIAS="Zona_31" #
+EV31_GPIO="drv:spb16ch:31"
+
+EV32_ALIAS="Zona_32" #
+EV32_GPIO="drv:spb16ch:32"
+
+EV33_ALIAS="Zona_33" #
+EV33_GPIO="drv:spb16ch:33"
+
+EV34_ALIAS="Zona_34" #
+EV34_GPIO="drv:spb16ch:34"
+
+EV35_ALIAS="Zona_35" #
+EV35_GPIO="drv:spb16ch:35"
+
+EV36_ALIAS="Zona_36" #
+EV36_GPIO="drv:spb16ch:36"
+
+EV37_ALIAS="Zona_37" #
+EV37_GPIO="drv:spb16ch:37"
+
+EV38_ALIAS="Zona_38" #
+EV38_GPIO="drv:spb16ch:38"
+
+EV39_ALIAS="Zona_39" #
+EV39_GPIO="drv:spb16ch:39"
+
+EV40_ALIAS="Zona_40" #
+EV40_GPIO="drv:spb16ch:40"
+
+EV41_ALIAS="Zona_41" #
+EV41_GPIO="drv:spb16ch:41"
+
+EV42_ALIAS="Zona_42" #
+EV42_GPIO="drv:spb16ch:42"
+
+EV43_ALIAS="Zona_43" #
+EV43_GPIO="drv:spb16ch:43"
+
+EV44_ALIAS="Zona_44" #
+EV44_GPIO="drv:spb16ch:44"
+
+EV45_ALIAS="Zona_45" #
+EV45_GPIO="drv:spb16ch:45"
+
+EV46_ALIAS="Zona_46" #
+EV46_GPIO="drv:spb16ch:46"
+
+EV47_ALIAS="Zona_47" #
+EV47_GPIO="drv:spb16ch:47"
+
+EV48_ALIAS="Zona_48" #
+EV48_GPIO="drv:spb16ch:48"
+
+EV49_ALIAS="Zona_49" #
+EV49_GPIO="drv:spb16ch:49"
+
+EV50_ALIAS="Zona_50" #
+EV50_GPIO="drv:spb16ch:50"
+
+EV51_ALIAS="Zona_51" #
+EV51_GPIO="drv:spb16ch:51"
+
+EV52_ALIAS="Zona_52" #
+EV52_GPIO="drv:spb16ch:52"
+
+EV53_ALIAS="Zona_53" #
+EV53_GPIO="drv:spb16ch:53"
+
+EV54_ALIAS="Zona_54" #
+EV54_GPIO="drv:spb16ch:54"
+
+EV55_ALIAS="Zona_55" #
+EV55_GPIO="drv:spb16ch:55"
+
+EV56_ALIAS="Zona_56" #
+EV56_GPIO="drv:spb16ch:56"
+
+EV57_ALIAS="Zona_57" #
+EV57_GPIO="drv:spb16ch:57"
+
+EV58_ALIAS="Zona_58" #
+EV58_GPIO="drv:spb16ch:58"
+
+EV59_ALIAS="Zona_59" #
+EV59_GPIO="drv:spb16ch:59"
+
+EV60_ALIAS="Zona_60" #
+EV60_GPIO="drv:spb16ch:60"
+
+EV61_ALIAS="Zona_61" #
+EV61_GPIO="drv:spb16ch:61"
+
+EV62_ALIAS="Zona_62" #
+EV62_GPIO="drv:spb16ch:62"
+
+EV63_ALIAS="Zona_63" #
+EV63_GPIO="drv:spb16ch:63"
+
+EV64_ALIAS="Zona_64" #
+EV64_GPIO="drv:spb16ch:64"
+
+EV65_ALIAS="Zona_65" #
+EV65_GPIO="drv:spb16ch:65"
+
+EV66_ALIAS="Zona_66" #
+EV66_GPIO="drv:spb16ch:66"
+
+EV67_ALIAS="Zona_67" #
+EV67_GPIO="drv:spb16ch:67"
+
+EV68_ALIAS="Zona_68" #
+EV68_GPIO="drv:spb16ch:68"
+
+EV69_ALIAS="Zona_69" #
+EV69_GPIO="drv:spb16ch:69"
+
+EV70_ALIAS="Zona_70" #
+EV70_GPIO="drv:spb16ch:70"
+
+EV71_ALIAS="Zona_71" #
+EV71_GPIO="drv:spb16ch:71"
+
+EV72_ALIAS="Zona_72" #
+EV72_GPIO="drv:spb16ch:72"
+
+EV73_ALIAS="Zona_73" #
+EV73_GPIO="drv:spb16ch:73"
+
+EV74_ALIAS="Zona_74" #
+EV74_GPIO="drv:spb16ch:74"
+
+EV75_ALIAS="Zona_75" #
+EV75_GPIO="drv:spb16ch:75"
+
+EV76_ALIAS="Zona_76" #
+EV76_GPIO="drv:spb16ch:76"
+
+EV77_ALIAS="Zona_77" #
+EV77_GPIO="drv:spb16ch:77"
+
+EV78_ALIAS="Zona_78" #
+EV78_GPIO="drv:spb16ch:78"
+
+EV79_ALIAS="Zona_79" #
+EV79_GPIO="drv:spb16ch:79"
+
+EV80_ALIAS="Zona_80" #
+EV80_GPIO="drv:spb16ch:80"
+
+EV81_ALIAS="Zona_81" #
+EV81_GPIO="drv:spb16ch:81"
+
+EV82_ALIAS="Zona_82" #
+EV82_GPIO="drv:spb16ch:82"
+
+EV83_ALIAS="Zona_83" #
+EV83_GPIO="drv:spb16ch:83"
+
+EV84_ALIAS="Zona_84" #
+EV84_GPIO="drv:spb16ch:84"
+
+EV85_ALIAS="Zona_85" #
+EV85_GPIO="drv:spb16ch:85"
+
+EV86_ALIAS="Zona_86" #
+EV86_GPIO="drv:spb16ch:86"
+
+EV87_ALIAS="Zona_87" #
+EV87_GPIO="drv:spb16ch:87"
+
+EV88_ALIAS="Zona_88" #
+EV88_GPIO="drv:spb16ch:88"
+
+EV89_ALIAS="Zona_89" #
+EV89_GPIO="drv:spb16ch:89"
+
+EV90_ALIAS="Zona_90" #
+EV90_GPIO="drv:spb16ch:90"
+
+EV91_ALIAS="Zona_91" #
+EV91_GPIO="drv:spb16ch:91"
+
+EV92_ALIAS="Zona_92" #
+EV92_GPIO="drv:spb16ch:92"
+
+EV93_ALIAS="Zona_93" #
+EV93_GPIO="drv:spb16ch:93"
+
+EV94_ALIAS="Zona_94" #
+EV94_GPIO="drv:spb16ch:94"
+
+EV95_ALIAS="Zona_95" #
+EV95_GPIO="drv:spb16ch:95"
+
+EV96_ALIAS="Zona_96" #
+EV96_GPIO="drv:spb16ch:96"
+
+EV97_ALIAS="Zona_97" #
+EV97_GPIO="drv:spb16ch:97"
+
+EV98_ALIAS="Zona_98" #
+EV98_GPIO="drv:spb16ch:98"
+
+EV99_ALIAS="Zona_99" #
+EV99_GPIO="drv:spb16ch:99"
+
+EV100_ALIAS="Zona_100" #
+EV100_GPIO="drv:spb16ch:100"
+
+EV101_ALIAS="Zona_101" #
+EV101_GPIO="drv:spb16ch:101"
+
+EV102_ALIAS="Zona_102" #
+EV102_GPIO="drv:spb16ch:102"
+
+EV103_ALIAS="Zona_103" #
+EV103_GPIO="drv:spb16ch:103"
+
+EV104_ALIAS="Zona_104" #
+EV104_GPIO="drv:spb16ch:104"
+
+EV105_ALIAS="Zona_105" #
+EV105_GPIO="drv:spb16ch:105"
+
+EV106_ALIAS="Zona_106" #
+EV106_GPIO="drv:spb16ch:106"
+
+EV107_ALIAS="Zona_107" #
+EV107_GPIO="drv:spb16ch:107"
+
+EV108_ALIAS="Zona_108" #
+EV108_GPIO="drv:spb16ch:108"
+
+EV109_ALIAS="Zona_109" #
+EV109_GPIO="drv:spb16ch:109"
+
+EV110_ALIAS="Zona_110" #
+EV110_GPIO="drv:spb16ch:110"
+
+EV111_ALIAS="Zona_111" #
+EV111_GPIO="drv:spb16ch:111"
+
+EV112_ALIAS="Zona_112" #
+EV112_GPIO="drv:spb16ch:112"
+
+EV113_ALIAS="Zona_113" #
+EV113_GPIO="drv:spb16ch:113"
+
+EV114_ALIAS="Zona_114" #
+EV114_GPIO="drv:spb16ch:114"
+
+EV115_ALIAS="Zona_115" #
+EV115_GPIO="drv:spb16ch:115"
+
+EV116_ALIAS="Zona_116" #
+EV116_GPIO="drv:spb16ch:116"
+
+EV117_ALIAS="Zona_117" #
+EV117_GPIO="drv:spb16ch:117"
+
+EV118_ALIAS="Zona_118" #
+EV118_GPIO="drv:spb16ch:118"
+
+EV119_ALIAS="Zona_119" #
+EV119_GPIO="drv:spb16ch:119"
+
+EV120_ALIAS="Zona_120" #
+EV120_GPIO="drv:spb16ch:120"
+
+EV121_ALIAS="Zona_121" #
+EV121_GPIO="drv:spb16ch:121"
+
+EV122_ALIAS="Zona_122" #
+EV122_GPIO="drv:spb16ch:122"
+
+EV123_ALIAS="Zona_123" #
+EV123_GPIO="drv:spb16ch:123"
+
+EV124_ALIAS="Zona_124" #
+EV124_GPIO="drv:spb16ch:124"
+
+EV125_ALIAS="Zona_125" #
+EV125_GPIO="drv:spb16ch:125"
+
+EV126_ALIAS="Zona_126" #
+EV126_GPIO="drv:spb16ch:126"
+
+EV127_ALIAS="Zona_127" #
+EV127_GPIO="drv:spb16ch:127"
+
+EV128_ALIAS="Zona_128" #
+EV128_GPIO="drv:spb16ch:128"
+
+
+# Definisce l'api key e il luogo per recuperare lo stato meteo online
+WUNDERGROUND_KEY=""
+WUNDERGROUND_LOCATION="IY/Monsummano"	# http://www.wunderground.com/weather/api/d/docs?d=resources/country-to-iso-matching&MR=1
+
+# Blocca l'irrigazione se l'ultima pioggia rilevata online è avvenuta nell'ultima quantità di tempo inserita.
+# Il tempo è espresso in secondi. Quindi inserendo 86400, se nelle ultime 24 ore ha piovuto viene bloccata l'irrigazione. Inserendo il valore zero non viene eseguito nessun controllo.
+NOT_IRRIGATE_IF_RAIN_ONLINE=86400
+
+# Il parametro è simile a quello precedente, il controllo però anziché essere fatto attingendo a wunderground, viene eseguito direttamente sul sensore se installato. Inserendo il valore zero non viene eseguito nessun controllo.
+NOT_IRRIGATE_IF_RAIN_SENSOR=86400
+
+# Indirizzo ip e porta di ascolto del socket server
+TCPSERVER_IP="127.0.0.1"
+TCPSERVER_PORT="8084"
+
+# Utente e password che i clients devono utilizzare per stabilire una connessione tramite socket server
+TCPSERVER_USER=""
+TCPSERVER_PWD=""
+
+# Con impostato il valore 1 non invia l'identificativi per statistiche di utilizzo
+NO_SEND_IDENTIFIER=0
+
+
+#
+# Configurazione schede spb16ch
+#
+
+# Stato da assegnare ai gpio per abilitare/disabilitare le schede spb16ch
+SPB16CH_GPIO_ON=1
+SPB16CH_GPIO_OFF=0
+
+# Gpio di per gestire l'abilitazione/disabilitazione delle chede spb16ch
+SPB16CH1_GPIO=17	# Physical 11 - wPi 0
+SPB16CH2_GPIO=27	# Physical 13 - wPi 2
+SPB16CH3_GPIO=22	# Physical 15 - wPi 3
+SPB16CH4_GPIO=18	# Physical 12 - wPi 1
+SPB16CH5_GPIO=23	# Physical 16 - wPi 4
+SPB16CH6_GPIO=24	# Physical 18 - wPi 5
+SPB16CH7_GPIO=4		# Physical 7  - wPi 7
+SPB16CH8_GPIO=14	# Physical 8  - wPi 15

@@ -10,16 +10,24 @@
 #
 function initialize {
 
-	#lock
-
 	log_write "Run initialize"
+
+	unlock
+
+	# Inizializza i driver gpio
+        for drv in "${list_drv[@]}"
+        do
+		echo "$(date) drv_${drv}_init"
+		drv_${drv}_init
+        done &> "$LOG_OUTPUT_DRV_FILE"
 
 	# Imposta l'alimentazione con voltaggio negativo e setta i gpio in scrittura per le elettrovalvole bistabili
 	if [ "$EV_MONOSTABLE" != "1" ]; then
-		$GPIO -g write $SUPPLY_GPIO_1 0
-		$GPIO -g write $SUPPLY_GPIO_2 0
-		$GPIO -g mode $SUPPLY_GPIO_1 out
-		$GPIO -g mode $SUPPLY_GPIO_2 out
+		drv_supply_bistable_init "$SUPPLY_GPIO_1" "$SUPPLY_GPIO_2"
+		#$GPIO -g write $SUPPLY_GPIO_1 0
+		#$GPIO -g write $SUPPLY_GPIO_2 0
+		#$GPIO -g mode $SUPPLY_GPIO_1 out
+		#$GPIO -g mode $SUPPLY_GPIO_2 out
 	fi
 
 	# Elimina tutti gli stati delle elettrovalvole preesistenti
@@ -29,8 +37,9 @@ function initialize {
 	for i in $(seq $EV_TOTAL)
 	do
 		g=EV"$i"_GPIO
-		$GPIO -g write ${!g} RELE_GPIO_OPEN 	# chiude l'alimentazione all'elettrovalvole
-		$GPIO -g mode ${!g} out			# setta il gpio nella modalita di scrittura
+		drv_rele_init "${!g}"
+		#$GPIO -g write ${!g} RELE_GPIO_OPEN 	# chiude l'alimentazione all'elettrovalvole
+		#$GPIO -g mode ${!g} out		# setta il gpio nella modalita di scrittura
 		ev_set_state $i 0
 	done
 
@@ -44,15 +53,14 @@ function initialize {
 
 	# Inizializza il sensore di rilevamento pioggia
 	if [ -n "$RAIN_GPIO" ]; then 
-		$GPIO -g mode $RAIN_GPIO in
+		drv_rain_sensor_init "$RAIN_GPIO"
+		#$GPIO -g mode $RAIN_GPIO in
 		log_write "Rain sensor initialized"
 	else
 		log_write "Rain sensor not present"
 	fi
 
 	log_write "End initialize"
-
-	#unlock
 
 }
 
@@ -109,19 +117,21 @@ function ev_open {
 	# Dall'alias dell'elettrovalvola recupero il numero e dal numero recupero gpio da usare
 	ev_alias2number $1
 	EVNUM=$?
-	ev_number2gpio $EVNUM
-	g=$?
+	g=`ev_number2gpio $EVNUM`
 
 	lock
 
 	# Gestisce l'apertura dell'elettrovalvola in base alla tipologia (monostabile / bistabile) 
 	if [ "$EV_MONOSTABLE" == "1" ]; then
-		$GPIO -g write $g $RELE_GPIO_CLOSE
+		#$GPIO -g write $g $RELE_GPIO_CLOSE
+		drv_rele_close "$g"
 	else
 		supply_positive
-		$GPIO -g write $g $RELE_GPIO_CLOSE
+		#$GPIO -g write $g $RELE_GPIO_CLOSE
+		drv_rele_close "$g"
 		sleep 1
-		$GPIO -g write $g $RELE_GPIO_OPEN
+		#$GPIO -g write $g $RELE_GPIO_OPEN
+		drv_rele_open "$g"
 	fi
 
 	ev_set_state $EVNUM $state
@@ -202,19 +212,21 @@ function ev_close {
 	# Dall'alias dell'elettrovalvola recupero il numero e dal numero recupero gpio da usare
 	ev_alias2number $1
 	EVNUM=$?
-	ev_number2gpio $EVNUM
-	g=$?
+	g=`ev_number2gpio $EVNUM`
 
 	lock
 
 	# Gestisce l'apertura dell'elettrovalvola in base alla tipologia (monostabile / bistabile) 
 	if [ "$EV_MONOSTABLE" == "1" ]; then
-		$GPIO -g write $g $RELE_GPIO_OPEN
+		#$GPIO -g write $g $RELE_GPIO_OPEN
+		drv_rele_open "$g"
 	else
 		supply_negative
-		$GPIO -g write $g $RELE_GPIO_CLOSE
+		#$GPIO -g write $g $RELE_GPIO_CLOSE
+		drv_rele_close "$g"
 		sleep 1
-		$GPIO -g write $g $RELE_GPIO_OPEN
+		#$GPIO -g write $g $RELE_GPIO_OPEN
+		drv_rele_open "$g"
 	fi
 
 	ev_set_state $EVNUM 0
@@ -231,16 +243,18 @@ function ev_close {
 # Imposta l'alimentazione delle elettrovalvole con voltaggio positivo
 #
 function supply_positive {
-	$GPIO -g write $SUPPLY_GPIO_1 $SUPPLY_GPIO_POS
-	$GPIO -g write $SUPPLY_GPIO_2 $SUPPLY_GPIO_POS
+	drv_supply_positive "$SUPPLY_GPIO_1" "$SUPPLY_GPIO_2"
+	#$GPIO -g write $SUPPLY_GPIO_1 $SUPPLY_GPIO_POS
+	#$GPIO -g write $SUPPLY_GPIO_2 $SUPPLY_GPIO_POS
 }
 
 #
 # Imposta l'alimentazione delle elettrovalvole con voltaggio negativo
 #
 function supply_negative {
-	$GPIO -g write $SUPPLY_GPIO_1 $SUPPLY_GPIO_NEG
-	$GPIO -g write $SUPPLY_GPIO_2 $SUPPLY_GPIO_NEG
+	drv_supply_negative "$SUPPLY_GPIO_1" "$SUPPLY_GPIO_2"
+	#$GPIO -g write $SUPPLY_GPIO_1 $SUPPLY_GPIO_NEG
+	#$GPIO -g write $SUPPLY_GPIO_2 $SUPPLY_GPIO_NEG
 }
 
 #
@@ -363,7 +377,7 @@ function ev_number2gpio {
 	g=EV"$i"_GPIO
 	gv=${!g}
 #	echo "gv = $gv"
-	return $gv
+	echo "$gv"
 }
 
 #
@@ -390,103 +404,6 @@ function ev_status {
 	local state=$?
 	echo -e "$state"
 	return $state
-}
-
-#
-# Controlla se se piove tramite http://api.wunderground.com/
-#
-function check_rain_online {
-	# http://www.wunderground.com/weather/api/d/docs?d=resources/phrase-glossary&MR=1
-	$CURL http://api.wunderground.com/api/$WUNDERGROUND_KEY/conditions/q/$WUNDERGROUND_LOCATION.json > $TMP_PATH/check_rain_online.json
-	local weather=`cat $TMP_PATH/check_rain_online.json | $JQ -M ".current_observation.weather"`
-	local current_observation=`cat $TMP_PATH/check_rain_online.json | $JQ -M ".current_observation"`
-	local local_epoch=`cat $TMP_PATH/check_rain_online.json | $JQ -M -r ".current_observation.local_epoch"`
-	#echo $weather
-	#weather="[Light/Heavy] Drizzle"
-	if [ "$weather" = "null" ]; then
-		log_write "check_rain_online - failed read online data"
-	else
-		log_write "check_rain_online - weather=$weather, local_epoch=$local_epoch"
-		#if [[ "$weather" == *"Clear"* ]]; then
-		#if [[ "$weather" == *"Rain"* ]]; then
-		if 	[[ "$weather" == *"Rain"* ]] || 
-		 	[[ "$weather" == *"Snow"* ]] || 
-		 	[[ "$weather" == *"Hail"* ]] || 
-		 	[[ "$weather" == *"Ice"* ]] || 
-		 	[[ "$weather" == *"Thunderstorm"* ]] || 
-			[[ "$weather" == *"Drizzle"* ]]; 
-		then
-			#echo "ECCOMI!!!!!"
-			echo $local_epoch > "$STATUS_DIR/last_rain_online"
-			return $local_epoch	
-		fi
-		echo "$current_observation" > "$STATUS_DIR/last_weather_online"
-	fi
-}
-
-#
-# Controlla se se piove tramite sensore
-#
-function check_rain_sensor {
-
-	if [ -n "$RAIN_GPIO" ]; then 
-		local s=`$GPIO -g read $RAIN_GPIO`
-		if [ "$s" = "$RAIN_GPIO_STATE" ]; then
-			local local_epoch=`date +%s`
-			echo $local_epoch > "$STATUS_DIR/last_rain_sensor"
-			log_write "check_rain_sensor - now it's raining ($local_epoch)"
-			return $local_epoch	
-		else
-			log_write "check_rain_sensor - now is not raining"
-		fi
-	else
-		log_write "Rain sensor not present"
-	fi
-
-}
-
-#
-# Chiude tutte le elettrovalvole se sta piovendo
-# Eseguie il controllo in tempo reale sul sensore hardware e sui dati dell'ultima chiamata eseguita online
-#
-function close_all_for_rain {
-
-	local close_all=0
-	local now=`date +%s`
-
-	if [[ "$NOT_IRRIGATE_IF_RAIN_ONLINE" -gt 0 && -f $STATUS_DIR/last_rain_online ]]; then
-		local last_rain=`cat $STATUS_DIR/last_rain_online`
-		local dif=0
-		let "dif = now - last_rain"
-		if [ $dif -lt $NOT_IRRIGATE_IF_RAIN_ONLINE ]; then
-			close_all=1
-		fi
-	fi
-
-	if [[ "$NOT_IRRIGATE_IF_RAIN_SENSOR" -gt 0 && -f $STATUS_DIR/last_rain_sensor ]]; then
-		local last_rain=`cat $STATUS_DIR/last_rain_sensor`
-		local dif=0
-		let "dif = now - last_rain"
-		if [ $dif -lt $NOT_IRRIGATE_IF_RAIN_SENSOR ]; then
-			close_all=1
-		fi
-	fi
-
-	if [ "$close_all" = "1" ]; then
-		for i in $(seq $EV_TOTAL)
-		do
-			local a=EV"$i"_ALIAS
-			local al=${!a}
-			ev_status $al
-			local state=$?
-			#echo "$al = $state"
-			if [ "$state" = "1" ]; then
-				ev_close $al
-				log_write "close_all_for_rain - Close solenoid '$al' for rain"
-			fi
-		done
-	fi
-
 }
 
 #
@@ -548,9 +465,12 @@ function json_status {
         do
 		if [ $i = "get_cron" ]; then
 			with_get_cron="1"
-		fi
-		if [ $i = "get_cron_open_in" ]; then
+		elif [[ "$i" == get_cron:* ]]; then
+			with_get_cron="${i#get_cron:}"
+		elif [ $i = "get_cron_open_in" ]; then
 			with_get_cron_open_in="1"
+		elif [[ "$i" == get_cron_open_in:* ]]; then
+			with_get_cron_open_in="${i#get_cron_open_in:}"
 		fi
 	done
 
@@ -591,10 +511,17 @@ function json_status {
 	local json_last_success="\"success\":\"$last_success\""	
 
 	local json_get_cron=""			
-	if [ $with_get_cron = "1" ]; then
+	if [ $with_get_cron != "0" ]; then
 		local values_open="" 
 		local values_close="" 
-		for i in $(seq $EV_TOTAL)
+		local element_for=""
+		if [ "$with_get_cron" == "1" ]; then
+			element_for="$(seq $EV_TOTAL)"
+		else
+			ev_alias2number $with_get_cron
+			element_for=$?
+		fi
+		for i in $element_for
 		do
 			local a=EV"$i"_ALIAS
 			local av=${!a}
@@ -617,10 +544,17 @@ function json_status {
 	local json_cron="\"cron\":{$json_get_cron}"			
 
 	local json_get_cron_open_in=""			
-	if [ $with_get_cron_open_in = "1" ]; then
+	if [ $with_get_cron_open_in != "0" ]; then
 		local values_open_in="" 
 		local values_open_in_stop="" 
-		for i in $(seq $EV_TOTAL)
+		local element_for=""
+		if [ "$with_get_cron_open_in" == "1" ]; then
+			element_for="$(seq $EV_TOTAL)"
+		else
+			ev_alias2number $with_get_cron_open_in
+			element_for=$?
+		fi
+		for i in $element_for
 		do
 			local a=EV"$i"_ALIAS
 			local av=${!a}
@@ -651,494 +585,6 @@ function json_status {
 }
 
 #
-# Elimina una tipoliga di schedulazione dal crontab dell'utente
-# $1	tipologia del crontab
-# $2	argomento della tipologia
-#
-function cron_del {
-
-	local CRON_TYPE=$1
-	local CRON_ARG=$2
-
-	if [ -z "$CRON_TYPE" ]; then
-		echo "Cron type is empty" >&2
-		log_write "Cron type is empty"
-		return 1
-	fi
-
-	$CRONTAB -l > "$TMP_CRON_FILE"
-	local START=`$GREP -n "# START cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
-	local END=`$GREP -n "# END cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
-	local re='^[0-9]+$'
-
-	if ! [[ "$START" =~ $re ]] && ! [[ "$END" =~ $re ]] ; then
-		echo "$1 $2 cron is not present" >&2
-		return
-	fi
-	if ! [[ $START =~ $re ]] ; then
-  		echo "Cron start don't find" >&2
-  		log_write "Cron start don't find"
-		return 1
-	fi
-	if ! [[ $END =~ $re ]] ; then
-  		echo "Cron end cron don't find" >&2
-  		log_write "Cron end cron don't find"
-		return 1
-	fi
-	if [ "$START" -gt "$END" ]; then
-  		echo "Wrong position for start and end in cron" >&2
-  		log_write "Wrong position for start and end in cron"
-		return 1
-	fi
-
-
-	$SED "$START,${END}d" "$TMP_CRON_FILE" | $SED '$!N; /^\(.*\)\n\1$/!P; D' | $CRONTAB -
-	#$CRONTAB "$TMP_CRON_FILE"
-	rm "$TMP_CRON_FILE"
-
-}
-
-#
-# Aggiunge una schedulazione nel crontab dell'utente
-# $1	tipologia del crontab
-# $2	minuto
-# $3	ora
-# $4	giorno del mese
-# $5	mese
-# $6	giorno della settimana
-# $7	argomento della tipologia
-# $8	secondo argomento della tipologia
-#
-function cron_add {
-
-	local CRON_TYPE=$1
-	local CRON_M=$2
-	local CRON_H=$3
-	local CRON_DOM=$4
-	local CRON_MON=$5
-	local CRON_DOW=$6
-	local CRON_ARG=$7
-	local CRON_ARG2=$8
-	local CRON_COMMAND=""
-	local CRON_DISABLED=""
-	local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/$NAME_SCRIPT"`
-	local TMP_CRON_FILE2="$TMP_CRON_FILE-2"
-
-	if [ -z "$CRON_TYPE" ]; then
-		echo "Cron type is empty" >&2
-		log_write "Cron type is empty"
-		return 1
-	fi
-
-	$CRONTAB -l > "$TMP_CRON_FILE"
-	local START=`$GREP -n "# START cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
-	local END=`$GREP -n "# END cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
-	local re='^[0-9]+$'
-
-	local NEW_CRON=0
-	local PREVIUS_CONTENT=""
-
-	if ! [[ $START =~ $re ]] && ! [[ $END =~ $re ]] ; then
-  		NEW_CRON=1
-	else
-		if ! [[ $START =~ $re ]] ; then
-  			echo "Cron start don't find" >&2
-  			log_write "Cron start don't find"
-			return 1
-		fi
-		if ! [[ $END =~ $re ]] ; then
-  			echo "Cron end cron don't find" >&2
-  			log_write "Cron end cron don't find"
-			return 1
-		fi
-		START=$(($START + 1))
-		END=$(($END - 1))
-
-		if [ "$START" -gt "$END" ]; then
-  			echo "Wrong position for start and end in cron" >&2
-  			log_write "Wrong position for start and end in cron"
-			return 1
-		fi
-		
-		PREVIOUS_CONTENT=`$SED -n "$START,${END}p" "$TMP_CRON_FILE"`
-
-	fi
-
-	case "$CRON_TYPE" in
-
-		init)
-			CRON_M="@reboot"
-			CRON_H=""
-			CRON_DOM=""
-			CRON_MON=""
-			CRON_DOW=""
-			CRON_COMMAND="$PATH_SCRIPT init"
-			;;
-
-		start_socket_server)
-			CRON_M="@reboot"
-			CRON_H=""
-			CRON_DOM=""
-			CRON_MON=""
-			CRON_DOW=""
-			CRON_COMMAND="$PATH_SCRIPT start_socket_server force"
-			;;
-
-		check_rain_online)
-			CRON_M="*/3"
-			CRON_H="*"
-			CRON_DOM="*"
-			CRON_MON="*"
-			CRON_DOW="*"
-			CRON_COMMAND="$PATH_SCRIPT check_rain_online 2> /tmp/check_rain_online.err"
-			;;
-
-		check_rain_sensor)
-			CRON_M="*"
-			CRON_H="*"
-			CRON_DOM="*"
-			CRON_MON="*"
-			CRON_DOW="*"
-			CRON_COMMAND="$PATH_SCRIPT check_rain_sensor 2> /tmp/check_rain_sensor.err"
-			;;
-
-		close_all_for_rain)
-			CRON_M="*/5"
-			CRON_H="*"
-			CRON_DOM="*"
-			CRON_MON="*"
-			CRON_DOW="*"
-			CRON_COMMAND="$PATH_SCRIPT close_all_for_rain 2> /tmp/close_all_for_rain.err 1> /dev/null"
-			;;
-
-		open)
-			CRON_COMMAND="$PATH_SCRIPT open $CRON_ARG"
-			if [ "$CRON_ARG2" == "disabled" ]; then
-				CRON_DISABLED="#"
-			fi
-			;;
-
-		open_in)
-			CRON_COMMAND="$PATH_SCRIPT open $CRON_ARG $CRON_ARG2"
-			;;
-
-		open_in_stop)
-			CRON_COMMAND="$PATH_SCRIPT close $CRON_ARG"
-			;;
-
-		close)
-			CRON_COMMAND="$PATH_SCRIPT close $CRON_ARG"
-			if [ "$CRON_ARG2" == "disabled" ]; then
-				CRON_DISABLED="#"
-			fi
-			;;
-
-		*)
-			echo "Wrong cron type: $CRON_TYPE"
-			log_write "Wrong cron type: $CRON_TYPE"
-			;;
-
-	esac
-
-	if [ "$NEW_CRON" -eq "0" ]; then
-		START=$(($START - 1))
-		END=$(($END + 1))
-		$SED "$START,${END}d" "$TMP_CRON_FILE" > "$TMP_CRON_FILE2"
-	else
-		cat "$TMP_CRON_FILE" > "$TMP_CRON_FILE2"
-	fi
-
-	if [ "$NEW_CRON" -eq "1" ]; then
-		echo "" >> "$TMP_CRON_FILE2"
-	fi
-	echo "# START cron $CRON_TYPE $CRON_ARG" >> "$TMP_CRON_FILE2"
-	if [ "$NEW_CRON" -eq "0" ]; then
-		echo "$PREVIOUS_CONTENT" >> "$TMP_CRON_FILE2"
-	fi
-	echo "$CRON_DISABLED$CRON_M $CRON_H $CRON_DOM $CRON_MON $CRON_DOW $CRON_COMMAND" >> "$TMP_CRON_FILE2"
-	echo "# END cron $CRON_TYPE $CRON_ARG" >> "$TMP_CRON_FILE2"
-
-	$CRONTAB "$TMP_CRON_FILE2"
-	rm "$TMP_CRON_FILE" "$TMP_CRON_FILE2"
-
-}
-
-#
-# Legge una tipoliga di schedulazione dal crontab dell'utente
-# $1	tipologia del crontab
-# $2	argomento della tipologia
-#
-function cron_get {
-
-	local CRON_TYPE=$1
-	local CRON_ARG=$2
-
-	if [ -z "$CRON_TYPE" ]; then
-		echo "Cron type is empty" >&2
-		log_write "Cron type is empty"
-		return 1
-	fi
-
-	$CRONTAB -l > "$TMP_CRON_FILE"
-	local START=`$GREP -n "# START cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
-	local END=`$GREP -n "# END cron $CRON_TYPE $CRON_ARG" "$TMP_CRON_FILE"| $CUT -d : -f 1`
-	local re='^[0-9]+$'
-
-	local PREVIUS_CONTENT=""
-
-	if ! [[ $START =~ $re ]] && ! [[ $END =~ $re ]] ; then
-  		PREVIUS_CONTENT=""
-	else
-		if ! [[ $START =~ $re ]] ; then
-  			echo "Cron start don't find" >&2
-  			log_write "Cron start don't find"
-			return 1
-		fi
-		if ! [[ $END =~ $re ]] ; then
-  			echo "Cron end cron don't find" >&2
-  			log_write "Cron end cron don't find"
-			return 1
-		fi
-		START=$(($START + 1))
-		END=$(($END - 1))
-
-		if [ "$START" -gt "$END" ]; then
-  			echo "Wrong position for start and end in cron" >&2
-  			log_write "Wrong position for start and end in cron"
-			return 1
-		fi
-		
-		PREVIOUS_CONTENT=`$SED -n "$START,${END}p" "$TMP_CRON_FILE"`
-	fi
-
-	echo "$PREVIOUS_CONTENT"
-
-}
-
-#
-# Imposta il cron di inizializzazione della centralina
-#
-function set_cron_init {
-
-	cron_del "init" 2> /dev/null
-	cron_add "init"
-
-}
-
-#
-# Elimina il cron di inizializzazione della centralina
-#
-function del_cron_init {
-
-	cron_del "init"
-
-}
-
-#
-# Imposta il cron per l'avvio del socket server
-#
-function set_cron_start_socket_server {
-
-	cron_del "start_socket_server" 2> /dev/null
-	cron_add "start_socket_server"
-
-}
-
-#
-# Elimina il cron per l'avvio del socket server
-#
-function del_cron_start_socket_server {
-
-	cron_del "start_socket_server"
-}
-
-#
-# Imposta il cron che esegue il controllo di presenza pioggia tramite sensore
-#
-function set_cron_check_rain_sensor {
-
-	cron_del "check_rain_sensor" 2> /dev/null
-	cron_add "check_rain_sensor"
-}
-
-#
-# Elimina il cron che esegue il controllo di presenza pioggia tramite sensore
-#
-function del_cron_check_rain_sensor {
-
-	cron_del "check_rain_sensor"
-
-}
-
-#
-# Imposta il cron che esegue il controllo di presenza pioggia tramite servizio online
-#
-function set_cron_check_rain_online {
-
-	cron_del "check_rain_online" 2> /dev/null
-	cron_add "check_rain_online"
-}
-
-#
-# Elimina il cron che esegue il controllo di presenza pioggia tramite servizio online
-#
-function del_cron_check_rain_online {
-
-	cron_del "check_rain_online"
-
-}
-
-#
-# Imposta il cron che gestisce la chiusura delle elettrovalvole in caso di pioggia
-#
-function set_cron_close_all_for_rain {
-
-	cron_del "close_all_for_rain" 2> /dev/null
-	cron_add "close_all_for_rain"
-}
-
-#
-# Elimina il cron che gestisce la chiusura delle elettrovalvole in caso di pioggia
-#
-function del_cron_close_all_for_rain {
-
-	cron_del "close_all_for_rain"
-
-}
-
-#
-# Aggiunge una schedulazione cron per aprire una elettrovalvola
-# $1	alias elettrovalvola
-# $2	minuto cron
-# $3	ora cron
-# $4	giorno del mese cron
-# $5	mese cron
-# $6	giorno della settimana cron
-# $7	disabled
-#
-function add_cron_open {
-
-	local exists=`alias_exists $1`
-	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
-		echo "Alias $1 not found"
-		return 1
-	fi
-
-	cron_add "open" "$2" "$3" "$4" "$5" "$6" "$1" "$7"
-
-}
-
-#
-# Cancella tutte le schedulazioni cron per aprire una elettrovalvola
-# $1	alias elettrovalvola
-#
-function del_cron_open {
-
-	local exists=`alias_exists $1`
-	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
-		echo "Alias $1 not found"
-		return 1
-	fi
-
-	cron_del "open" $1	
-
-}
-
-#
-# Legge tutte le schedulazioni cron per aprire una elettrovalvola
-# $1	alias elettrovalvola
-#
-function get_cron_open {
-
-	local exists=`alias_exists $1`
-	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
-		echo "Alias $1 not found"
-		return 1
-	fi
-
-	cron_get "open" $1	
-
-}
-
-#
-# Cancella tutte le schedulazioni cron per aprire/chiudere una elettrovalvola in modo ritardato
-# $1	alias elettrovalvola
-#
-function del_cron_open_in {
-
-	local exists=`alias_exists $1`
-	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
-		echo "Alias $1 not found"
-		return 1
-	fi
-
-	cron_del "open_in" $1	
-	cron_del "open_in_stop" $1	
-
-}
-
-#
-# Legge tutte le schedulazioni cron per chiudere una elettrovalvola
-# $1	alias elettrovalvola
-#
-function get_cron_close {
-
-	local exists=`alias_exists $1`
-	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
-		echo "Alias $1 not found"
-		return 1
-	fi
-
-	cron_get "close" $1	
-
-}
-
-#
-# Aggiunge una schedulazione cron per chiudere una elettrovalvola
-# $1	alias elettrovalvola
-# $2	minuto cron
-# $3	ora cron
-# $4	giorno del mese cron
-# $5	mese cron
-# $6	giorno della settimana cron
-# $7	disabled
-#
-function add_cron_close {
-
-	local exists=`alias_exists $1`
-	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
-		echo "Alias $1 not found"
-		return 1
-	fi
-
-	cron_add "close" "$2" "$3" "$4" "$5" "$6" "$1" "$7"
-
-}
-
-#
-# Cancella tutte le schedulazioni cron per chiudere una elettrovalvola
-# $1	alias elettrovalvola
-#
-function del_cron_close {
-
-	local exists=`alias_exists $1`
-	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
-		echo "Alias $1 not found"
-		return 1
-	fi
-
-	cron_del "close" $1	
-
-}
-
-#
 # Mostra il i parametri dello script
 #
 function show_usage {
@@ -1157,8 +603,12 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT check_rain_sensor                            check rain from hardware sensor"
 	echo -e "\t$NAME_SCRIPT close_all_for_rain                           close all solenoid if it's raining"
 	echo -e "\t$NAME_SCRIPT close_all [force]                            close all solenoid"
+	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT start_socket_server [force]                  start socket server, with 'force' parameter force close socket server if already open"
 	echo -e "\t$NAME_SCRIPT stop_socket_server                           stop socket server"
+	echo -e "\n"
+	echo -e "\t$NAME_SCRIPT reboot                                       reboot system"
+	echo -e "\t$NAME_SCRIPT poweroff                                     shutdown system"
 	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT set_cron_init                                set crontab for initialize control unit"
 	echo -e "\t$NAME_SCRIPT del_cron_init                                remove crontab for initialize control unit"
@@ -1181,214 +631,6 @@ function show_usage {
 	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT debug1 [parameter]|[parameter]|..]           Run debug code 1"
 	echo -e "\t$NAME_SCRIPT debug2 [parameter]|[parameter]|..]           Run debug code 2"
-}
-
-#
-# Avvia il socket server
-#
-function start_socket_server {
-
-	rm -f "$TCPSERVER_PID_FILE"
-	echo $TCPSERVER_PID_SCRIPT > "$TCPSERVER_PID_FILE"
-	$TCPSERVER -v -RHl0 $TCPSERVER_IP $TCPSERVER_PORT $0 socket_server_command 
-
-}
-
-#
-# Ferma il socket server
-#
-function stop_socket_server {
-
-        if [ ! -f "$TCPSERVER_PID_FILE" ]; then
-                echo "Daemon is not running"
-                exit 1
-        fi
-
-	log_write "stop socket server"
-
-        kill -9 $(list_descendants `cat "$TCPSERVER_PID_FILE"`) 2> /dev/null
-        kill -9 `cat "$TCPSERVER_PID_FILE"` 2> /dev/null
-        rm -f "$TCPSERVER_PID_FILE"
-
-}
-
-#
-# Esegue un comando ricevuto dal socket server
-#
-function socket_server_command {
-
-	RUN_FROM_TCPSERVER=1
-
-	local line=""
-
-	if [ ! -z "$TCPSERVER_USER" ] && [ ! -z "$TCPSERVER_PWD" ]; then
-		local user=""
-		local password=""
-		read -t 3 user
-		read -t 3 password	
-		user=$(echo "$user" | $TR -d '[\r\n]')
-		password=$(echo "$password" | $TR -d '[\r\n]')
-		if [ "$user" != "$TCPSERVER_USER" ] || [ "$password" != "$TCPSERVER_PWD" ]; then
-			log_write "socket connection from: $TCPREMOTEIP - Bad socket server credentials - user:$user"
-			json_error 0 "Bad socket server credentials"
-			return
-		fi
-	fi
-
-	read line
-	line=$(echo "$line " | $TR -d '[\r\n]')
-	arg1=$(echo "$line " | $CUT -d ' ' -f1)
-	arg2=$(echo "$line " | $CUT -d ' ' -f2)
-	arg3=$(echo "$line " | $CUT -d ' ' -f3)
-	arg4=$(echo "$line " | $CUT -d ' ' -f4)
-	arg5=$(echo "$line " | $CUT -d ' ' -f5)
-	arg6=$(echo "$line " | $CUT -d ' ' -f6)
-	arg7=$(echo "$line " | $CUT -d ' ' -f7)
-	arg8=$(echo "$line " | $CUT -d ' ' -f8)
-
-	log_write "socket connection from: $TCPREMOTEIP - command: $arg1 $arg2 $arg3 $arg4 $arg5 $arg6 $arg7 $arg8"
-	
-	reset_messages &> /dev/null
-
-	case "$arg1" in
-        	status)
-			json_status $arg2 $arg3 $arg4 $arg5 $arg6 $arg7
-			;;
-
-		open)
-	                if [ "empty$arg2" == "empty" ]; then
-        	                json_error 0 "Alias solenoid not specified"
-			else
-                		ev_open $arg2 $arg3 &> /dev/null
-				json_status "get_cron_open_in"
-			fi
-			;;
-
-		open_in)
-			ev_open_in $arg2 $arg3 $arg4 $arg5 &> /dev/null
-			json_status "get_cron_open_in"
-			;;	
-
-		close)
-	                if [ "empty$arg2" == "empty" ]; then
-        	                json_error 0 "Alias solenoid not specified"
-			else
-                		ev_close $arg2 &> /dev/null
-				json_status "get_cron_open_in"
-                	fi
-			;;
-
-		set_general_cron)
-			local vret=""
-			for i in $arg2 $arg3 $arg4 $arg5 $arg6 $arg7
-		        do
-				if [ $i = "set_cron_init" ]; then
-					vret="$(vret)`set_cron_init`"
-				elif [ $i = "set_cron_start_socket_server" ]; then
-					vret="$(vret)`set_cron_start_socket_server`"
-				elif [ $i = "set_cron_check_rain_sensor" ]; then
-					vret="$(vret)`set_cron_check_rain_sensor`"
-				elif [ $i = "set_cron_check_rain_online" ]; then
-					vret="$(vret)`set_cron_check_rain_online`"
-				elif [ $i = "set_cron_close_all_for_rain" ]; then
-					vret="$(vret)`set_cron_close_all_for_rain`"
-				fi
-			done
-
-			if [[ ! -z $vret ]]; then
-				json_error 0 "Cron set failed"
-				log_write "Cron set failed: $vret"
-			else
-				message_write "success" "Cron set successfull"
-				json_status
-			fi
-
-			;;
-
-		del_cron_open)
-			local vret=""
-
-			vret=`del_cron_open $arg2`
-
-			if [[ ! -z $vret ]]; then
-				json_error 0 "Cron set failed"
-				log_write "Cron del failed: $vret"
-			else
-				message_write "success" "Cron set successfull"
-				json_status
-			fi
-
-			;;
-
-		del_cron_open_in)
-			local vret=""
-
-			vret=`del_cron_open_in $arg2`
-
-			if [[ ! -z $vret ]]; then
-				json_error 0 "Cron del failed"
-				log_write "Cron del failed: $vret"
-			else
-				message_write "success" "Scheduled start successfully deleted"
-				json_status "get_cron_open_in"
-			fi
-
-			;;
-
-
-		del_cron_close)
-			local vret=""
-
-			vret=`del_cron_close $arg2`
-
-			if [[ ! -z $vret ]]; then
-				json_error 0 "Cron set failed"
-				log_write "Cron set failed: $vret"
-			else
-				message_write "success" "Cron set successfull"
-				json_status
-			fi
-
-			;;
-
-		add_cron_open)
-				local vret=""
-
-			vret=`add_cron_open "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" $arg8`
-
-			if [[ ! -z $vret ]]; then
-				json_error 0 "Cron set failed"
-				log_write "Cron set failed: $vret"
-			else
-				message_write "success" "Cron set successfull"
-				json_status
-			fi
-
-			;;
-
-		add_cron_close)
-			local vret=""
-
-			vret=`add_cron_close "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" $arg8`
-
-			if [[ ! -z $vret ]]; then
-				json_error 0 "Cron set failed"
-				log_write "Cron set failed: $vret"
-			else
-				message_write "success" "Cron set successfull"
-				json_status
-			fi
-
-			;;
-
-		*)
-			json_error 0 "invalid command"
-			;;
-
-	esac
-	
-	reset_messages &> /dev/null
-
 }
 
 #
@@ -1418,16 +660,12 @@ list_descendants ()
 #
 function lock {
 
-	sleep 0.$((100 * $RANDOM / 32767)) | $SED 's/..$/.&/'
-
 	local max_time=10
 	local current_time=$(($1 + 1))
 
-	local lock_content=`cat "$LOCK_FILE" 2> /dev/null`
-	if [ -z $lock_content ]; then
-		lock_content="0"
-	fi
-	if [ "$lock_content" -eq "1" ]; then
+	if mkdir "${LOCK_FILE}" &>/dev/null; then
+		local foo=bar
+	else
 		if [ "$current_time" -gt "$max_time" ]; then
 			log_write "Maximum locked time reached"
 			sleep $max_time
@@ -1439,18 +677,21 @@ function lock {
 		lock $current_time
 		return
 	fi
-	echo "1" > "$LOCK_FILE"
 
 }
+
+
 
 #
 # Chidue un lock
 # 
 function unlock {
 
-	echo "0" > "$LOCK_FILE"
+	rmdir "${LOCK_FILE}" &>/dev/null
 
 }
+
+
 
 #
 # Invia l'identificativo univoco ad uso statistico di utilizzo
@@ -1486,6 +727,25 @@ function send_identifier {
 
 }
 
+#
+# Spenge il sistema 
+#
+function exec_poweroff {
+	local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/scripts/poweroff.sh"`
+echo "$PATH_SCRIPT" > tmp/prova.txt
+        sleep 15
+	. $PATH_SCRIPT
+}
+
+#
+# Spenge il sistema 
+#
+function exec_reboot {
+	local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/scripts/reboot.sh"`
+        sleep 15
+	. $PATH_SCRIPT
+}
+
 function debug1 {
 	. "$DIR_SCRIPT/debug/debug1.sh"	
 }
@@ -1495,8 +755,8 @@ function debug2 {
 }
 
 VERSION=0
-SUB_VERSION=4
-RELEASE_VERSION=4
+SUB_VERSION=5
+RELEASE_VERSION=0
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
@@ -1509,7 +769,7 @@ TCPSERVER_PID_FILE="$TMP_PATH/piGardenTcpServer.pid"
 TCPSERVER_PID_SCRIPT=$$
 RUN_FROM_TCPSERVER=0
 TMP_CRON_FILE="$TMP_PATH/pigarden.user.cron.$$"
-LOCK_FILE="$TMP_PATH/piGarden.lock"
+LOCK_FILE="$TMP_PATH/piGarden.dir.lock"
 
 if [ -f $CONFIG_ETC ]; then
 	. $CONFIG_ETC
@@ -1518,10 +778,18 @@ else
 	exit 1
 fi
 
+. "$DIR_SCRIPT/include/drv.include.sh"
+. "$DIR_SCRIPT/include/cron.include.sh"
+. "$DIR_SCRIPT/include/socket.include.sh"
+. "$DIR_SCRIPT/include/rain.include.sh"
+
 LAST_INFO_FILE="$STATUS_DIR/last_info"
 LAST_WARNING_FILE="$STATUS_DIR/last_worning"
 LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
 
+if [ -z $LOG_OUTPUT_DRV_FILE ]; then
+	$LOG_OUTPUT_DRV_FILE="/dev/null"
+fi
 
 # Elimina il file di lock se più vecchio di 11 secondi
 if [ -f "$LOCK_FILE" ]; then
@@ -1534,6 +802,7 @@ if [ -f "$LOCK_FILE" ]; then
 fi
 
 send_identifier &
+setup_drv
 
 case "$1" in
 	init) 
@@ -1688,6 +957,14 @@ case "$1" in
 	get_cron_close)
 		get_cron_close $2
 		;;
+	
+	reboot)
+		exec_reboot
+		;;
+
+	poweroff)
+		exec_poweroff
+		;;
 
 	debug1)
 		debug1 $2 $3 $4 $5
@@ -1704,7 +981,8 @@ case "$1" in
 		;;
 esac
 
-# Elimina eventuali file temporane utilizzati per la gestione dei cron
+# Elimina eventuali file temporani utilizzati per la gestione dei cron e i messaggi per il sockt server
 rm "$TMP_CRON_FILE" 2> /dev/null
 rm "$TMP_CRON_FILE-2" 2> /dev/null
 
+reset_messages &> /dev/null
