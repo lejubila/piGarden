@@ -8,6 +8,9 @@ LOG_FILE_MAX_SIZE=1048576 # 1MB
 # Status directory
 STATUS_DIR="/home/pi/piGarden/state"
 
+# Event directory
+EVENT_DIR="/home/pi/piGarden/events"
+
 # Posizione gpio
 GPIO="/usr/local/bin/gpio"
 
@@ -85,6 +88,7 @@ EV_TOTAL=128
 # Definizione delle elettrovalvole
 EV1_ALIAS="Zona_1" #
 EV1_GPIO="drv:spb16ch:1"
+#EV1_NORAIN=1 #         Non interrompe l'irrigazione di questa zona in caso di pioggia
 
 EV2_ALIAS="Zona_2" #
 EV2_GPIO="drv:spb16ch:2"

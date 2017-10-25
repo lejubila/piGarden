@@ -1,3 +1,6 @@
+# 0.5.1 - xx/xx/2017
+- Added events managemets
+
 # 0.5.0 - 12/10/2017
 - Implemented driver subsystem for interfacing with other board
 - Added driver spb16ch for interfacing with "Smart Power Board 16 channel with RTC"

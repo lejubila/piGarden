@@ -8,6 +8,9 @@ LOG_OUTPUT_DRV_FILE="/tmp/piGarden.drv.log"
 # Status directory
 STATUS_DIR="/home/pi/piGarden/state"
 
+# Event directory
+EVENT_DIR="/home/pi/piGarden/events"
+
 # Posizione gpio
 GPIO="/usr/local/bin/gpio"
 
@@ -86,6 +89,7 @@ EV_TOTAL=6
 # Definizione delle elettrovalvole
 EV1_ALIAS="1" #
 EV1_GPIO=17   #		Physical 11 - wPi 0
+#EV1_NORAIN=1 # 	Non interrompe l'irrigazione di questa zona in caso di pioggia
 
 EV2_ALIAS="2" #
 EV2_GPIO=27   #		Physical 13 - wPi 2

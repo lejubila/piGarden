@@ -14,6 +14,8 @@ function initialize {
 
 	unlock
 
+	trigger_event "init_before" ""
+
 	# Inizializza i driver gpio
         for drv in "${list_drv[@]}"
         do
@@ -60,6 +62,7 @@ function initialize {
 		log_write "Rain sensor not present"
 	fi
 
+	trigger_event "init_after" ""
 	log_write "End initialize"
 
 }
@@ -114,6 +117,12 @@ function ev_open {
 		state=2
 	fi
 
+	trigger_event "ev_open_before" "$1" "$2"
+	if [ $? -eq 0 ]; then
+		log_write "Solenoid '$1' not open due to external event"
+		message_write 'warning' "Solenoid not open due to external event"
+	fi
+
 	# Dall'alias dell'elettrovalvola recupero il numero e dal numero recupero gpio da usare
 	ev_alias2number $1
 	EVNUM=$?
@@ -135,6 +144,8 @@ function ev_open {
 	fi
 
 	ev_set_state $EVNUM $state
+
+	trigger_event "ev_open_after" "$1" "$2"
 
 	unlock
 
@@ -214,6 +225,8 @@ function ev_close {
 	EVNUM=$?
 	g=`ev_number2gpio $EVNUM`
 
+	trigger_event "ev_close_before" "$1"
+
 	lock
 
 	# Gestisce l'apertura dell'elettrovalvola in base alla tipologia (monostabile / bistabile) 
@@ -230,6 +243,8 @@ function ev_close {
 	fi
 
 	ev_set_state $EVNUM 0
+
+	trigger_event "ev_close_after" "$1"
 
 	unlock
 
@@ -756,7 +771,7 @@ function debug2 {
 
 VERSION=0
 SUB_VERSION=5
-RELEASE_VERSION=0
+RELEASE_VERSION=1
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
@@ -790,6 +805,11 @@ LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
 if [ -z $LOG_OUTPUT_DRV_FILE ]; then
 	$LOG_OUTPUT_DRV_FILE="/dev/null"
 fi
+
+if [ -z "$EVENT_DIR" ]; then
+	EVENT_DIR="$DIR_SCRIPT/events"
+fi
+
 
 # Elimina il file di lock se più vecchio di 11 secondi
 if [ -f "$LOCK_FILE" ]; then
