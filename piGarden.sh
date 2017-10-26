@@ -118,9 +118,10 @@ function ev_open {
 	fi
 
 	trigger_event "ev_open_before" "$1" "$2"
-	if [ $? -eq 0 ]; then
+	if [ $? -ne 0 ]; then
 		log_write "Solenoid '$1' not open due to external event"
 		message_write 'warning' "Solenoid not open due to external event"
+		return
 	fi
 
 	# Dall'alias dell'elettrovalvola recupero il numero e dal numero recupero gpio da usare
@@ -797,6 +798,7 @@ fi
 . "$DIR_SCRIPT/include/cron.include.sh"
 . "$DIR_SCRIPT/include/socket.include.sh"
 . "$DIR_SCRIPT/include/rain.include.sh"
+. "$DIR_SCRIPT/include/events.include.sh"
 
 LAST_INFO_FILE="$STATUS_DIR/last_info"
 LAST_WARNING_FILE="$STATUS_DIR/last_worning"

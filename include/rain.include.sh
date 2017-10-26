@@ -29,6 +29,8 @@ function check_rain_online {
 		then
 			current_state_rain_online='rain'
 			echo $local_epoch > "$STATUS_DIR/last_rain_online"
+		else
+			current_state_rain_online='norain'
 		fi
 		echo "$current_observation" > "$STATUS_DIR/last_weather_online"
 		if [ "$current_state_rain_online" != "$last_state_rain_online" ]; then
@@ -57,6 +59,7 @@ function check_rain_sensor {
 			log_write "check_rain_sensor - now it's raining ($local_epoch)"
 			#return $local_epoch	
 		else
+			current_state_rain_sensor='norain'
 			log_write "check_rain_sensor - now is not raining"
 		fi
 		if [ "$current_state_rain_sensor" != "$last_state_rain_sensor" ]; then
