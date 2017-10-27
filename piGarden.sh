@@ -85,7 +85,13 @@ function ev_open {
 
 	cron_del open_in $1 > /dev/null 2>&1
 
-	if [ ! "$2" = "force" ]; then
+	# Dall'alias dell'elettrovalvola recupero il numero e dal numero recupero gpio da usare
+	ev_alias2number $1
+	local EVNUM=$?
+	local g=`ev_number2gpio $EVNUM`
+	local EVNORAIN=`ev_number2norain $EVNUM`
+
+	if [ ! "$2" = "force" ] && [ "$EVNORAIN" != "1" ]; then
 		if [[ "$NOT_IRRIGATE_IF_RAIN_ONLINE" -gt 0 && -f $STATUS_DIR/last_rain_online ]]; then
 			local last_rain=`cat $STATUS_DIR/last_rain_online`
 			local now=`date +%s`
@@ -123,11 +129,6 @@ function ev_open {
 		message_write 'warning' "Solenoid not open due to external event"
 		return
 	fi
-
-	# Dall'alias dell'elettrovalvola recupero il numero e dal numero recupero gpio da usare
-	ev_alias2number $1
-	EVNUM=$?
-	g=`ev_number2gpio $EVNUM`
 
 	lock
 
@@ -388,11 +389,20 @@ function alias_exists {
 # $1 numero elettrovalvola
 #
 function ev_number2gpio {
-#	echo "numero ev $1"
-	i=$1
-	g=EV"$i"_GPIO
-	gv=${!g}
-#	echo "gv = $gv"
+	local i=$1
+	local g=EV"$i"_GPIO
+	local gv=${!g}
+	echo "$gv"
+}
+
+#
+# Recupera il valore norain associato ad una elettrovalvola
+# $1 numero elettrovalvola
+#
+function ev_number2norain {
+	local i=$1
+	local g=EV"$i"_NORAIN
+	local gv=${!g}
 	echo "$gv"
 }
 

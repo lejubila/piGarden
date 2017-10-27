@@ -1,5 +1,6 @@
-# 0.5.1 - xx/xx/2017
+# 0.5.1 - 28/10/2017
 - Added events managemets
+- Added support for zones not subject to rainfall (with parameter EVx_NORAIN)
 
 # 0.5.0 - 12/10/2017
 - Implemented driver subsystem for interfacing with other board

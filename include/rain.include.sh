@@ -105,10 +105,12 @@ function close_all_for_rain {
 		do
 			local a=EV"$i"_ALIAS
 			local al=${!a}
+			local a=EV"$i"_NORAIN
+			local evnorain=${!a}
 			ev_status $al
 			local state=$?
 			#echo "$al = $state"
-			if [ "$state" = "1" ]; then
+			if [ "$state" = "1" ] && [ "$evnorain" != "1" ]; then
 				ev_close $al
 				log_write "close_all_for_rain - Close solenoid '$al' for rain"
 			fi
