@@ -294,7 +294,7 @@ function drv_rain_sensor_get {
 
 	# Nessun driver definito, esegue la lettura del sensore tramite gpio del raspberry
 	if [ -z "$fnc" ]; then
-		val=`$GPIO -g read $idx`
+		vret=`$GPIO -g read $idx`
 	# Il driver definito non è stato trovato
 	elif [ "$fnc" == "drvnotfound" ]; then
 	        log_write "Driver not found: $idx"
