@@ -1,3 +1,7 @@
+# 0.5.2 - 01/11/2017
+- Fix problem inconsistent return value in drv_rain_sensor_get
+- Fix get parameter in event script sendmail.sh
+
 # 0.5.1 - 28/10/2017
 - Added events managemets
 - Added support for zones not subject to rainfall (with parameter EVx_NORAIN)
