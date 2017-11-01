@@ -29,8 +29,7 @@ BODY=""
 
 case "$EVENT" in
 	"init_before" | "init_after")
-		STATE="$2"
-		TIME=$3
+		TIME=$2
 		BODY="PiGarden triggered new event\n\nEVENT: $EVENT\nTIME: $(/bin/date -d@$TIME)"
 		;;
 
