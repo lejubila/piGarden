@@ -5,19 +5,6 @@
 
 function trigger_event {
 
-	# check_rain_online_after
-	# check_rain_online_before
-	# check_rain_online_change
-	# check_rain_sensor_after
-	# check_rain_sensor_before
-	# check_rain_sensor_change
-	# ev_close_after
-	# ev_close_before
-	# ev_open_after
-	# ev_open_before
-	# init_after
-	# init_before
-
 	local EVENT="$1"
 	local CAUSE="$2"
 	local current_event_dir="$EVENT_DIR/$EVENT"
@@ -34,6 +21,22 @@ function trigger_event {
 						$f "$EVENT" "$ALIAS" "$FORCE" `date +%s`  &> /dev/null 
 						;;
 
+					"ev_open_in_before")
+						ALIAS="$2"
+						FORCE="$3"
+						local MINUTE_START="$4"
+						local MINUTE_STOP="$5"
+						$f "$EVENT" "$ALIAS" "$FORCE" "$MINUTE_START" "$MINUTE_STOP" `date +%s`  &> /dev/null 
+						;;
+
+					"ev_open_in_after")
+						ALIAS="$2"
+						FORCE="$3"
+						local CRON_START="$4"
+						local CRON_STOP="$5"
+						$f "$EVENT" "$ALIAS" "$FORCE" "$CRON_START" "$CRON_STOP" `date +%s`  &> /dev/null 
+						;;
+
 					"ev_close_before" | "ev_close_after")
 						ALIAS="$2"
 						$f "$EVENT" "$ALIAS" `date +%s`  &> /dev/null 
@@ -45,9 +48,38 @@ function trigger_event {
 						$f "$EVENT" "$STATE" `date +%s`  &> /dev/null 
 						;;
 
-					"check_rain_online_before" | "check_rain_online_after" | "check_rain_online_change")
+					"check_rain_online_before")
 						STATE="$2"
 						$f "$EVENT" "$STATE" `date +%s`  &> /dev/null 
+						;;
+
+					"check_rain_online_after" | "check_rain_online_change")
+						STATE="$2"
+						WEATHER="$3"
+						$f "$EVENT" "$STATE" "$WEATHER" `date +%s`  &> /dev/null 
+						;;
+
+
+					"init_before" | "init_after")
+						STATE="$2"
+						$f "$EVENT" `date +%s`  &> /dev/null 
+						;;
+
+					"cron_add_before" | "cron_add_after")
+						local CRON_TYPE="$2"
+						local CRON_ARG="$3"
+						local CRON_ELEMENT="$4"
+						$f "$EVENT" "$CRON_TYPE" "$CRON_ARG" "$CRON_ELEMENT" `date +%s`  &> /dev/null 
+						;;
+
+					"cron_del_before" | "cron_del_after")
+						local CRON_TYPE="$2"
+						local CRON_ARG="$3"
+						$f "$EVENT" "$CRON_TYPE" "$CRON_ARG" `date +%s`  &> /dev/null 
+						;;
+
+					"exec_poweroff_before" | "exec_poweroff_after" | "exec_reboot_before" | "exec_reboot_after" )
+						$f "$EVENT" `date +%s`  &> /dev/null 
 						;;
 
 					*)

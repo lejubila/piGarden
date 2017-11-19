@@ -1,3 +1,11 @@
+# 0.5.3 - 19/11/2017
+- Fix send parameter on event init_before and init_after
+- Added WEATHER argument in check_rain_sensor_after and check_rain_sensor_change event
+- Added events cron_add_before, cron_add_after, cron_del_before, cron_del_after, ev_open_in_before, ev_open_in_after, exec_poweroff_before, exec_poweroff_after, exec_reboot_before, exec_reboot_after
+- Added to sendmail.sh argument passed form check_rain_sensor_after and check_rain_sensor_change event
+- Added to sendmail.sh new events
+- Fix wrong state on event script sendmail.sh
+
 # 0.5.2 - 01/11/2017
 - Fix problem inconsistent return value in drv_rain_sensor_get
 - Fix get parameter in event script sendmail.sh

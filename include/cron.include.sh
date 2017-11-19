@@ -39,10 +39,10 @@ function cron_del {
 		return 1
 	fi
 
-
+	trigger_event "cron_del_before" "$1" "$2"
 	$SED "$START,${END}d" "$TMP_CRON_FILE" | $SED '$!N; /^\(.*\)\n\1$/!P; D' | $CRONTAB -
-	#$CRONTAB "$TMP_CRON_FILE"
 	rm "$TMP_CRON_FILE"
+	trigger_event "cron_del_after" "$1" "$2"
 
 }
 
@@ -206,8 +206,10 @@ function cron_add {
 	echo "$CRON_DISABLED$CRON_M $CRON_H $CRON_DOM $CRON_MON $CRON_DOW $CRON_COMMAND" >> "$TMP_CRON_FILE2"
 	echo "# END cron $CRON_TYPE $CRON_ARG" >> "$TMP_CRON_FILE2"
 
+	trigger_event "cron_add_before" "$CRON_TYPE" "$CRON_ARG" "$CRON_DISABLED$CRON_M $CRON_H $CRON_DOM $CRON_MON $CRON_DOW $CRON_COMMAND"
 	$CRONTAB "$TMP_CRON_FILE2"
 	rm "$TMP_CRON_FILE" "$TMP_CRON_FILE2"
+	trigger_event "cron_add_after" "$CRON_TYPE" "$CRON_ARG" "$CRON_DISABLED$CRON_M $CRON_H $CRON_DOM $CRON_MON $CRON_DOW $CRON_COMMAND"
 
 }
 

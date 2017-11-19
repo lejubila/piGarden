@@ -190,6 +190,9 @@ function ev_open_in {
 		message_write "warning" "Alias solenoid not specified"
 		return 1
 	fi
+
+	trigger_event "ev_open_in_before" "$3" "$4" "$1" "$2"
+
 	gpio_alias2number $alias > /dev/null 2>&1
 
 	minute_start=$(($minute_start + 1))
@@ -201,6 +204,7 @@ function ev_open_in {
 
 	if [ "$minute_start" -eq "1" ]; then
 		ev_open $alias $force
+		cron_start="- - - - -"
 	else
 		cron_add open_in $cron_start "$alias" "$force"
 	fi
@@ -209,6 +213,8 @@ function ev_open_in {
 	cron_add open_in_stop $cron_stop "$alias" 
 
 	message_write "success" "Scheduled start successfully performed"
+
+	trigger_event "ev_open_in_after" "$3" "$4" "$cron_start" "$cron_stop"
 
 	#echo $cron_start
 	#echo $cron_stop
@@ -757,19 +763,22 @@ function send_identifier {
 # Spenge il sistema 
 #
 function exec_poweroff {
+	trigger_event "exec_poweroff_before" 
 	local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/scripts/poweroff.sh"`
-echo "$PATH_SCRIPT" > tmp/prova.txt
         sleep 15
 	. $PATH_SCRIPT
+	trigger_event "exec_poweroff_after" 
 }
 
 #
 # Spenge il sistema 
 #
 function exec_reboot {
+	trigger_event "exec_reboot_before" 
 	local PATH_SCRIPT=`$READLINK -f "$DIR_SCRIPT/scripts/reboot.sh"`
         sleep 15
 	. $PATH_SCRIPT
+	trigger_event "exec_reboot_after" 
 }
 
 function debug1 {

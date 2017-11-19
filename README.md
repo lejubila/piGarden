@@ -4,7 +4,7 @@ Bash script to manage an irrigation system built with a Raspberry Pi
 
 ## Official documentation 
 
-Documentation of piGarden and build system irrigation with Raspberry Pi can be found on the [www.lejubila.net/tag/pigarden/](http://www.lejubila.net/tag/pigarden/)
+Documentation of piGarden and build system irrigation with Raspberry Pi can be found on the [www.lejubila.net/pigarden/](http://www.lejubila.net/pigarden/)
 
 ## License
 
@@ -66,5 +66,3 @@ sudo cp piGarden/conf/piGarden.conf.example /etc/piGarden.conf
 Customize the configuration file. 
 For more information see 
 [www.lejubila.net/2015/12/impianto-di-irrigazione-con-raspberry-pi-pigarden-lo-script-di-gestione-quinta-parte/](https://www.lejubila.net/2015/12/impianto-di-irrigazione-con-raspberry-pi-pigarden-lo-script-di-gestione-quinta-parte/)
-and
-[www.lejubila.net/2017/04/pigarden-0-2-easter-egg/](https://www.lejubila.net/2017/04/pigarden-0-2-easter-egg/)

@@ -35,11 +35,11 @@ function check_rain_online {
 		echo "$current_observation" > "$STATUS_DIR/last_weather_online"
 		if [ "$current_state_rain_online" != "$last_state_rain_online" ]; then
 			echo "$current_state_rain_online" > "$STATUS_DIR/last_state_rain_online"
-			trigger_event "check_rain_online_change" "$current_state_rain_online"
+			trigger_event "check_rain_online_change" "$current_state_rain_online" "$weather"
 		fi
 	fi
 
-	trigger_event "check_rain_online_after" "$current_state_rain_online"
+	trigger_event "check_rain_online_after" "$current_state_rain_online" "$weather"
 }
 
 #
