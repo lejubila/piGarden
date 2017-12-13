@@ -1,3 +1,6 @@
+# 0.5.4 - 13/11/2017
+- Fix bad initialization LOG_OUTPUT_DRV_FILE variable if not defined in config file
+
 # 0.5.3 - 19/11/2017
 - Fix send parameter on event init_before and init_after
 - Added WEATHER argument in check_rain_sensor_after and check_rain_sensor_change event

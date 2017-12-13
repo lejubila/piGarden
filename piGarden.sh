@@ -824,7 +824,7 @@ LAST_WARNING_FILE="$STATUS_DIR/last_warning"
 LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
 
 if [ -z $LOG_OUTPUT_DRV_FILE ]; then
-	$LOG_OUTPUT_DRV_FILE="/dev/null"
+	LOG_OUTPUT_DRV_FILE="/dev/null"
 fi
 
 if [ -z "$EVENT_DIR" ]; then
