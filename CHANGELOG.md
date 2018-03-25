@@ -1,3 +1,6 @@
+# 0.5.5 - 25/03/2018
+- Added "remote" driver to control remote pigarden
+
 # 0.5.4 - 13/11/2017
 - Fix bad initialization LOG_OUTPUT_DRV_FILE variable if not defined in config file
 

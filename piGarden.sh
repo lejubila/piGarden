@@ -26,10 +26,6 @@ function initialize {
 	# Imposta l'alimentazione con voltaggio negativo e setta i gpio in scrittura per le elettrovalvole bistabili
 	if [ "$EV_MONOSTABLE" != "1" ]; then
 		drv_supply_bistable_init "$SUPPLY_GPIO_1" "$SUPPLY_GPIO_2"
-		#$GPIO -g write $SUPPLY_GPIO_1 0
-		#$GPIO -g write $SUPPLY_GPIO_2 0
-		#$GPIO -g mode $SUPPLY_GPIO_1 out
-		#$GPIO -g mode $SUPPLY_GPIO_2 out
 	fi
 
 	# Elimina tutti gli stati delle elettrovalvole preesistenti
@@ -40,8 +36,6 @@ function initialize {
 	do
 		g=EV"$i"_GPIO
 		drv_rele_init "${!g}"
-		#$GPIO -g write ${!g} RELE_GPIO_OPEN 	# chiude l'alimentazione all'elettrovalvole
-		#$GPIO -g mode ${!g} out		# setta il gpio nella modalita di scrittura
 		ev_set_state $i 0
 	done
 
@@ -56,7 +50,6 @@ function initialize {
 	# Inizializza il sensore di rilevamento pioggia
 	if [ -n "$RAIN_GPIO" ]; then 
 		drv_rain_sensor_init "$RAIN_GPIO"
-		#$GPIO -g mode $RAIN_GPIO in
 		log_write "Rain sensor initialized"
 	else
 		log_write "Rain sensor not present"
@@ -90,6 +83,8 @@ function ev_open {
 	local EVNUM=$?
 	local g=`ev_number2gpio $EVNUM`
 	local EVNORAIN=`ev_number2norain $EVNUM`
+	local EV_IS_REMOTE_VAR=EV"$EVNUM"_REMOTE
+	local EV_IS_REMOTE=${!EV_IS_REMOTE_VAR}
 
 	if [ ! "$2" = "force" ] && [ "$EVNORAIN" != "1" ]; then
 		if [[ "$NOT_IRRIGATE_IF_RAIN_ONLINE" -gt 0 && -f $STATUS_DIR/last_rain_online ]]; then
@@ -133,15 +128,16 @@ function ev_open {
 	lock
 
 	# Gestisce l'apertura dell'elettrovalvola in base alla tipologia (monostabile / bistabile) 
-	if [ "$EV_MONOSTABLE" == "1" ]; then
-		#$GPIO -g write $g $RELE_GPIO_CLOSE
+	if [ "$EV_MONOSTABLE" == "1" ] || [ "$EV_IS_REMOTE" == "1" ]; then
 		drv_rele_close "$g"
+		if [ $? -eq 1 ]; then
+			unlock
+			return		
+		fi
 	else
 		supply_positive
-		#$GPIO -g write $g $RELE_GPIO_CLOSE
 		drv_rele_close "$g"
 		sleep 1
-		#$GPIO -g write $g $RELE_GPIO_OPEN
 		drv_rele_open "$g"
 	fi
 
@@ -232,21 +228,24 @@ function ev_close {
 	ev_alias2number $1
 	EVNUM=$?
 	g=`ev_number2gpio $EVNUM`
+	local EV_IS_REMOTE_VAR=EV"$EVNUM"_REMOTE
+	local EV_IS_REMOTE=${!EV_IS_REMOTE_VAR}
 
 	trigger_event "ev_close_before" "$1"
 
 	lock
 
 	# Gestisce l'apertura dell'elettrovalvola in base alla tipologia (monostabile / bistabile) 
-	if [ "$EV_MONOSTABLE" == "1" ]; then
-		#$GPIO -g write $g $RELE_GPIO_OPEN
+	if [ "$EV_MONOSTABLE" == "1" ] || [ "$EV_IS_REMOTE" == "1" ]; then
 		drv_rele_open "$g"
+		if [ $? -eq 1 ]; then
+			unlock
+			return		
+		fi
 	else
 		supply_negative
-		#$GPIO -g write $g $RELE_GPIO_CLOSE
 		drv_rele_close "$g"
 		sleep 1
-		#$GPIO -g write $g $RELE_GPIO_OPEN
 		drv_rele_open "$g"
 	fi
 
@@ -267,8 +266,6 @@ function ev_close {
 #
 function supply_positive {
 	drv_supply_positive "$SUPPLY_GPIO_1" "$SUPPLY_GPIO_2"
-	#$GPIO -g write $SUPPLY_GPIO_1 $SUPPLY_GPIO_POS
-	#$GPIO -g write $SUPPLY_GPIO_2 $SUPPLY_GPIO_POS
 }
 
 #
@@ -276,8 +273,6 @@ function supply_positive {
 #
 function supply_negative {
 	drv_supply_negative "$SUPPLY_GPIO_1" "$SUPPLY_GPIO_2"
-	#$GPIO -g write $SUPPLY_GPIO_1 $SUPPLY_GPIO_NEG
-	#$GPIO -g write $SUPPLY_GPIO_2 $SUPPLY_GPIO_NEG
 }
 
 #
@@ -791,7 +786,7 @@ function debug2 {
 
 VERSION=0
 SUB_VERSION=5
-RELEASE_VERSION=4
+RELEASE_VERSION=5
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
@@ -844,6 +839,8 @@ fi
 
 send_identifier &
 setup_drv
+
+#echo "EV_MONOSTABLE=$EV_MONOSTABLE"
 
 case "$1" in
 	init) 

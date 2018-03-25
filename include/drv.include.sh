@@ -111,9 +111,13 @@ function drv_rele_close {
 	elif [ "$fnc" == "drvnotfound" ]; then
 	        log_write "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
+		return 1
 	else
 		echo "$(date) $fnc arg:$idx" >> "$LOG_OUTPUT_DRV_FILE"
 		$fnc "$idx" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
+		if [ $? -eq 1 ]; then
+			return 1
+		fi
 	fi
 }
 
@@ -133,9 +137,13 @@ function drv_rele_open {
 	elif [ "$fnc" == "drvnotfound" ]; then
 	        log_write "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
+		return 1
 	else
 		echo "$(date) $fnc arg:$idx" >> "$LOG_OUTPUT_DRV_FILE"
 		$fnc "$idx" >> "$LOG_OUTPUT_DRV_FILE" 2>&1
+		if [ $? -eq 1 ]; then
+			return 1
+		fi
 	fi
 }
 
