@@ -93,6 +93,8 @@ function ev_open {
 			local dif=0
 			let "dif = now - last_rain"
 			if [ $dif -lt $NOT_IRRIGATE_IF_RAIN_ONLINE ]; then
+				trigger_event "ev_not_open_for_rain_online" "$1" "$2"
+				trigger_event "ev_not_open_for_rain" "$1" "$2"
 				log_write "Solenoid '$1' not open for rain (online check)"
 				message_write "warning" "Solenoid not open for rain"
 				return
@@ -106,6 +108,8 @@ function ev_open {
 			local dif=0
 			let "dif = now - last_rain"
 			if [ $dif -lt $NOT_IRRIGATE_IF_RAIN_SENSOR ]; then
+				trigger_event "ev_not_open_for_rain_sensor" "$1" "$2"
+				trigger_event "ev_not_open_for_rain" "$1" "$2"
 				log_write "Solenoid '$1' not open for rain (sensor check)"
 				message_write "warning" "Solenoid not open for rain"
 				return

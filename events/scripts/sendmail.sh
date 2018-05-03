@@ -65,6 +65,13 @@ case "$EVENT" in
 		BODY="PiGarden triggered new event\n\nEVENT: $EVENT\nZONE: $ALIAS\nTIME: $(/bin/date -d@$TIME)"
 		;;
 
+	"ev_not_open_for_rain" | "ev_not_open_for_rain_online" | "ev_not_open_for_rain_sensor")
+		ALIAS="$2"
+		FORCE="$3"
+		TIME=$4
+		BODY="PiGarden triggered new event\n\nEVENT: $EVENT\nZONE: $ALIAS\nFORCED IRRIGATION: $FORCE\nTIME: $(/bin/date -d@$TIME)"
+		;;
+
 	"check_rain_sensor_before" | "check_rain_sensor_after" | "check_rain_sensor_change")
 		STATE="$2"
 		TIME=$3
