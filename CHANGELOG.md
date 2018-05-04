@@ -1,3 +1,7 @@
+# 0.5.6 - 04/05/2018
+- Added events ev_not_open_for_rain, ev_not_open_for_rain_sensor, ev_not_open_for_rain_online
+- Added script rpinotify.sh for notificate events to telegram
+
 # 0.5.5 - 25/03/2018
 - Added "remote" driver to control remote pigarden
 
