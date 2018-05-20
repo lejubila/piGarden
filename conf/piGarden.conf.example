@@ -90,6 +90,7 @@ EV_TOTAL=6
 EV1_ALIAS="1" #
 EV1_GPIO=17   #		Physical 11 - wPi 0
 #EV1_NORAIN=1 # 	Non interrompe l'irrigazione di questa zona in caso di pioggia
+#EV1_MONOSTAVLE=1 #	L'elettrovalvola è monostabile
 
 EV2_ALIAS="2" #
 EV2_GPIO=27   #		Physical 13 - wPi 2

@@ -85,6 +85,8 @@ function ev_open {
 	local EVNORAIN=`ev_number2norain $EVNUM`
 	local EV_IS_REMOTE_VAR=EV"$EVNUM"_REMOTE
 	local EV_IS_REMOTE=${!EV_IS_REMOTE_VAR}
+	local EV_IS_MONOSTAVLE_VAR=EV"$EVNUM"_MONOSTABLE
+	local EV_IS_MONOSTAVLE=${!EV_IS_MONOSTAVLE_VAR}
 
 	if [ ! "$2" = "force" ] && [ "$EVNORAIN" != "1" ]; then
 		if [[ "$NOT_IRRIGATE_IF_RAIN_ONLINE" -gt 0 && -f $STATUS_DIR/last_rain_online ]]; then
@@ -132,7 +134,7 @@ function ev_open {
 	lock
 
 	# Gestisce l'apertura dell'elettrovalvola in base alla tipologia (monostabile / bistabile) 
-	if [ "$EV_MONOSTABLE" == "1" ] || [ "$EV_IS_REMOTE" == "1" ]; then
+	if [ "$EV_MONOSTABLE" == "1" ] || [ "$EV_IS_REMOTE" == "1" ] || [ "$EV_IS_MONOSTABLE" == "1" ]; then
 		drv_rele_close "$g"
 		if [ $? -eq 1 ]; then
 			unlock

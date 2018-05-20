@@ -13,25 +13,25 @@ function drv_remote_rele_init {
 #
 # $1 identificativo relè da aprire (chiude l'elettrovalvola)
 #
-function drv_remote_rele_open {
+function drv_sonoff_tasmota_http_rele_open {
 
 	local remote=`echo $1 | $CUT -d':' -f3,3`
 	local remote_alias=`echo $1 | $CUT -d':' -f4,4`
 
-	local command="close $remote_alias"
+	local command="cmnd=$remote_alias%20Off"
 
 	echo "remote=$remote"
 	echo "remote_alias=$remote_alias"
 	echo "command=$command"
 
-	local response=$(drv_remote_command "$remote" "$command")
+	local response=$(drv_sonoff_tasmota_http_command "$remote" "$command")
 
 	echo "response=$response"
 
-	local result=$(echo $response|$JQ -M ".error.description")
+	local result=$(echo $response|$JQ -M ".$remore_alias")
 	echo "result=$result"
-	if [[ "$result" != "\"\"" ]]; then
-		local error=$result
+	if [[ "$result" != "\"Off\"" ]]; then
+		local error="Command error: $result"
 		error="${error%\"}"
 		error="${error#\"}"
 		echo "error=$error"
@@ -46,25 +46,25 @@ function drv_remote_rele_open {
 #
 # $1 identificativo relè da chiudere (apre l'elettrovalvola)
 #
-function drv_remote_rele_close {
+function drv_sonoff_tasmota_http_rele_close {
 
 	local remote=`echo $1 | $CUT -d':' -f3,3`
 	local remote_alias=`echo $1 | $CUT -d':' -f4,4`
 
-	local command="open $remote_alias force"
+	local command="cmnd=$remote_alias%20On"
 
 	echo "remote=$remote"
 	echo "remote_alias=$remote_alias"
 	echo "command=$command"
 
-	local response=$(drv_remote_command "$remote" "$command")
+	local response=$(drv_sonoff_tasmota_http_command "$remote" "$command")
 
 	echo "response=$response"
 
-	local result=`echo $response|$JQ -M ".error.description"`
+	local result=$(echo $response|$JQ -M ".$remore_alias")
 	echo "result=$result"
-	if [[ "$result" != "\"\"" ]]; then
-		local error=$result
+	if [[ "$result" != "\"On\"" ]]; then
+		local error="Command error: $result"
 		error="${error%\"}"
 		error="${error#\"}"
 		echo "error=$error"
@@ -72,5 +72,6 @@ function drv_remote_rele_close {
         	message_write "warning" "Remote rele close error: $error"
 		return 1
 	fi
+
 }
 
