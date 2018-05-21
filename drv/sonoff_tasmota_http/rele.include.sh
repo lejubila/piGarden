@@ -28,10 +28,10 @@ function drv_sonoff_tasmota_http_rele_open {
 
 	echo "response=$response"
 
-	local result=$(echo $response|$JQ -M ".$remore_alias")
+	local result=$(echo $response|$JQ -M ".$remote_alias")
 	echo "result=$result"
-	if [[ "$result" != "\"Off\"" ]]; then
-		local error="Command error: $result"
+	if [[ "$result" != "\"OFF\"" ]]; then
+		local error="Command error: $response"
 		error="${error%\"}"
 		error="${error#\"}"
 		echo "error=$error"
@@ -61,10 +61,10 @@ function drv_sonoff_tasmota_http_rele_close {
 
 	echo "response=$response"
 
-	local result=$(echo $response|$JQ -M ".$remore_alias")
+	local result=$(echo $response|$JQ -M ".$remote_alias")
 	echo "result=$result"
-	if [[ "$result" != "\"On\"" ]]; then
-		local error="Command error: $result"
+	if [[ "$result" != "\"ON\"" ]]; then
+		local error="Command error: $response"
 		error="${error%\"}"
 		error="${error#\"}"
 		echo "error=$error"

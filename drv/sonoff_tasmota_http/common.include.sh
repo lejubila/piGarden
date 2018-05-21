@@ -21,11 +21,9 @@ function drv_sonoff_tasmota_http_command {
 	local remote_user="${!remote_user_var}"
 	local remote_pwd="${!remote_pwd_var}"
 
-	local url="http://$remore_ip/cm"
+	local url="http://$remote_ip/cm"
 	local credentials=""
 	local response=""
-
-	#$CURL -LI http://$remote_ip/ -o /dev/null -w '%{http_code}\n' -s
 
 	if [[ ! -z $remote_user ]] && [[ ! -z $remote_pwd ]]; then
 		credentials="user=$remote_user&password=$remote_pwd&"
@@ -33,9 +31,18 @@ function drv_sonoff_tasmota_http_command {
 
 	url="$url?$credentials$command"
 
-	$CURL -sb -H "$url"
+	echo "url api sonoff: $url" >> "$LOG_OUTPUT_DRV_FILE"
 
-	#$CURL -LI $url -o /dev/null -w '%{http_code}\n' -s
+	$CURL --connect-timeout 5 -sb -H "$url"
+
+	local res=$?
+
+	echo "curl code response: $res" >> "$LOG_OUTPUT_DRV_FILE"
+
+	if [ "$res" != "0" ]; then
+		#echo "The curl command failed with: $res - url: $url"
+		local FOO="bar"
+	fi
 
 }
 
