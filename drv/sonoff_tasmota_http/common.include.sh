@@ -40,9 +40,10 @@ function drv_sonoff_tasmota_http_command {
 	echo "curl code response: $res" >> "$LOG_OUTPUT_DRV_FILE"
 
 	if [ "$res" != "0" ]; then
-		#echo "The curl command failed with: $res - url: $url"
-		local FOO="bar"
+		echo "The curl command failed with: $res - url: $url"
 	fi
+
+	#echo "{\"POWER1\":\"ON\"}"
 
 }
 

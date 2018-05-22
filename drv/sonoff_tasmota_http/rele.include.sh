@@ -60,8 +60,9 @@ function drv_sonoff_tasmota_http_rele_close {
 	local response=$(drv_sonoff_tasmota_http_command "$remote" "$command")
 
 	echo "response=$response"
+	local jskey=${remote_alias^^}
 
-	local result=$(echo $response|$JQ -M ".$remote_alias")
+	local result=$(echo $response|$JQ -M ".$jskey")
 	echo "result=$result"
 	if [[ "$result" != "\"ON\"" ]]; then
 		local error="Command error: $response"
