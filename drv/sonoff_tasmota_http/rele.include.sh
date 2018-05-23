@@ -3,8 +3,7 @@
 #
 # $1 identificativo relè da inizializzare
 #
-function drv_remote_rele_init {
-
+function drv_sonoff_tasmota_http_rele_init {
 	drv_remote_rele_open "$1"
 }
 
@@ -27,8 +26,9 @@ function drv_sonoff_tasmota_http_rele_open {
 	local response=$(drv_sonoff_tasmota_http_command "$remote" "$command")
 
 	echo "response=$response"
+	local jskey=${remote_alias^^}
 
-	local result=$(echo $response|$JQ -M ".$remote_alias")
+	local result=$(echo $response|$JQ -M ".$jskey")
 	echo "result=$result"
 	if [[ "$result" != "\"OFF\"" ]]; then
 		local error="Command error: $response"
