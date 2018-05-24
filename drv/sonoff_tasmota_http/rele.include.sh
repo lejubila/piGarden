@@ -4,7 +4,7 @@
 # $1 identificativo relè da inizializzare
 #
 function drv_sonoff_tasmota_http_rele_init {
-	drv_remote_rele_open "$1"
+	drv_sonoff_tasmota_http_rele_open "$1"
 }
 
 #
