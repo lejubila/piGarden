@@ -1,3 +1,6 @@
+# 0.5.7 - 01/06/2018
+- Added "sonoff_tasmota_http" driver for interfacin with Sonoff module with Tasmota firmware over http protocol
+
 # 0.5.6 - 04/05/2018
 - Added events ev_not_open_for_rain, ev_not_open_for_rain_sensor, ev_not_open_for_rain_online
 - Added script rpinotify.sh for notificate events to telegram

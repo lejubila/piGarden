@@ -1,0 +1,141 @@
+# Log file
+LOG_FILE="/home/pi/piGarden/log/piGarden.log"
+LOG_FILE_MAX_SIZE=1048576 # 1MB
+
+# Log file for driver output
+#LOG_OUTPUT_DRV_FILE="/tmp/piGarden.drv.log"
+
+# Status directory
+STATUS_DIR="/home/pi/piGarden/state"
+
+# Event directory
+EVENT_DIR="/home/pi/piGarden/events"
+
+# Posizione gpio
+GPIO="/usr/local/bin/gpio"
+
+# Posizione js
+JQ="/usr/local/bin/jq"
+
+# Percorso curl
+CURL="/usr/bin/curl"
+
+# Percorso wc
+WC="/usr/bin/wc"
+
+# Percorso gzip
+GZIP="/bin/gzip"
+
+# Percorso mv
+MV="/bin/mv"
+
+# Percorso di tr
+TR="/usr/bin/tr"
+
+# Percorso di cut
+CUT="/usr/bin/cut"
+
+# Percorso tcpserver
+TCPSERVER="/usr/bin/tcpserver"
+
+# Percorso cron
+CRONTAB="/usr/bin/crontab"
+
+# Percorso grep
+GREP="/bin/grep"
+
+# Percorsp sed
+SED="/bin/sed"
+
+# Percorso readlink
+READLINK="/bin/readlink"
+
+# Percorso stat
+STAT="/usr/bin/stat"
+
+# Se impostato con il valore 1, indica che il sistema gestisce elettrovalvole monostabili, 
+# se impostato a 0 il sistema gestirà elettrovalvole bisstabili
+EV_MONOSTABLE=0
+
+# Id gpio usati per simulare il doppio deviatore con cui eseguire l'alimentazione alle elettrovalvole
+SUPPLY_GPIO_1=2
+SUPPLY_GPIO_2=3
+
+# Stato dei due gpio per impartire l'alimentazione positiva alle elettrovalvole (aperta)
+SUPPLY_GPIO_POS=0
+
+# Stato dei due gpio per impartire l'alimentazione negativa alle elettrovalvole (chiusa)
+SUPPLY_GPIO_NEG=1
+
+# Stato di ingresso da assegnare al gpio per chiudere il rele
+RELE_GPIO_CLOSE=0
+
+# Stato di ingresso da assegnare al gpio per aprire il rele
+RELE_GPIO_OPEN=1
+
+# Id del gpio usato per collegare il sensore di rilevamento pioggia
+RAIN_GPIO=25		# Physical 22 - wPi 6
+
+# Valore in ingresso sul gpio definito in RAIN_GPIO che indica lo stato di pioggia
+RAIN_GPIO_STATE=0
+
+
+
+
+# Numero totale di elettrovalvole
+EV_TOTAL=4
+
+# Definizione delle elettrovalvole
+EV1_ALIAS="Giardino_Posteriore_DX"
+EV1_GPIO="drv:sonoff_tasmota_http:SONOFF1:Power1"
+EV1_MONOSTABLE=1
+
+EV2_ALIAS="Giardino_Posteriore_CN"
+EV2_GPIO="drv:sonoff_tasmota_http:SONOFF1:Power2"
+EV2_MONOSTABLE=1
+
+EV3_ALIAS="Giardino_Posteriore_SX"
+EV3_GPIO="drv:sonoff_tasmota_http:SONOFF1:Power3"
+EV3_MONOSTABLE=1
+
+EV4_ALIAS="Giardino_Anteriore"
+EV4_GPIO="drv:sonoff_tasmota_http:SONOFF2:Power1"
+
+
+# Definisce l'api key e il luogo per recuperare lo stato meteo online
+WUNDERGROUND_KEY=""
+WUNDERGROUND_LOCATION="IT/Pieve%20a%20Nievole"	# http://www.wunderground.com/weather/api/d/docs?d=resources/country-to-iso-matching&MR=1
+
+# Blocca l'irrigazione se l'ultima pioggia rilevata online è avvenuta nell'ultima quantità di tempo inserita.
+# Il tempo è espresso in secondi. Quindi inserendo 86400, se nelle ultime 24 ore ha piovuto viene bloccata l'irrigazione. Inserendo il valore zero non viene eseguito nessun controllo.
+NOT_IRRIGATE_IF_RAIN_ONLINE=86400
+
+# Il parametro è simile a quello precedente, il controllo però anziché essere fatto attingendo a wunderground, viene eseguito direttamente sul sensore se installato. Inserendo il valore zero non viene eseguito nessun controllo.
+NOT_IRRIGATE_IF_RAIN_SENSOR=86400
+
+# Indirizzo ip e porta di ascolto del socket server
+TCPSERVER_IP="127.0.0.1"
+TCPSERVER_PORT="8084"
+
+# Utente e password che i clients devono utilizzare per stabilire una connessione tramite socket server
+TCPSERVER_USER=""
+TCPSERVER_PWD=""
+
+# Con impostato il valore 1 non invia l'identificativi per statistiche di utilizzo
+NO_SEND_IDENTIFIER=0
+
+
+#
+# Configurazione moduli sonoff
+#
+SONOFF1_IP="192.168.1.1"
+SONOFF1_USER="user"
+SONOFF1_PWD="pwd"
+
+SONOFF2_IP="192.168.1.21"
+SONOFF2_USER=""
+SONOFF2_PWD=""
+
+
+
+
