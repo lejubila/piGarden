@@ -832,6 +832,11 @@ if [ -z "$EVENT_DIR" ]; then
 	EVENT_DIR="$DIR_SCRIPT/events"
 fi
 
+if [ -z $WEATHER_SERVICE ]; then
+	WEATHER_SERVICE="drv:wunderground"
+else
+	WEATHER_SERVICE="drv:$WEATHER_SERVICE"
+fi
 
 # Elimina il file di lock se più vecchio di 11 secondi
 if [ -f "$LOCK_FILE" ]; then

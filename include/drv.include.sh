@@ -19,7 +19,7 @@ function setup_drv {
         done
 
 	# Inizializza i driver per gli altri gpio
-	for gpio in "$SUPPLY_GPIO_1" "$SUPPLY_GPIO_2" "$RAIN_GPIO"
+	for gpio in "$SUPPLY_GPIO_1" "$SUPPLY_GPIO_2" "$RAIN_GPIO" "$WEATHER_SERVICE"
 	do
 		if [[ "$gpio" == drv:* ]]; then
 			local drv=`echo $gpio | $CUT -d':' -f2,2`
@@ -32,7 +32,7 @@ function setup_drv {
 	local file_drv
 	for drv in "${list_drv[@]}"
 	do
-		for callback in config common init rele supply rainsensor setup
+		for callback in config common init rele supply rainsensor rainonline setup
 		do
 			file_drv="$DIR_SCRIPT/drv/$drv/$callback.include.sh"
 			if [ -f "$file_drv" ]; then
@@ -303,6 +303,33 @@ function drv_rain_sensor_get {
 	# Nessun driver definito, esegue la lettura del sensore tramite gpio del raspberry
 	if [ -z "$fnc" ]; then
 		vret=`$GPIO -g read $idx`
+	# Il driver definito non è stato trovato
+	elif [ "$fnc" == "drvnotfound" ]; then
+	        log_write "Driver not found: $idx"
+        	message_write "warning" "Driver not found: $idx"
+	else
+		echo "$(date) $fnc arg:$idx" >> "$LOG_OUTPUT_DRV_FILE"
+		vret=`$fnc "$idx"`
+	fi
+
+	echo "$vret"
+
+}
+
+#
+# Legge lo stato le condizioni meteo dal servizio online
+#
+# $1	identificativo gpio sensore pioggia
+#
+function drv_rain_online_get {
+	local idx="$1"
+	local fnc=`get_driver_callback "rain_online_get" "$idx"`
+	local vret=""
+
+	# Nessun driver definito, esegue la lettura del sensore tramite gpio del raspberry
+	if [ -z "$fnc" ]; then
+	        log_write "Driver not found: $idx"
+        	message_write "warning" "Driver not found: $idx"
 	# Il driver definito non è stato trovato
 	elif [ "$fnc" == "drvnotfound" ]; then
 	        log_write "Driver not found: $idx"

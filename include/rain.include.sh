@@ -1,7 +1,7 @@
 #
 # Controlla se se piove tramite http://api.wunderground.com/
 #
-function check_rain_online {
+function check_rain_online_old {
 
 	trigger_event "check_rain_online_before" ""
 
@@ -41,6 +41,55 @@ function check_rain_online {
 
 	trigger_event "check_rain_online_after" "$current_state_rain_online" "$weather"
 }
+
+
+
+
+
+
+
+
+
+
+#
+# Controlla se se piove tramite http://api.wunderground.com/
+#
+function check_rain_online {
+
+	trigger_event "check_rain_online_before" ""
+
+	local local_epoch=`drv_rain_online_get $WEATHER_SERVICE`
+	local current_state_rain_online=""
+	local last_state_rain_online=`cat "$STATUS_DIR/last_state_rain_online" 2> /dev/null`
+	local weather="null"
+
+	if [[ $local_epoch =~ ^-?[0-9]+$ ]]; then
+		if [ $local_epoch -eq 0 ]; then
+			log_write "check_rain_online - failed read online data"
+		else
+			if [ $local_epoch -gt 0 ]; then
+				current_state_rain_online='rain'
+				echo $local_epoch > "$STATUS_DIR/last_rain_online"
+			else
+				current_state_rain_online='norain'
+			fi
+			weather=$(cat "$STATUS_DIR/last_weather_online" | $JQ -M ".weather")
+			
+			log_write "check_rain_online - weather=$weather, local_epoch=$local_epoch"
+			if [ "$current_state_rain_online" != "$last_state_rain_online" ]; then
+				echo "$current_state_rain_online" > "$STATUS_DIR/last_state_rain_online"
+				trigger_event "check_rain_online_change" "$current_state_rain_online" "$weather"
+			fi
+		fi
+	else
+		log_write "check_rain_online - failed read online data"
+	fi
+
+	trigger_event "check_rain_online_after" "$current_state_rain_online" "$weather"
+}
+
+
+
 
 #
 # Controlla se se piove tramite sensore
