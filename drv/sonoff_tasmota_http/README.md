@@ -5,7 +5,8 @@ More information on Sonoff Tasmota firmware: https://github.com/arendst/Sonoff-T
 
 # Example of zone configuration in piGarden.conf
 
-```EV1_ALIAS="Giardino_Posteriore_DX"
+```bash
+EV1_ALIAS="Giardino_Posteriore_DX"
 EV1_GPIO="drv:sonoff_tasmota_http:SONOFF1:Power1"
 EV1_MONOSTABLE=1
 
