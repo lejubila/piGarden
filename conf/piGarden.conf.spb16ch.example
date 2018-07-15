@@ -472,9 +472,18 @@ EV128_ALIAS="Zona_128" #
 EV128_GPIO="drv:spb16ch:128"
 
 
-# Definisce l'api key e il luogo per recuperare lo stato meteo online
+# Definisci il servizio online da utilizzare per il controllo delle condizioni meteo, puoi scegliere openweathermap oppure wunderground
+WEATHER_SERVICE="openweathermap"
+
+# Parametri di openweathermap, definisce l'api key e il luogo per recuperare lo stato meteo online
+OPENWEATHERMAP_KEY=""
+OPENWEATHERMAP_LOCATION="q=Pieve%20a%20Nievole,it" # https://openweathermap.org/current
+OPENWEATHERMAP_TZ="Europe/Rome"	# Time zone
+
+# Parametri di wunderground, definisce l'api key e il luogo per recuperare lo stato meteo online
 WUNDERGROUND_KEY=""
-WUNDERGROUND_LOCATION="IY/Monsummano"	# http://www.wunderground.com/weather/api/d/docs?d=resources/country-to-iso-matching&MR=1
+WUNDERGROUND_LOCATION="IT/Pieve%20a%20Nievole"	# http://www.wunderground.com/weather/api/d/docs?d=resources/country-to-iso-matching&MR=1
+
 
 # Blocca l'irrigazione se l'ultima pioggia rilevata online è avvenuta nell'ultima quantità di tempo inserita.
 # Il tempo è espresso in secondi. Quindi inserendo 86400, se nelle ultime 24 ore ha piovuto viene bloccata l'irrigazione. Inserendo il valore zero non viene eseguito nessun controllo.

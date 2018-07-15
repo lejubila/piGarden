@@ -1,3 +1,6 @@
+# 0.5.8 - xx/07/2018
+- Added "openweathermap" driver for impement check weather condition from openweatermap api
+
 # 0.5.7 - 01/06/2018
 - Added "sonoff_tasmota_http" driver for interfacin with Sonoff module with Tasmota firmware over http protocol
 

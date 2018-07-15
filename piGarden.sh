@@ -782,6 +782,94 @@ function exec_reboot {
 	trigger_event "exec_reboot_after" 
 }
 
+
+#
+# Converte da gradi a direzione
+#
+# $1 gradi
+#
+function deg2dir {
+	local deg=$(echo $1 | $SED 's/\..*$//')
+	local dir=""
+
+	if [ "$deg" == "null" ]; then
+		echo ""
+		return
+	fi
+
+	# N	348.75 - 11.25
+	if [ $deg -le 11 ]; then
+		dir="North"
+
+	# NNE	11.25 - 33.75
+	elif [ $deg -le 33 ]; then
+		dir="NNE"
+
+	# NE	33.75 - 56.25
+	elif [ $deg -le 56 ]; then
+		dir="NE"
+
+	# ENE	56.25 - 78.75
+	elif [ $deg -le 78 ]; then
+		dir="ENE"
+
+	# E	78.75 - 101.25
+	elif [ $deg -le 101 ]; then
+		dir="East"
+
+	# ESE	101.25 - 123.75
+	elif [ $deg -le 123 ]; then
+		dir="ESE"
+
+	# SE	123.75 - 146.25
+	elif [ $deg -le 146 ]; then
+		dir="SE"
+
+	# SSE	146.25 - 168.75
+	elif [ $deg -le 168 ]; then
+		dir="SSE"
+
+	# S	168.75 - 191.25
+	elif [ $deg -le 191 ]; then
+		dir="South"
+
+	# SSW	191.25 - 213.75
+	elif [ $deg -le 213 ]; then
+		dir="SSW"
+
+	# SW	213.75 - 236.25
+	elif [ $deg -le 236 ]; then
+		dir="SW"
+
+	# WSW	236.25 - 258.75
+	elif [ $deg -le 258 ]; then
+		dir="WSW"
+
+	# W	258.75 - 281.25
+	elif [ $deg -le 281 ]; then
+		dir="West"
+
+	# WNW	281.25 - 303.75
+	elif [ $deg -le 303 ]; then
+		dir="WNW"
+
+	# NW	303.75 - 326.25
+	elif [ $deg -le 326 ]; then
+		dir="NW"
+
+	# NNW	326.25 - 348.75
+	elif [ $deg -le 348 ]; then
+		dir="NNW"
+
+	# N	348.75 - 11.25
+	else
+		dir="North"
+	fi
+
+	echo $dir
+
+}
+
 function debug1 {
 	. "$DIR_SCRIPT/debug/debug1.sh"	
 }
@@ -792,7 +880,7 @@ function debug2 {
 
 VERSION=0
 SUB_VERSION=5
-RELEASE_VERSION=7
+RELEASE_VERSION=8
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
