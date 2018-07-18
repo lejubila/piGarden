@@ -1,4 +1,4 @@
-# 0.5.8 - xx/07/2018
+# 0.5.8 - 19/07/2018
 - Added "openweathermap" driver for impement check weather condition from openweatermap api
 
 # 0.5.7 - 01/06/2018

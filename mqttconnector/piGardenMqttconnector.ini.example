@@ -1,0 +1,12 @@
+[mqtt]
+broker_address=m20.cloudmqtt.com  
+port=13554                        
+user=ucorgnpg
+password=K5iJrLxNnhbM
+client_id=Python
+
+[pigarden]
+path=/home/pi/piGarden/
+user=a
+pwd=b
+
