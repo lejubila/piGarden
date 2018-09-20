@@ -1,3 +1,6 @@
+# 0.5.9 - xx/xx/2018
+- Added mqtt support for publishing status to broker 
+
 # 0.5.8 - 19/07/2018
 - Added "openweathermap" driver for impement check weather condition from openweatermap api
 

@@ -53,6 +53,11 @@ READLINK="/bin/readlink"
 # Percorso stat
 STAT="/usr/bin/stat"
 
+# Percorso mosquito_pub
+# Installare con apt install mosquitto-clients
+MOSQUITTO_PUB="/usr/bin/mosquitto_pub"
+
+
 # Se impostato con il valore 1, indica che il sistema gestisce elettrovalvole monostabili, 
 # se impostato a 0 il sistema gestirà elettrovalvole bisstabili
 EV_MONOSTABLE=0
@@ -130,6 +135,15 @@ TCPSERVER_PWD=""
 
 # Con impostato il valore 1 non invia l'identificativi per statistiche di utilizzo
 NO_SEND_IDENTIFIER=0
+
+# Parametri connessione al broker mqtt
+MQTT_ENABLE=0   # set 1 to enable
+MQTT_HOST=you_host_mqtt
+MQTT_PORT=1883
+MQTT_USER=your_user_mqtt
+MQTT_PWD=yout_password_mqtt
+MQTT_TOPIC="pigarden/result"
+MQTT_CLIENT_ID=piGarden
 
 
 #

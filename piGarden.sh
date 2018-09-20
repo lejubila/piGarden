@@ -492,6 +492,11 @@ function json_status {
 	local last_success=""
 	local with_get_cron="0"
 	local with_get_cron_open_in="0"
+	local current_pid=$!
+
+	if [ "$PARENT_PID" -gt "0" ]; then
+		current_pid=$PARENT_PID
+	fi
 
 	local vret=""
 	for i in $1 $2 $3 $4 $5 $6
@@ -516,7 +521,8 @@ function json_status {
 		if [ -n "$json" ]; then
 			json="$json,"
 		fi
-		json="$json\"$i\":{\"name\":\"$av\",\"state\":$sv}"
+		#json="$json\"$i\":{\"name\":\"$av\",\"state\":$sv}"
+		json="$json\"$av\":{\"name\":\"$av\",\"state\":$sv}"
 	done
 	json="\"zones\":{$json}"
 
@@ -527,14 +533,14 @@ function json_status {
 	if [[ ! -z "$last_weather_online" ]]; then
 		json_last_weather_online=$last_weather_online
 	fi
-	if [ -f "$LAST_INFO_FILE.$!" ]; then
-		last_info=`cat "$LAST_INFO_FILE.$!"`
+	if [ -f "$LAST_INFO_FILE.$current_pid" ]; then
+		last_info=`cat "$LAST_INFO_FILE.$current_pid"`
 	fi
-	if [ -f "$LAST_WARNING_FILE.$!" ]; then
-		last_warning=`cat "$LAST_WARNING_FILE.$!"`
+	if [ -f "$LAST_WARNING_FILE.$current_pid" ]; then
+		last_warning=`cat "$LAST_WARNING_FILE.$current_pid"`
 	fi
-	if [ -f "$LAST_SUCCESS_FILE.$!" ]; then
-		last_success=`cat "$LAST_SUCCESS_FILE.$!"`
+	if [ -f "$LAST_SUCCESS_FILE.$current_pid" ]; then
+		last_success=`cat "$LAST_SUCCESS_FILE.$current_pid"`
 	fi
 	local json_last_weather_online="\"last_weather_online\":$json_last_weather_online"
 	local json_last_rain_sensor="\"last_rain_sensor\":\"$last_rain_sensor\""
@@ -618,6 +624,26 @@ function json_status {
 }
 
 #
+# Invia al broker mqtt il json contentente lo stato del sistema
+#
+# $1 parent pid (opzionale)
+#
+function mqtt_status {
+
+	if [ ! $MQTT_ENABLE -eq 1 ]; then
+		return
+	fi
+
+	if [ ! -z "$1" ]; then
+		PARENT_PID=$1
+	fi
+
+	local js=$(json_status)
+	$MOSQUITTO_PUB -h $MQTT_HOST -p $MQTT_PORT -u $MQTT_USER -P $MQTT_PWD -i $MQTT_CLIENT_ID -r -t "$MQTT_TOPIC" -m "$js"
+}
+
+
+#
 # Mostra il i parametri dello script
 #
 function show_usage {
@@ -632,6 +658,7 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT ev_status alias                              show status solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status_all                                show status solenoids"
 	echo -e "\t$NAME_SCRIPT json_status [get_cron|get_cron_open_in]      show status in json format"
+	echo -e "\t$NAME_SCRIPT mqtt_status                                  send status in json format to mqtt broker"
 	echo -e "\t$NAME_SCRIPT check_rain_online                            check rain from http://api.wunderground.com/"
 	echo -e "\t$NAME_SCRIPT check_rain_sensor                            check rain from hardware sensor"
 	echo -e "\t$NAME_SCRIPT close_all_for_rain                           close all solenoid if it's raining"
@@ -880,7 +907,7 @@ function debug2 {
 
 VERSION=0
 SUB_VERSION=5
-RELEASE_VERSION=8
+RELEASE_VERSION=9
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
@@ -911,6 +938,8 @@ fi
 LAST_INFO_FILE="$STATUS_DIR/last_info"
 LAST_WARNING_FILE="$STATUS_DIR/last_warning"
 LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
+
+PARENT_PID=0
 
 if [ -z $LOG_OUTPUT_DRV_FILE ]; then
 	LOG_OUTPUT_DRV_FILE="/dev/null"
@@ -979,6 +1008,10 @@ case "$1" in
 
 	json_status)
 		json_status $2 $3 $4 $5 $6
+		;;
+
+	mqtt_status)
+		mqtt_status $2
 		;;
 
 	check_rain_online)
