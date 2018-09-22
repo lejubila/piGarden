@@ -17,12 +17,14 @@ function trigger_event {
 				case "$EVENT" in
 					"ev_open_before" | "ev_open_after")
 						ALIAS="$2"
+						CURRENT_EVENT_ALIAS="$ALIAS"
 						FORCE="$3"
 						$f "$EVENT" "$ALIAS" "$FORCE" `date +%s`  &> /dev/null 
 						;;
 
 					"ev_open_in_before")
 						ALIAS="$2"
+						CURRENT_EVENT_ALIAS="$ALIAS"
 						FORCE="$3"
 						local MINUTE_START="$4"
 						local MINUTE_STOP="$5"
@@ -31,6 +33,7 @@ function trigger_event {
 
 					"ev_open_in_after")
 						ALIAS="$2"
+						CURRENT_EVENT_ALIAS="$ALIAS"
 						FORCE="$3"
 						local CRON_START="$4"
 						local CRON_STOP="$5"
@@ -39,6 +42,7 @@ function trigger_event {
 
 					"ev_close_before" | "ev_close_after")
 						ALIAS="$2"
+						CURRENT_EVENT_ALIAS="$ALIAS"
 						$f "$EVENT" "$ALIAS" `date +%s`  &> /dev/null 
 						;;
 
@@ -90,6 +94,7 @@ function trigger_event {
 				local ec=$?
 				#echo "$EVENT ec=$ec" >> /tmp/piGarden.testevent
 
+				CURRENT_EVENT="$EVENT"
 				mqtt_status &
 
 				if [ $ec -ne 0 ]; then

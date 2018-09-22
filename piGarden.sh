@@ -493,6 +493,7 @@ function json_status {
 	local with_get_cron="0"
 	local with_get_cron_open_in="0"
 	local current_pid=$!
+	local json_event="\"event\": {\"event\": \"$CURRENT_EVENT\", \"alias\": \"$CURRENT_EVENT_ALIAS\"}"
 
 	if [ "$PARENT_PID" -gt "0" ]; then
 		current_pid=$PARENT_PID
@@ -615,7 +616,7 @@ function json_status {
 	fi
 	local json_cron_open_in="\"cron_open_in\":{$json_get_cron_open_in}"			
 
-	json="{$json_version,$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron,$json_cron_open_in}"
+	json="{$json_version,$json_event,$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron,$json_cron_open_in}"
 
 	echo "$json"
 
@@ -938,6 +939,9 @@ fi
 LAST_INFO_FILE="$STATUS_DIR/last_info"
 LAST_WARNING_FILE="$STATUS_DIR/last_warning"
 LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
+
+CURRENT_EVENT=""
+CURRENT_EVENT_ALIAS=""
 
 PARENT_PID=0
 
