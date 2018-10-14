@@ -63,7 +63,7 @@ function initialize {
 #
 # Elimina i file contenente i messaggi da inserire nel json status
 #
-function reset_messages {
+function reset_messages_old {
 	rm -f "$LAST_INFO_FILE.$!"
 	rm -f "$LAST_WARNING_FILE.$!"
 	rm -f "$LAST_SUCCESS_FILE.$!"
@@ -95,10 +95,10 @@ function ev_open {
 			local dif=0
 			let "dif = now - last_rain"
 			if [ $dif -lt $NOT_IRRIGATE_IF_RAIN_ONLINE ]; then
+				message_write "warning" "Solenoid not open for rain"
 				trigger_event "ev_not_open_for_rain_online" "$1" 
 				trigger_event "ev_not_open_for_rain" "$1" 
 				log_write "Solenoid '$1' not open for rain (online check)"
-				message_write "warning" "Solenoid not open for rain"
 				return
 			fi
 		fi
@@ -110,10 +110,10 @@ function ev_open {
 			local dif=0
 			let "dif = now - last_rain"
 			if [ $dif -lt $NOT_IRRIGATE_IF_RAIN_SENSOR ]; then
+				message_write "warning" "Solenoid not open for rain"
 				trigger_event "ev_not_open_for_rain_sensor" "$1" 
 				trigger_event "ev_not_open_for_rain" "$1" 
 				log_write "Solenoid '$1' not open for rain (sensor check)"
-				message_write "warning" "Solenoid not open for rain"
 				return
 			fi
 		fi
@@ -128,6 +128,7 @@ function ev_open {
 	if [ $? -ne 0 ]; then
 		log_write "Solenoid '$1' not open due to external event"
 		message_write 'warning' "Solenoid not open due to external event"
+		mqtt_status
 		return
 	fi
 
@@ -149,12 +150,12 @@ function ev_open {
 
 	ev_set_state $EVNUM $state
 
+	log_write "Solenoid '$1' open"
+	message_write "success" "Solenoid open"
+
 	trigger_event "ev_open_after" "$1" "$2"
 
 	unlock
-
-	log_write "Solenoid '$1' open"
-	message_write "success" "Solenoid open"
 }
 
 #
@@ -175,21 +176,25 @@ function ev_open_in {
 	if ! [[ $minute_start =~ $re ]] ; then
 		echo -e "Time start of irrigation is wrong or not specified"
 		message_write "warning" "Time start of irrigation is wrong or not specified"
+		mqtt_status
 		return 1
 	fi
 	if ! [[ $minute_stop =~ $re ]] ; then
 		echo -e "Time stop of irrigation is wrong or not specified"
 		message_write "warning" "Time stop of irrigation is wrong or not specified"
+		mqtt_status
 		return 1
 	fi
 	if [ $minute_stop -lt "1" ] ; then
 		echo -e "Time stop of irrigation is wrong"
 		message_write "warning" "Time stop of irrigation is wrong"
+		mqtt_status
 		return 1
 	fi
 	if [ "empty$alias" == "empty" ]; then
 		echo -e "Alias solenoid not specified"
 		message_write "warning" "Alias solenoid not specified"
+		mqtt_status
 		return 1
 	fi
 
@@ -257,12 +262,12 @@ function ev_close {
 
 	ev_set_state $EVNUM 0
 
+	log_write "Solenoid '$1' close"
+	message_write "success" "Solenoid close"
+
 	trigger_event "ev_close_after" "$1"
 
 	unlock
-
-	log_write "Solenoid '$1' close"
-	message_write "success" "Solenoid close"
 
 	cron_del open_in_stop $1 > /dev/null 2>&1
 }
@@ -303,6 +308,20 @@ function log_write {
 # $2 messaggio
 #
 function message_write {
+	local file_message=""
+	if [ "$1" = 'info' ]; then
+		MESSAGE_INFO="$2"
+	elif [ "$1" = "warning" ]; then
+		MESSAGE_WARNING="$2"
+	elif [ "$1" = "success" ]; then
+		MESSAGE_SUCCESS="$2"
+	else
+		return
+	fi
+	
+}
+
+function message_write_old {
 	local file_message=""
 	if [ "$1" = 'info' ]; then
 		file_message="$LAST_INFO_FILE.$!"
@@ -351,6 +370,7 @@ function gpio_alias2number {
 
 	log_write "ERROR solenoid alias not found: $1"
 	message_write "warning" "Solenoid alias not found"
+	mqtt_status
 	exit 1
 }
 
@@ -370,6 +390,7 @@ function ev_alias2number {
 
 	log_write "ERROR solenoid alias not found: $1"
 	message_write "warning" "Solenoid alias not found"
+	mqtt_status
 	exit 1
 }
 
@@ -534,15 +555,18 @@ function json_status {
 	if [[ ! -z "$last_weather_online" ]]; then
 		json_last_weather_online=$last_weather_online
 	fi
-	if [ -f "$LAST_INFO_FILE.$current_pid" ]; then
-		last_info=`cat "$LAST_INFO_FILE.$current_pid"`
-	fi
-	if [ -f "$LAST_WARNING_FILE.$current_pid" ]; then
-		last_warning=`cat "$LAST_WARNING_FILE.$current_pid"`
-	fi
-	if [ -f "$LAST_SUCCESS_FILE.$current_pid" ]; then
-		last_success=`cat "$LAST_SUCCESS_FILE.$current_pid"`
-	fi
+	#if [ -f "$LAST_INFO_FILE.$current_pid" ]; then
+	#	last_info=`cat "$LAST_INFO_FILE.$current_pid"`
+	#fi
+	#if [ -f "$LAST_WARNING_FILE.$current_pid" ]; then
+	#	last_warning=`cat "$LAST_WARNING_FILE.$current_pid"`
+	#fi
+	#if [ -f "$LAST_SUCCESS_FILE.$current_pid" ]; then
+	#	last_success=`cat "$LAST_SUCCESS_FILE.$current_pid"`
+	#fi
+	last_info="$MESSAGE_INFO"
+	last_warning="$MESSAGE_WARNING"
+	last_success="$MESSAGE_SUCCESS"
 	local json_last_weather_online="\"last_weather_online\":$json_last_weather_online"
 	local json_last_rain_sensor="\"last_rain_sensor\":\"$last_rain_sensor\""
 	local json_last_rain_online="\"last_rain_online\":\"$last_rain_online\""
@@ -614,9 +638,10 @@ function json_status {
 
 		json_get_cron_open_in="\"open_in\": {$values_open_in},\"open_in_stop\": {$values_open_in_stop}"
 	fi
-	local json_cron_open_in="\"cron_open_in\":{$json_get_cron_open_in}"			
+	local json_cron_open_in="\"cron_open_in\":{$json_get_cron_open_in}"
+	local json_timestamp="\"timestamp\": $(date +%s)"
 
-	json="{$json_version,$json_event,$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron,$json_cron_open_in}"
+	json="{$json_version,$json_timestamp,$json_event,$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron,$json_cron_open_in}"
 
 	echo "$json"
 
@@ -936,9 +961,12 @@ fi
 . "$DIR_SCRIPT/include/rain.include.sh"
 . "$DIR_SCRIPT/include/events.include.sh"
 
-LAST_INFO_FILE="$STATUS_DIR/last_info"
-LAST_WARNING_FILE="$STATUS_DIR/last_warning"
-LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
+#LAST_INFO_FILE="$STATUS_DIR/last_info"
+#LAST_WARNING_FILE="$STATUS_DIR/last_warning"
+#LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
+MESSAGE_INFO=""
+MESSAGE_WARNING=""
+MESSAGE_SUCCESS=""
 
 CURRENT_EVENT=""
 CURRENT_EVENT_ALIAS=""
@@ -1159,4 +1187,4 @@ esac
 rm "$TMP_CRON_FILE" 2> /dev/null
 rm "$TMP_CRON_FILE-2" 2> /dev/null
 
-reset_messages &> /dev/null
+#reset_messages &> /dev/null

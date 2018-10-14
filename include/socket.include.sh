@@ -63,7 +63,7 @@ function socket_server_command {
 
 	log_write "socket connection from: $TCPREMOTEIP - command: $arg1 $arg2 $arg3 $arg4 $arg5 $arg6 $arg7 $arg8"
 	
-	reset_messages &> /dev/null
+	#reset_messages &> /dev/null
 
 	case "$arg1" in
         	status)
@@ -225,7 +225,7 @@ function socket_server_command {
 
 	esac
 	
-	reset_messages &> /dev/null
+	#reset_messages &> /dev/null
 
 }
 
