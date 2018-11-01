@@ -1,4 +1,4 @@
-# 0.5.9 - xx/xx/2018
+# 0.5.9 - 01/11/2018
 - Added mqtt support for publishing status to broker 
 
 # 0.5.8 - 19/07/2018
