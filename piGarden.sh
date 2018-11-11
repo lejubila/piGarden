@@ -86,7 +86,7 @@ function ev_open {
 	local EV_IS_REMOTE_VAR=EV"$EVNUM"_REMOTE
 	local EV_IS_REMOTE=${!EV_IS_REMOTE_VAR}
 	local EV_IS_MONOSTABLE_VAR=EV"$EVNUM"_MONOSTABLE
-	local EV_IS_MONOSTABLE=${!EV_IS_MONOSTAVLE_VAR}
+	local EV_IS_MONOSTABLE=${!EV_IS_MONOSTABLE_VAR}
 
 	if [ ! "$2" = "force" ] && [ "$EVNORAIN" != "1" ]; then
 		if [[ "$NOT_IRRIGATE_IF_RAIN_ONLINE" -gt 0 && -f $STATUS_DIR/last_rain_online ]]; then
