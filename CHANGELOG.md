@@ -1,3 +1,6 @@
+# 0.5.11 - 11/11/2018
+- Added ability to disable online weather service by defining WEATHER_SERVICE="none" in the configuration file
+
 # 0.5.10 - 11/11/2018
 - Fix bug in single monostable solenodid management caused from wrong variable name EV_IS_MONOSTAVLE
 
