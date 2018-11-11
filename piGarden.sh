@@ -85,8 +85,8 @@ function ev_open {
 	local EVNORAIN=`ev_number2norain $EVNUM`
 	local EV_IS_REMOTE_VAR=EV"$EVNUM"_REMOTE
 	local EV_IS_REMOTE=${!EV_IS_REMOTE_VAR}
-	local EV_IS_MONOSTAVLE_VAR=EV"$EVNUM"_MONOSTABLE
-	local EV_IS_MONOSTAVLE=${!EV_IS_MONOSTAVLE_VAR}
+	local EV_IS_MONOSTABLE_VAR=EV"$EVNUM"_MONOSTABLE
+	local EV_IS_MONOSTABLE=${!EV_IS_MONOSTAVLE_VAR}
 
 	if [ ! "$2" = "force" ] && [ "$EVNORAIN" != "1" ]; then
 		if [[ "$NOT_IRRIGATE_IF_RAIN_ONLINE" -gt 0 && -f $STATUS_DIR/last_rain_online ]]; then
@@ -933,7 +933,7 @@ function debug2 {
 
 VERSION=0
 SUB_VERSION=5
-RELEASE_VERSION=9
+RELEASE_VERSION=10
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
