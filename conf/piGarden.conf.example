@@ -113,8 +113,10 @@ EV6_ALIAS="6" #
 EV6_GPIO=24   #		Physical 18 - wPi 5
 
 
-# Definisci il servizio online da utilizzare per il controllo delle condizioni meteo, puoi scegliere openweathermap oppure wunderground
+# Definisci il servizio online da utilizzare per il controllo delle condizioni meteo, puoi scegliere openweathermap oppure wunderground.
+# Se non vuoi configurare nessun servizio imposta il vale "none"
 WEATHER_SERVICE="openweathermap"
+#WEATHER_SERVICE="none" # Nessun servizio configurato
 
 # Parametri di openweathermap, definisce l'api key e il luogo per recuperare lo stato meteo online
 OPENWEATHERMAP_KEY=""

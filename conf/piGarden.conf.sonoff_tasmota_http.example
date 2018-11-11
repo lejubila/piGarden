@@ -107,8 +107,10 @@ EV4_ALIAS="Giardino_Anteriore"
 EV4_GPIO="drv:sonoff_tasmota_http:SONOFF2:Power1"
 
 
-# Definisci il servizio online da utilizzare per il controllo delle condizioni meteo, puoi scegliere openweathermap oppure wunderground
+# Definisci il servizio online da utilizzare per il controllo delle condizioni meteo, puoi scegliere openweathermap oppure wunderground.
+# Se non vuoi configurare nessun servizio imposta il vale "none"
 WEATHER_SERVICE="openweathermap"
+#WEATHER_SERVICE="none" # Nessun servizio configurato
 
 # Parametri di openweathermap, definisce l'api key e il luogo per recuperare lo stato meteo online
 OPENWEATHERMAP_KEY=""

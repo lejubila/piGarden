@@ -1,60 +1,12 @@
 #
-# Controlla se se piove tramite http://api.wunderground.com/
-#
-function check_rain_online_old {
-
-	trigger_event "check_rain_online_before" ""
-
-	# http://www.wunderground.com/weather/api/d/docs?d=resources/phrase-glossary&MR=1
-	$CURL http://api.wunderground.com/api/$WUNDERGROUND_KEY/conditions/q/$WUNDERGROUND_LOCATION.json > $TMP_PATH/check_rain_online.json
-	local weather=`cat $TMP_PATH/check_rain_online.json | $JQ -M ".current_observation.weather"`
-	local current_observation=`cat $TMP_PATH/check_rain_online.json | $JQ -M ".current_observation"`
-	local local_epoch=`cat $TMP_PATH/check_rain_online.json | $JQ -M -r ".current_observation.local_epoch"`
-	local current_state_rain_online=""
-	local last_state_rain_online=`cat "$STATUS_DIR/last_state_rain_online" 2> /dev/null`
-	#echo $weather
-	#weather="[Light/Heavy] Drizzle"
-	if [ "$weather" = "null" ]; then
-		log_write "check_rain_online - failed read online data"
-	else
-		log_write "check_rain_online - weather=$weather, local_epoch=$local_epoch"
-		#if [[ "$weather" == *"Clear"* ]]; then
-		#if [[ "$weather" == *"Rain"* ]]; then
-		if 	[[ "$weather" == *"Rain"* ]] || 
-		 	[[ "$weather" == *"Snow"* ]] || 
-		 	[[ "$weather" == *"Hail"* ]] || 
-		 	[[ "$weather" == *"Ice"* ]] || 
-		 	[[ "$weather" == *"Thunderstorm"* ]] || 
-			[[ "$weather" == *"Drizzle"* ]]; 
-		then
-			current_state_rain_online='rain'
-			echo $local_epoch > "$STATUS_DIR/last_rain_online"
-		else
-			current_state_rain_online='norain'
-		fi
-		echo "$current_observation" > "$STATUS_DIR/last_weather_online"
-		if [ "$current_state_rain_online" != "$last_state_rain_online" ]; then
-			echo "$current_state_rain_online" > "$STATUS_DIR/last_state_rain_online"
-			trigger_event "check_rain_online_change" "$current_state_rain_online" "$weather"
-		fi
-	fi
-
-	trigger_event "check_rain_online_after" "$current_state_rain_online" "$weather"
-}
-
-
-
-
-
-
-
-
-
-
-#
-# Controlla se se piove tramite http://api.wunderground.com/
+# Esegue controllo meteo tramite servizio online configurato in WEATHER_SERVICE
 #
 function check_rain_online {
+
+	if [ "$WEATHER_SERVICE" == "none" ]; then
+		log_write "check_rain_online - online service is disable"
+		return
+	fi
 
 	trigger_event "check_rain_online_before" ""
 

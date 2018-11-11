@@ -983,7 +983,7 @@ fi
 
 if [ -z $WEATHER_SERVICE ]; then
 	WEATHER_SERVICE="drv:wunderground"
-else
+elif [ "$WEATHER_SERVICE" != "none" ]; then 
 	WEATHER_SERVICE="drv:$WEATHER_SERVICE"
 fi
 
