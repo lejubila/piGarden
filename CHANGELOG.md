@@ -1,3 +1,6 @@
+# 0.5.10 - 11/11/2018
+- Fix bug in single monostable solenodid management caused from wrong variable name EV_IS_MONOSTAVLE
+
 # 0.5.9 - 01/11/2018
 - Added mqtt support for publishing status to broker 
 
