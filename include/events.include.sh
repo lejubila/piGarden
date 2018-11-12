@@ -94,10 +94,12 @@ function trigger_event {
 				local ec=$?
 				#echo "$EVENT ec=$ec" >> /tmp/piGarden.testevent
 
-				CURRENT_EVENT="$EVENT"
-				mqtt_status &
+				#CURRENT_EVENT="$EVENT"
+				#mqtt_status &
 
 				if [ $ec -ne 0 ]; then
+					CURRENT_EVENT="$EVENT"
+					mqtt_status &
 					log_write "Stop events chain for exit code $ec in $current_event_dir/$f"
 					return $ec
 				fi
@@ -105,6 +107,9 @@ function trigger_event {
 		done
 
 	fi
+
+	CURRENT_EVENT="$EVENT"
+	mqtt_status &
 
 }
 
