@@ -1,5 +1,6 @@
-# 0.5.12 - xx/xx/2018
+# 0.5.12 - 13/11/2018
 - Fixed a bug that prevented the publication of the mqtt topic for each event
+- Fixed a bug on openweathermap driver which in some cases causes a malformation of the json status and prevented communication with piGardenWeb 
 
 # 0.5.11 - 11/11/2018
 - Added ability to disable online weather service by defining WEATHER_SERVICE="none" in the configuration file
