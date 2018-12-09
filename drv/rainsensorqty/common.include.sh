@@ -4,21 +4,28 @@
 #RAINSENSORQTY_MONPID="$TMP_PATH/rainsensorqty_monitor.pid"
 #
 
-function drv_rainsensorqty_check () {
 
-	if [[ -f "$RAINSENSORQTY_MONPID" && -z "$RAINSENSORQTY_MONPID" ]] ; then
-		pid=$( < "$RAINSENSORQTY_MONPID" )
-		echo "drv_rainsensorqty_check - NORMAL: checking if $pid pid is running" >> "$LOG_OUTPUT_DRV_FILE"
-		log_write "$$ pid monitor process - see $RAINSENSORQTY_MONPID"
+function drv_rainsensorqty_writelog {
+	#2 variables - $1 function, $2 message
+        echo -e "$1 - `date`\t\t$2" >> "$LOG_OUTPUT_DRV_FILE"
+}
+
+
+function drv_rainsensorqty_check () {
+	local f="drv_rainsensorqty_check"
+
+	if [[ -f "$RAINSENSORQTY_MONPID" ]] ; then
+		local pid=$( < "$RAINSENSORQTY_MONPID" )
+		drv_rainsensorqty_writelog $f "NORMAL: checking if $pid pid is running"
         	if ps -fp $pid >/dev/null ; then
-			echo "drv_rainsensorqty_check - NORMAL: $pid pid is running" >> "$LOG_OUTPUT_DRV_FILE"
+			drv_rainsensorqty_writelog $f "NORMAL: $pid pid is running"
 			return 0
         	else
-			echo "drv_rainsensorqty_check - NORMAL: $pid pid is NOT running" >> "$LOG_OUTPUT_DRV_FILE"
+			drv_rainsensorqty_writelog $f "$pid pid monitor process NOT running - $RAINSENSORQTY_MONPID file contains $pid"
 			return 1
         	fi
 	else
-		echo "drv_rainsensorqty_check - ERROR: no raining monitor process file \$RAINSENSORQTY_MONPID" >> "$LOG_OUTPUT_DRV_FILE"
+		drv_rainsensorqty_writelog $f "ERROR: no raining monitor process file \$RAINSENSORQTY_MONPID"
         	return 1
 	fi
 }

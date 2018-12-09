@@ -1,36 +1,33 @@
-#!/bin/bash -x
+#!/bin/bash
 #
-# Bash script to measure rainfall
+# Bash monitor script to measure rainfall
 # Author: androtto
-# Url: 
 #
 #
-# Scrive un messaggio nel file di log
-# $1 log da scrivere
-# 3 parameter expected in order:
-#$gpio
-#$RAINSENSORQTY_LOOPSFORSETRAINING
-#$RAINSENSORQTY_SECSBETWEENRAINEVENT
 
-function log_write {
-        echo -e "`date`\t\t$1" >> $RAINSENSORQTY_LOG
-}
 
 ###############
-# MAIN
+#    MAIN     #
 ###############
 
-if [ ! $# = 3 ] ; then 
- 	echo "ERROR: 3 parameters expected"
-fi
-
-GPIO=$1
-LOOPSFORSETRAINING=$2
-SECSBETWEENRAINEVENT=$3
 
 DIRNAME="$( dirname $0 )"
-. /etc/piGarden.conf # test sulla presenza del file gia' fatti prima
-. "$DIRNAME/config.include.sh"
+f="$(basename $0)"
+. $DIRNAME/common.include.sh
+
+echo "$(date) ---------------- NEW RUN "
+
+if [[ -f "$DIRNAME/set_var" ]] ; then
+	echo "NORMAL: file $DIRNAME/set_var found - getting variables"
+	. "$DIRNAME/set_var"
+else
+	echo "ERROR: $DIRNAME/set_var not found"
+	exit 1
+fi
+
+#drvt="$( echo $RAIN_GPIO | $CUT -f 1 -d: )"
+#drv="$( echo $RAIN_GPIO | $CUT -f 2 -d: )"
+gpio_port="$( echo $RAIN_GPIO | $CUT -f 3 -d: )"
 
 #got from config file above:
 #RAINSENSORQTY_LASTRAIN="$STATUS_DIR/rainsensorqty_lastrain"
@@ -41,43 +38,47 @@ DIRNAME="$( dirname $0 )"
 #RAINSENSORQTY_WAIT=rising
 
 
-if [[ -f "$RAINSENSORQTY_MONPID" && -z "$RAINSENSORQTY_MONPID" ]] ; then
-	pid=$( < "$RAINSENSORQTY_MONPID" )
+# no other monitor process running...
+if [[ -f "$RAINSENSORQTY_MONPID" ]] ; then
+	pid="$( < "$RAINSENSORQTY_MONPID" )"
 	if ps -fp $pid >/dev/null ; then
-		log_write "ERROR monitor process already running\n$( ps -fp $pid )"
+		drv_rainsensorqty_writelog $f "ERROR monitor process already running\n$( ps -fp $pid )"
 		exit 1
-	else
-		log_write "no rainmonitor process running"
-		echo $$ > $RAINSENSORQTY_MONPID
-		log_write "$$ pid monitor process - see $RAINSENSORQTY_MONPID"
 	fi
 fi
 
-MMEACH=0.303030303
+#drv_rainsensorqty_writelog $f "NORMAL - no rainmonitor process already running"
+echo $$ > $RAINSENSORQTY_MONPID
+drv_rainsensorqty_writelog $f "NORMAL - $$ pid monitor process started - see $RAINSENSORQTY_MONPID"
+#echo "NORMAL: no raining monitor process  $( echo ; ps -ef | grep rain | grep monitor)"
 
+# init variables
+MMEACH="$RAINSENSORQTY_MMEACH"
 counter=0
 
 while true
 do
 	before=`date +%s`
-	#gpio -g wfi $GPIO $RAINSENSORQTY_PULSE # falling 1->0
-	sleep $(</tmp/secs_to_wait) # for testing only
+	echo $GPIO -g wfi $gpio_port $RAINSENSORQTY_PULSE # falling 1->0
+	$GPIO -g wfi $gpio_port $RAINSENSORQTY_PULSE # falling 1->0
+	#sleep $(</tmp/secs_to_wait) # for testing only
 	now=`date +%s`
 	(( elapsed = now - before ))
-	if (( elapsed >= $SECSBETWEENRAINEVENT )) ; then
+	if (( $elapsed >= $RAINSENSORQTY_SECSBETWEENRAINEVENT )) ; then
 		counter=0 
-		log_write "sono passati $elapsed secondi ( > di $SECSBETWEENRAINEVENT ) dall'ultima precipitazione, reset counter"
-		echo "sono passati $elapsed secondi ( > di $SECSBETWEENRAINEVENT ) dall'ultima precipitazione, reset counter"
+		drv_rainsensorqty_writelog $f "$elapsed seconds elapsed ( greater than $RAINSENSORQTY_SECSBETWEENRAINEVENT set ) since last rain, first $MMEACH mm rain"
+		echo "$elapsed seconds elapsed ( greater than $RAINSENSORQTY_SECSBETWEENRAINEVENT set ) since last rain, first $MMEACH mm rain (first loop)" 
 	fi
   	counter=$(( counter+=1 ))
 	MMWATER=$( $JQ -n "$counter*$MMEACH" )
-	log_write "counter $counter -  $MMWATER mm acqua"
-	echo "counter $counter -  $MMWATER mm acqua"
-	if (( counter >= $LOOPSFORSETRAINING )) ; then 
-		log_write "raggiunta acqua per impedire irrigazione: $MMWATER mm"
-		echo "raggiunta acqua per impedire irrigazione: $MMWATER mm"
+	drv_rainsensorqty_writelog $f "now is $MMWATER mm rain"
+	echo "now is $MMWATER mm rain (loop $counter)"
+	if (( $counter >= $RAINSENSORQTY_LOOPSFORSETRAINING )) ; then 
+		drv_rainsensorqty_writelog $f "$MMWATER mm - irrigation to be stopped"
+		echo "$MMWATER mm - irrigation to be stopped (loop $counter)"
 		date +%s > ${RAINSENSORQTY_LASTRAIN}
 		date > ${RAINSENSORQTY_LASTRAIN}_date
 	fi
-	#gpio -g wfi $GPIO $RAINSENSORQTY_WAIT # rising 0->1
+	echo $GPIO -g wfi $gpio_port $RAINSENSORQTY_WAIT # rising 0->1
+	$GPIO -g wfi $gpio_port $RAINSENSORQTY_WAIT # rising 0->1
 done
