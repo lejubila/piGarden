@@ -1,3 +1,6 @@
+# 0.5.12.1 - 23/06/2019
+- Added zip log drver file when exceeding the size limit
+
 # 0.5.12 - 13/11/2018
 - Fixed a bug that prevented the publication of the mqtt topic for each event
 - Fixed a bug on openweathermap driver which in some cases causes a malformation of the json status and prevented communication with piGardenWeb 

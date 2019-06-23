@@ -299,6 +299,14 @@ function log_write {
 		fi
 	fi
 
+	if [ -e "$LOG_OUTPUT_DRV_FILE" ]; then
+		local actualsize=$($WC -c <"$LOG_OUTPUT_DRV_FILE")
+		if [ $actualsize -ge $LOG_FILE_MAX_SIZE ]; then
+			$GZIP $LOG_OUTPUT_DRV_FILE
+			$MV $LOG_OUTPUT_DRV_FILE.gz $LOG_OUTPUT_DRV_FILE.`date +%Y%m%d%H%M`.gz	
+		fi
+	fi
+
 	echo -e "`date`\t\t$1" >> $LOG_FILE
 }
 
