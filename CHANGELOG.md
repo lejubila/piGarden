@@ -1,3 +1,6 @@
+# 0.5.13 - 12/08/2019
+- Added driver rainsensorqty for menage rainfall detection based on quantity
+
 # 0.5.12.1 - 23/06/2019
 - Added zip log drver file when exceeding the size limit
 

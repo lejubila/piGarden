@@ -1,0 +1,4 @@
+# Ignore everything in this directory
+.set_var
+# Except this file
+!.gitignore
