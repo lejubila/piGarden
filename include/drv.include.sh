@@ -1,11 +1,15 @@
 declare -a list_drv
 
+#
+# Funzione eseguita ad ogni avvio di piGarden.sh, si occupa includere tutti i file dei driver utilizzati e di lanciare
+# la funzione di setup di ogni driver se esistente
+#
 function setup_drv { 
 
 	#declare -a list_drv
 	list_drv=()
 
-        # Inizializza i driver per le elettrovalvole
+        # Raccoglie i nomi dei driver utilizzati per le elettrovalvole
         for i in $(seq $EV_TOTAL)
         do
                 local a=EV"$i"_GPIO
@@ -18,7 +22,7 @@ function setup_drv {
 		fi
         done
 
-	# Inizializza i driver per gli altri gpio
+	# Raccoglie i nomi dei driver utilizzati per gli altri gpio
 	for gpio in "$SUPPLY_GPIO_1" "$SUPPLY_GPIO_2" "$RAIN_GPIO" "$WEATHER_SERVICE"
 	do
 		if [[ "$gpio" == drv:* ]]; then
@@ -29,6 +33,9 @@ function setup_drv {
 		fi
 	done
 
+	#
+	# Esegue l'unclusione dei file dei driver e per ognuno lancia l'eventuale funzione di setup
+	#
 	local file_drv
 	for drv in "${list_drv[@]}"
 	do

@@ -5,7 +5,7 @@
 #
 # Funzione di esempio
 #
-function sample_foo {
+function drv_sample_foo {
 
 	echo "bar"
 

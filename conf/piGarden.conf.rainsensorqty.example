@@ -1,0 +1,160 @@
+# Log file
+LOG_FILE="/home/pi/piGarden/log/piGarden.log"
+LOG_FILE_MAX_SIZE=1048576 # 1MB
+
+# Log file for driver output
+LOG_OUTPUT_DRV_FILE="/tmp/piGarden.drv.log"
+
+# Status directory
+STATUS_DIR="/home/pi/piGarden/state"
+
+# Event directory
+EVENT_DIR="/home/pi/piGarden/events"
+
+# Posizione gpio
+GPIO="/usr/local/bin/gpio"
+
+# Posizione js
+JQ="/usr/local/bin/jq"
+
+# Percorso curl
+CURL="/usr/bin/curl"
+
+# Percorso wc
+WC="/usr/bin/wc"
+
+# Percorso gzip
+GZIP="/bin/gzip"
+
+# Percorso mv
+MV="/bin/mv"
+
+# Percorso di tr
+TR="/usr/bin/tr"
+
+# Percorso di cut
+CUT="/usr/bin/cut"
+
+# Percorso tcpserver
+TCPSERVER="/usr/bin/tcpserver"
+
+# Percorso cron
+CRONTAB="/usr/bin/crontab"
+
+# Percorso grep
+GREP="/bin/grep"
+
+# Percorsp sed
+SED="/bin/sed"
+
+# Percorso readlink
+READLINK="/bin/readlink"
+
+# Percorso stat
+STAT="/usr/bin/stat"
+
+# Percorso mosquito_pub
+# # Installare con apt install mosquitto-clients
+MOSQUITTO_PUB="/usr/bin/mosquitto_pub"
+
+
+# Se impostato con il valore 1, indica che il sistema gestisce elettrovalvole monostabili, 
+# se impostato a 0 il sistema gestirà elettrovalvole bistabili
+EV_MONOSTABLE=0
+
+# Id gpio usati per simulare il doppio deviatore con cui eseguire l'alimentazione alle elettrovalvole
+SUPPLY_GPIO_1=2		# Physical 3 - wPi 8
+SUPPLY_GPIO_2=3		# Physical 5 - wPi 9
+
+# Stato dei due gpio per impartire l'alimentazione positiva alle elettrovalvole (aperta)
+SUPPLY_GPIO_POS=0
+
+# Stato dei due gpio per impartire l'alimentazione negativa alle elettrovalvole (chiusa)
+SUPPLY_GPIO_NEG=1
+
+# Stato di ingresso da assegnare al gpio per chiudere il rele
+RELE_GPIO_CLOSE=0
+
+# Stato di ingresso da assegnare al gpio per aprire il rele
+RELE_GPIO_OPEN=1
+
+# Id del gpio usato per collegare il sensore di rilevamento pioggia
+RAIN_GPIO="drv:rainsensorqty:25"	# Physical 22 - wPi 6
+
+# Valore in ingresso sul gpio definito in RAIN_GPIO che indica lo stato di pioggia
+RAIN_GPIO_STATE=0
+
+
+RAINSENSORQTY_LOOPSFORSETRAINING=10 # dopo 10 impulsi, 10 vaschette riempite si considera pioggia
+RAINSENSORQTY_SECSBETWEENRAINEVENT=10800 # =3h, significa che dopo 3 si resetta il numero di vaschette da riempire e solo dopo il riempimento del numero di vaschette si considera una nuova pioggia
+
+
+
+
+# Numero totale di elettrovalvole
+EV_TOTAL=6
+
+# Definizione delle elettrovalvole
+EV1_ALIAS="1" #
+EV1_GPIO=17   #		Physical 11 - wPi 0
+#EV1_NORAIN=1 # 	Non interrompe l'irrigazione di questa zona in caso di pioggia
+#EV1_MONOSTABLE=1 #	L'elettrovalvola è monostabile
+
+EV2_ALIAS="2" #
+EV2_GPIO=27   #		Physical 13 - wPi 2
+
+EV3_ALIAS="3" #
+EV3_GPIO=22   #		Physical 15 - wPi 3
+
+EV4_ALIAS="4" #
+EV4_GPIO=18   #		Physical 12 - wPi 1
+
+EV5_ALIAS="5" #
+EV5_GPIO=23   #		Physical 16 - wPi 4
+
+EV6_ALIAS="6" #
+EV6_GPIO=24   #		Physical 18 - wPi 5
+
+
+# Definisci il servizio online da utilizzare per il controllo delle condizioni meteo, puoi scegliere openweathermap oppure wunderground.
+# Se non vuoi configurare nessun servizio imposta il vale "none"
+WEATHER_SERVICE="openweathermap"
+#WEATHER_SERVICE="none" # Nessun servizio configurato
+
+# Parametri di openweathermap, definisce l'api key e il luogo per recuperare lo stato meteo online
+OPENWEATHERMAP_KEY=""
+OPENWEATHERMAP_LOCATION="q=Pieve%20a%20Nievole,it" # https://openweathermap.org/current
+OPENWEATHERMAP_TZ="Europe/Rome"	# Time zone
+
+# Parametri di wunderground, definisce l'api key e il luogo per recuperare lo stato meteo online
+WUNDERGROUND_KEY=""
+WUNDERGROUND_LOCATION="IT/Pieve%20a%20Nievole"	# http://www.wunderground.com/weather/api/d/docs?d=resources/country-to-iso-matching&MR=1
+
+
+# Blocca l'irrigazione se l'ultima pioggia rilevata online è avvenuta nell'ultima quantità di tempo inserita.
+# Il tempo è espresso in secondi. Quindi inserendo 86400, se nelle ultime 24 ore ha piovuto viene bloccata l'irrigazione. Inserendo il valore zero non viene eseguito nessun controllo.
+NOT_IRRIGATE_IF_RAIN_ONLINE=86400
+
+# Il parametro è simile a quello precedente, il controllo però anziché essere fatto attingendo a wunderground, viene eseguito direttamente sul sensore se installato. Inserendo il valore zero non viene eseguito nessun controllo.
+NOT_IRRIGATE_IF_RAIN_SENSOR=86400
+
+# Indirizzo ip e porta di ascolto del socket server
+TCPSERVER_IP="127.0.0.1"
+TCPSERVER_PORT="8084"
+
+# Utente e password che i clients devono utilizzare per stabilire una connessione tramite socket server
+TCPSERVER_USER=""
+TCPSERVER_PWD=""
+
+# Con impostato il valore 1 non invia l'identificativi per statistiche di utilizzo
+NO_SEND_IDENTIFIER=0
+
+# Parametri connessione al broker mqtt
+MQTT_ENABLE=0	# set 1 to enable
+MQTT_HOST=you_host_mqtt
+MQTT_PORT=1883
+MQTT_USER=your_user_mqtt
+MQTT_PWD=yout_password_mqtt
+MQTT_TOPIC="pigarden/result"
+MQTT_CLIENT_ID=piGarden
+
