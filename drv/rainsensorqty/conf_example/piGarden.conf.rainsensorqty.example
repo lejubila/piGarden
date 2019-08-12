@@ -1,0 +1,14 @@
+# cfg file version 0.2.0
+# Id del gpio usato per collegare il sensore di rilevamento pioggia
+# attraverso il driver rainsensorqty
+RAIN_GPIO="drv:rainsensorqty:25"	# Physical 22 - wPi 6
+
+# Valore in ingresso sul gpio definito in RAIN_GPIO che indica lo stato di pioggia
+# variabile usata anche da drv:rainsensorqty, se e' a 1, significa che il reed contact e' collegato ad un circuito pull-down, vuol dire che attende l'impulso a 1 per contare le vaschette, normalmente e' a 0.
+# se e' a 0, significa che il reed contact e' collegato ad un circuito pull-up, vuol dire che attende l'impulso a 0 per contare le vaschette, normalmente e' a 0.
+RAIN_GPIO_STATE=0
+
+RAINSENSORQTY_LOOPSFORSETRAINING=16 # dopo 16 impulsi, 16 vaschette riempite si considera pioggia
+RAINSENSORQTY_SECSBETWEENRAINEVENT=10800 # =3h, significa che dopo 3 ore si resetta il numero di vaschette riempire e solo dopo un nuovo ciclo di riempimento si considera una nuova pioggia
+
+RAINSENSORQTY_MMEACH=0.33 # see RAINSENSORQTY driver readme for details

@@ -1,17 +1,37 @@
 #
-# Funzioni comuni utilizzate dal driver
-#
+# Driver rainsensorqty - driver for measure the rain volume
+# Author: androtto
+# file "common.include.sh"
+# common functions used by driver
+# Version: 0.2.0
+# Data: 11/Aug/2019
+
+
+#note:
 #RAINSENSORQTY_MONPID="$TMP_PATH/rainsensorqty_monitor.pid"
 #
 
-
-function drv_rainsensorqty_writelog {
-	#2 variables - $1 function, $2 message
-        echo -e "$1 - `date`\t\t$2" >> "$LOG_OUTPUT_DRV_FILE"
+d() # short date & time
+{
+date '+%X-%x'
 }
 
 
-function drv_rainsensorqty_check () {
+drv_rainsensorqty_writelog()
+{
+	#2 variables - $1 function, $2 message
+	if [[ $2 =~ ERROR || $2 =~ WARNING || $2 =~ RAIN || $RAINSENSORQTY_verbose = yes ]] ; then
+	        echo -e "$1 - `d`\t\t$2" >> "$LOG_OUTPUT_DRV_FILE"
+#        	if [[ $($WC -c <"$LOG_OUTPUT_DRV_FILE") > $LOG_FILE_MAX_SIZE )) ; then
+#                	$GZIP "$LOG_OUTPUT_DRV_FILE"
+#                	$MV "${LOG_OUTPUT_DRV_FILE}.gz" "${LOG_OUTPUT_DRV_FILE}.$(date +%Y%m%d%H%M).gz"
+#        	fi
+	fi
+}
+
+
+drv_rainsensorqty_check()
+{
 	local f="drv_rainsensorqty_check"
 
 	if [[ -f "$RAINSENSORQTY_MONPID" ]] ; then
@@ -21,11 +41,29 @@ function drv_rainsensorqty_check () {
 			drv_rainsensorqty_writelog $f "NORMAL: $pid pid is running"
 			return 0
         	else
-			drv_rainsensorqty_writelog $f "$pid pid monitor process NOT running - $RAINSENSORQTY_MONPID file contains $pid"
+			drv_rainsensorqty_writelog $f "ERROR: $pid pid monitor process NOT running - $RAINSENSORQTY_MONPID file contains $pid"
 			return 1
         	fi
 	else
 		drv_rainsensorqty_writelog $f "ERROR: no raining monitor process file \$RAINSENSORQTY_MONPID"
         	return 1
+	fi
+}
+
+en_echo() # enhanched echo - check verbose variable
+{
+	[[ $RAINSENSORQTY_verbose = yes ]] && echo "$(d) $*"
+}
+
+rain_history()
+{
+	[[ ! -f $RAINSENSORQTY_HISTORY ]] && touch $RAINSENSORQTY_HISTORY
+	[[ ! -f $RAINSENSORQTY_LASTRAIN ]] && return 1
+	if grep -q ^$(<$RAINSENSORQTY_LASTRAIN)$ $RAINSENSORQTY_HISTORY ; then
+		: # do nothing
+		return 2
+	else
+		cat $RAINSENSORQTY_LASTRAIN >> $RAINSENSORQTY_HISTORY
+		return 0
 	fi
 }
