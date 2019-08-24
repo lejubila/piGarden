@@ -563,15 +563,7 @@ function json_status {
 	if [[ ! -z "$last_weather_online" ]]; then
 		json_last_weather_online=$last_weather_online
 	fi
-	#if [ -f "$LAST_INFO_FILE.$current_pid" ]; then
-	#	last_info=`cat "$LAST_INFO_FILE.$current_pid"`
-	#fi
-	#if [ -f "$LAST_WARNING_FILE.$current_pid" ]; then
-	#	last_warning=`cat "$LAST_WARNING_FILE.$current_pid"`
-	#fi
-	#if [ -f "$LAST_SUCCESS_FILE.$current_pid" ]; then
-	#	last_success=`cat "$LAST_SUCCESS_FILE.$current_pid"`
-	#fi
+
 	last_info="$MESSAGE_INFO"
 	last_warning="$MESSAGE_WARNING"
 	last_success="$MESSAGE_SUCCESS"
