@@ -961,9 +961,6 @@ fi
 . "$DIR_SCRIPT/include/rain.include.sh"
 . "$DIR_SCRIPT/include/events.include.sh"
 
-#LAST_INFO_FILE="$STATUS_DIR/last_info"
-#LAST_WARNING_FILE="$STATUS_DIR/last_warning"
-#LAST_SUCCESS_FILE="$STATUS_DIR/last_success"
 MESSAGE_INFO=""
 MESSAGE_WARNING=""
 MESSAGE_SUCCESS=""
