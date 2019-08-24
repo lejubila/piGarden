@@ -223,9 +223,6 @@ function ev_open_in {
 
 	trigger_event "ev_open_in_after" "$3" "$4" "$cron_start" "$cron_stop"
 
-	#echo $cron_start
-	#echo $cron_stop
-
 }
 
 
