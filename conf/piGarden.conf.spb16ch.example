@@ -57,6 +57,9 @@ STAT="/usr/bin/stat"
 # Installare con apt install mosquitto-clients
 MOSQUITTO_PUB="/usr/bin/mosquitto_pub"
 
+# Percorso di piGardenSched, se non definito non verranno gestire le schedulazioni di piGardenSched tramite api
+#PIGARDENSCHED_PATH="/home/pi/piGardenSched/piGardenSched.sh"
+
 
 # Se impostato con il valore 1, indica che il sistema gestisce elettrovalvole monostabili, 
 # se impostato a 0 il sistema gestirà elettrovalvole bisstabili

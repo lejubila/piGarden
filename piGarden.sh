@@ -503,8 +503,9 @@ function list_alias {
 #
 # Stampa un json contanente lo status della centralina
 # $1 .. $6 parametri opzionali
-# 	- get_cron: aggiunge i dati relativi ai crontab delle scehdulazioni di apertura/chisura delle elettrovalvole
+# 	- get_cron: aggiunge i dati relativi ai crontab delle scehdulazioni di apertura/chisura
 #	- get_cron_open_in: aggiunge i dati relativi ai crontab degli avvii ritardati eseguiti con il comando open_in
+#       - get_schedule: aggiunge i dati relativi alle schedulazioni di piGardenSched
 #
 function json_status {
 	local json=""
@@ -518,6 +519,7 @@ function json_status {
 	local last_success=""
 	local with_get_cron="0"
 	local with_get_cron_open_in="0"
+	local with_get_schedule="0"
 	local current_pid=$!
 	local json_event="\"event\": {\"event\": \"$CURRENT_EVENT\", \"alias\": \"$CURRENT_EVENT_ALIAS\"}"
 
@@ -536,6 +538,8 @@ function json_status {
 			with_get_cron_open_in="1"
 		elif [[ "$i" == get_cron_open_in:* ]]; then
 			with_get_cron_open_in="${i#get_cron_open_in:}"
+		elif [ $i = "get_schedule" ] && [[ $PIGARDENSCHED == "1" ]]; then
+			with_get_schedule="1"
 		fi
 	done
 
@@ -548,7 +552,6 @@ function json_status {
 		if [ -n "$json" ]; then
 			json="$json,"
 		fi
-		#json="$json\"$i\":{\"name\":\"$av\",\"state\":$sv}"
 		json="$json\"$av\":{\"name\":\"$av\",\"state\":$sv}"
 	done
 	json="\"zones\":{$json}"
@@ -604,6 +607,23 @@ function json_status {
 	fi
 	local json_cron="\"cron\":{$json_get_cron}"			
 
+	local json_get_schedule=""			
+	local json_schedule=""
+	if [ $with_get_schedule != "0" ]; then
+		json_get_schedule=""
+		for scheduled in `$PIGARDENSCHED_PATH sched`
+		do
+			local ev=$(echo $scheduled|$CUT -f1 -d";")
+			local al=${!ev}
+			local json_get_schedule="\"$ev\": {\"alias\": \"$al\", \"entry\": \"$scheduled\"}, $json_get_schedule"
+		done
+		if [[ !  -z  $json_get_schedule ]]; then
+			json_get_schedule="${json_get_schedule::-2}"
+		fi
+	
+		local json_schedule=", \"schedule\":{$json_get_schedule}"
+	fi
+
 	local json_get_cron_open_in=""			
 	if [ $with_get_cron_open_in != "0" ]; then
 		local values_open_in="" 
@@ -638,7 +658,7 @@ function json_status {
 	local json_cron_open_in="\"cron_open_in\":{$json_get_cron_open_in}"
 	local json_timestamp="\"timestamp\": $(date +%s)"
 
-	json="{$json_version,$json_timestamp,$json_event,$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron,$json_cron_open_in}"
+	json="{$json_version,$json_timestamp,$json_event,$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron,$json_cron_open_in $json_schedule}"
 
 	echo "$json"
 
@@ -680,7 +700,7 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT list_alias                                   view list of aliases solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status alias                              show status solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status_all                                show status solenoids"
-	echo -e "\t$NAME_SCRIPT json_status [get_cron|get_cron_open_in]      show status in json format"
+	echo -e "\t$NAME_SCRIPT json_status [get_cron|get_cron_open_in|get_schedule] show status in json format"
 	echo -e "\t$NAME_SCRIPT mqtt_status                                  send status in json format to mqtt broker"
 	echo -e "\t$NAME_SCRIPT check_rain_online                            check rain from http://api.wunderground.com/"
 	echo -e "\t$NAME_SCRIPT check_rain_sensor                            check rain from hardware sensor"
@@ -930,7 +950,7 @@ function debug2 {
 
 VERSION=0
 SUB_VERSION=5
-RELEASE_VERSION=13
+RELEASE_VERSION=14
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
@@ -979,6 +999,11 @@ if [ -z $WEATHER_SERVICE ]; then
 	WEATHER_SERVICE="drv:wunderground"
 elif [ "$WEATHER_SERVICE" != "none" ]; then 
 	WEATHER_SERVICE="drv:$WEATHER_SERVICE"
+fi
+
+PIGARDENSCHED="0"
+if [[ -x "$PIGARDENSCHED_PATH" ]]; then
+	PIGARDENSCHED="1"
 fi
 
 # Elimina il file di lock se più vecchio di 11 secondi
