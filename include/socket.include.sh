@@ -205,6 +205,21 @@ function socket_server_command {
 
 			;;
 
+		cmd_pigardensched)
+			local vret=""
+
+			vret=`cmd_pigardensched $arg2 $arg3 $arg4 $arg5 $arg6`
+
+			if [[ ! -z $vret ]]; then
+				json_error 0 "piGardenSched command failed"
+				log_write "piGardenSched command failed: $vret"
+			else
+				message_write "success" "Schedule set successfull"
+				json_status
+			fi
+
+			;;
+
 		reboot)
 			message_write "warning" "System reboot is started"
 			json_status

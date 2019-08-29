@@ -732,6 +732,8 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT del_cron_close alias                         remove all crontab for close a solenoid"
 	echo -e "\t$NAME_SCRIPT get_cron_close alias                         get all crontab for close a solenoid"
 	echo -e "\n"
+	echo -e "\t$NAME_SCRIPT cmd_pigardensched [prm1 [prm2 [prm3]...]]    performs a pigardensched command"
+	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT debug1 [parameter]|[parameter]|..]           Run debug code 1"
 	echo -e "\t$NAME_SCRIPT debug2 [parameter]|[parameter]|..]           Run debug code 2"
 }
@@ -850,6 +852,31 @@ function exec_reboot {
         sleep 15
 	. $PATH_SCRIPT
 	trigger_event "exec_reboot_after" 
+}
+
+#
+# Esegue un comando con piGardenSched
+#
+# $1	parametro 1 
+# $2	parametro 2 
+# $3	parametro 3 
+# $4	parametro 4 
+# $5	parametro 5 
+
+function cmd_pigardensched {
+	local foo="bar"
+
+	if [ $PIGARDENSCHED == 0 ]; then
+		echo "piGardenSched not configured in piGarden" >&2
+		log_write "piGardenSched not configured in piGarden"
+		return
+	fi
+
+	$PIGARDENSCHED_PATH $1 $2 $3 $4 $5
+
+	if [ $? -ne 0 ]; then
+		echo "piGardenSched command failed"
+	fi
 }
 
 
@@ -1177,6 +1204,10 @@ case "$1" in
 
 	get_cron_close)
 		get_cron_close $2
+		;;
+
+	cmd_pigardensched)
+		cmd_pigardensched $2 $3 $4 $5
 		;;
 	
 	reboot)
