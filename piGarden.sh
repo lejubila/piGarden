@@ -543,6 +543,7 @@ function json_status {
 		fi
 	done
 
+	local json_ev=""
 	for i in $(seq $EV_TOTAL)
 	do
 		local a=EV"$i"_ALIAS
@@ -553,8 +554,13 @@ function json_status {
 			json="$json,"
 		fi
 		json="$json\"$av\":{\"name\":\"$av\",\"state\":$sv}"
+
+		if [ -n "$json_ev" ]; then
+			json_ev="$json_ev,"
+		fi
+		json_ev="$json_ev\"$a\":{\"alias\":\"$av\"}"
 	done
-	json="\"zones\":{$json}"
+	json="\"zones\":{$json},\"ev\":{$json_ev}"
 
 	local last_rain_sensor=`cat "$STATUS_DIR/last_rain_sensor" 2> /dev/null`
 	local last_rain_online=`cat "$STATUS_DIR/last_rain_online" 2> /dev/null`
