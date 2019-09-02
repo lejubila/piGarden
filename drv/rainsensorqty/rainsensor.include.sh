@@ -14,14 +14,41 @@
 #
 drv_rainsensorqty_rain_sensor_init()
 {
-	drv_rainsensorqty_writelog "drv_rainsensorqty_rain_sensor_init" $1 
+	local f=drv_rainsensorqty_rain_sensor_init
+	drv_rainsensorqty_writelog "launched: $f" $1 
 
 	local drvt="$( echo $RAIN_GPIO | $CUT -f 1 -d: )"
 	local drv="$( echo $RAIN_GPIO | $CUT -f 2 -d: )"
 	local gpio_port="$( echo $RAIN_GPIO | $CUT -f 3 -d: )"
 
-	$GPIO -g mode $gpio_port in
+	if $GPIO -g mode $gpio_port in ; then
+		drv_rainsensorqty_writelog $f "NORMAL: '$GPIO -g mode $gpio_port in' set correctly"
+	else
+		drv_rainsensorqty_writelog $f "ERROR: '$GPIO -g mode $gpio_port in' has an error"
+		exit 1
+	fi
 
+	case $GPIO_RESISTOR in 
+		pull-up)   gpio_arg=up 
+			   message="NORMAL: '$GPIO -g mode $gpio_port up' set internal pull-up resistor"
+			;;
+		pull-down) gpio_arg=down
+			   message="NORMAL: '$GPIO -g mode $gpio_port down' set internal pull-down resistor"
+			;;
+		none)      gpio_arg=tri
+			   message="NORMAL: '$GPIO -g mode $gpio_port tri' set none to internal resistor"
+			;;
+		*) echo "ERROR: GPIO_RESISTOR not set correctly - values are \"pull-up|pull-down|none\" "
+			drv_rainsensorqty_writelog "drv_rainsensorqty_rain_sensor_init" "ERROR: GPIO_RESISTOR not set correctly - values are \"pull-up|pull-down|none\" "
+			exit 1
+			;;
+	esac
+	if $GPIO -g mode $gpio_port $gpio_arg ; then
+		drv_rainsensorqty_writelog $f "$message"
+	else
+		drv_rainsensorqty_writelog $f "ERROR: '$GPIO -g mode $gpio_port $gpio_arg' command"
+		exit 1
+	fi
 }
 
 #

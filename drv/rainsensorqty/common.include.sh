@@ -3,8 +3,8 @@
 # Author: androtto
 # file "common.include.sh"
 # common functions used by driver
-# Version: 0.2.0
-# Data: 11/Aug/2019
+# Version: 0.2.0a
+# Data: 13/Aug/2019
 
 
 #note:
@@ -67,3 +67,16 @@ rain_history()
 		return 0
 	fi
 }
+
+rain_when_amount()
+{
+# from standard input
+cat - | while read line
+do
+        set -- ${line//:/ }
+        when=$1
+        howmuch=$2
+        printf "RAINED on %s for %.2f mm\n" "$(date --date="@$1")" $( $JQ -n "$howmuch * $RAINSENSORQTY_MMEACH" )
+done
+}
+

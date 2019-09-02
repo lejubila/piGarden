@@ -2,10 +2,10 @@
 #
 # Driver rainsensorqty - driver for measure the rain volume
 # Author: androtto
-# file "test_rainsensorqty_CHECK.sh"
+# file "rainsensorqty_CHECK.sh"
 # test script for checking rain status using drv_rainsensorqty_rain_sensor_get function
-# Version: 0.2.0
-# Data: 11/Aug/2019
+# Version: 0.2.0a
+# Data: 13/Aug/2019
 
 SCRIPTDIR="$(cd `dirname $0` ; pwd )"
 SCRIPTNAME=${0##*/}
@@ -27,14 +27,7 @@ LOG_OUTPUT_DRV_FILE="$DIR_SCRIPT/log/$LOG_OUTPUT_DRV_FILE"
 . ./init.include.sh
 . ./rainsensor.include.sh
 
+rain_history # update rain history file if not
+
 echo "RAIN HISTORY"
-rain_history
-
-cat $RAINSENSORQTY_HISTORY | while read line
-do
-	set -- ${line//:/ }
-	when=$1
-	howmuch=$2
-	printf "RAINED on %s for %.2f mm\n" "$(date --date="@$1")" $( $JQ -n "$howmuch * $RAINSENSORQTY_MMEACH" )
-done
-
+cat $RAINSENSORQTY_HISTORY | rain_when_amount

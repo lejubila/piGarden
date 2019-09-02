@@ -1,10 +1,10 @@
 #!/bin/bash
 # Driver rainsensorqty - driver for measure the rain volume
 # Author: androtto
-# file "test_rainsensorqty_RAINNOW.sh"
+# file "rainsensorqty_RAINNOW.sh"
 # test script for simulate rain ... now!
-# Version: 0.2.0
-# Data: 11/Aug/2019
+# Version: 0.2.0a
+# Data: 13/Aug/2019
 
 SCRIPTDIR="$(cd `dirname $0` ; pwd )"
 SCRIPTNAME=${0##*/}
@@ -24,4 +24,8 @@ fi
 . ./init.include.sh
 . ./rainsensor.include.sh
 
+echo "RAIN now!"
 echo "$(date +%s):$RAINSENSORQTY_LOOPSFORSETRAINING" > ${RAINSENSORQTY_LASTRAIN}
+echo "file ${RAINSENSORQTY_LASTRAIN} updated."
+echo -e "\nLAST RAIN:"
+cat $RAINSENSORQTY_LASTRAIN | rain_when_amount

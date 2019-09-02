@@ -23,4 +23,11 @@ function drv_rainsensorqty_init {
 	fi
 }
 
-set | $GREP -e ^GPIO -e ^LOG -e ^CUT -e ^JQ -e ^RAIN -e ^SCR -e ^TMP > "${RAINSENSORQTY_DIR}/.set_var"
+if ! config_check ; then
+	echo "ERROR" 
+	exit 1
+fi
+
+RAINSENSORQTY_VAR=$TMP_PATH/.rainsensorqty_var
+
+set | $GREP -e ^GPIO -e ^LOG -e ^CUT -e ^JQ -e ^RAIN -e ^SCR -e ^TMP > $RAINSENSORQTY_VAR

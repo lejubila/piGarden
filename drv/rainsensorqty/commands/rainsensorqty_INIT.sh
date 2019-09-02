@@ -1,7 +1,7 @@
 #!/bin/bash
 # Driver rainsensorqty - driver for measure the rain volume
 # Author: androtto
-# file "test_rainsensorqty_INIT.sh"
+# file "rainsensorqty_INIT.sh"
 # test script for initialize driver and executing monitor process
 # Version: 0.2.0
 # Data: 11/Aug/2019

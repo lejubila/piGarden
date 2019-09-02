@@ -2,7 +2,7 @@
 #
 # Driver rainsensorqty - driver for measure the rain volume
 # Author: androtto
-# file "test_rainsensorqty_CHECK.sh"
+# file "rainsensorqty_CHECK.sh"
 # test script for checking rain status using drv_rainsensorqty_rain_sensor_get function
 # Version: 0.2.0
 # Data: 11/Aug/2019
