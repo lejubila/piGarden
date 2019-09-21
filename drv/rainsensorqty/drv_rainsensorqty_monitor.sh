@@ -4,8 +4,8 @@
 # Author: androtto
 # file "drv_rainsensorqty_monitor.sh"
 # monitor script
-# Version: 0.2.1
-# Data: 29/Aug/2019
+# Version: 0.2.2
+# Data: 08/Sep/2019
 
 resetcounter()
 {
@@ -20,15 +20,12 @@ resetcounter()
 
 trap "resetcounter" SIGUSR1
 
+
 DIRNAME="$( dirname $0 )"
 f="$(basename $0)"
 . $DIRNAME/common.include.sh
-TMP_PATH="/run/shm"
-if [ ! -d "$TMP_PATH" ]; then
-        TMP_PATH="/tmp"
-fi
 
-RAINSENSORQTY_VAR=$TMP_PATH/.rainsensorqty_var
+RAINSENSORQTY_VAR=$TMPDIR/.rainsensorqty_var
 
 if [[ -f "$RAINSENSORQTY_VAR" ]] ; then
 	en_echo "NORMAL: file $RAINSENSORQTY_VAR found - getting variables"
@@ -60,7 +57,7 @@ MMEACH="$RAINSENSORQTY_MMEACH"
 rain_history
 
 echo ""
-en_echo "---- NEW RUN "
+en_echo "---- NEW RUN ----"
 
 # loop forever
 while true
@@ -74,8 +71,8 @@ do
 	if (( elapsed >= RAINSENSORQTY_SECSBETWEENRAINEVENT )) ; then
 		(( counter=0 ))
 		drv_rainsensorqty_writelog $f "first drops after $elapsed seconds since last rain ( greater than $RAINSENSORQTY_SECSBETWEENRAINEVENT )- new cycle - waiting for $( $JQ -n "$RAINSENSORQTY_LOOPSFORSETRAINING * $MMEACH" ) mm of rain" &
-		echo "NEW CYCLE"
-		rain_history
+		en_echo "---- NEW CYCLE ----"
+		rain_history &
 	fi
   	(( counter+=1 ))
 	en_echo "$RAINSENSORQTY_PULSE PULSE #$counter RECEIVED" 

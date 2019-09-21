@@ -69,9 +69,9 @@ RAINSENSORQTY_HISTORY="$STATUS_DIR/rainsensorqty_history"
 RAINSENSORQTY_MONITORLOG="$DIR_SCRIPT/log/rainsensorqty_monitor.log"
 	log dello script di monitoring, popolato solo se RAINSENSORQTY_verbose="yes"
 
-RAINSENSORQTY_MONPID="$TMP_PATH/rainsensorqty_monitor.pid"
+RAINSENSORQTY_MONPID="$TMPDIR/rainsensorqty_monitor.pid"
 	file che viene popolato con il pid dello script di monitoring
-RAINSENSORQTY_STATE="$TMP_PATH/rainsensorqty_state"
+RAINSENSORQTY_STATE="$TMPDIR/rainsensorqty_state"
 	file che viene popolato con l'ultimo stato della vaschetta (formato timestamp:counter)
 
 RAINSENSORQTY_DIR="$DIR_SCRIPT/drv/rainsensorqty"
@@ -79,7 +79,9 @@ RAINSENSORQTY_DIR="$DIR_SCRIPT/drv/rainsensorqty"
 
 monitor_sh="$RAINSENSORQTY_DIR/drv_rainsensorqty_monitor.sh"
 	script di monitoring
-	lo script eredita le variabili di ambiente da $RAINSENSORQTY_VAR ($TMP_PATH/.rainsensorqty_var)
+	lo script eredita le variabili di ambiente da $RAINSENSORQTY_VAR ($TMPDIR/.rainsensorqty_var)
+
+NOTA: $TMPDIR e' /tmp e lo script visualizza un warning se non e' un tmpfs
 
 # internal gpio resistor, 3 values: pull-up, pull-down, none
 # pull-up/down if rain gauge is connected directly to raspberry

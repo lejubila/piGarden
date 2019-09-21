@@ -13,10 +13,6 @@ cd $SCRIPTDIR/.. # command is a subdirectory of driver
 
 DIR_SCRIPT=/home/pi/piGarden # home directory of piGarden
 CONFIG_ETC="/etc/piGarden.conf"
-TMP_PATH="/run/shm"
-if [ ! -d "$TMP_PATH" ]; then
-        TMP_PATH="/tmp"
-fi
 
 . $CONFIG_ETC
 

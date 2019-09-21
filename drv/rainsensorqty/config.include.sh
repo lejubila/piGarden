@@ -6,6 +6,8 @@
 # Version: 0.2.0
 # Data: 11/Aug/2019
 
+export TMPDIR=/tmp
+
 RAINSENSOR_DEBOUNCE=0.3 # 0.3 seconds for manage debounce of reed contact
 
 RAINSENSORQTY_verbose="yes" # yes/no
@@ -15,9 +17,9 @@ RAINSENSORQTY_HISTORY="$STATUS_DIR/rainsensorqty_history"
 
 RAINSENSORQTY_MONITORLOG="$DIR_SCRIPT/log/rainsensorqty_monitor.log"
 
-RAINSENSORQTY_MONPID="$TMP_PATH/rainsensorqty_monitor.pid"
-RAINSENSORQTY_STATE="$TMP_PATH/rainsensorqty_state"
-RAINSENSORQTY_STATE_HIST="$TMP_PATH/rainsensorqty_state.history"
+RAINSENSORQTY_MONPID="$TMPDIR/rainsensorqty_monitor.pid"
+RAINSENSORQTY_STATE="$TMPDIR/rainsensorqty_state"
+RAINSENSORQTY_STATE_HIST="$TMPDIR/rainsensorqty_state.history"
 
 RAINSENSORQTY_DIR="$DIR_SCRIPT/drv/rainsensorqty"
 
@@ -41,8 +43,9 @@ config_check()
 	var2check="RAINSENSOR_DEBOUNCE RAINSENSORQTY_verbose RAINSENSORQTY_LASTRAIN RAINSENSORQTY_HISTORY RAINSENSORQTY_MONITORLOG RAINSENSORQTY_MONPID RAINSENSORQTY_DIR monitor_sh"
 	for var in $var2check
 	do
-		if [[ -z $var ]] ; then
-			echo "ERROR: $var not set"
+		#${!a}
+		if [[ -z ${!var} ]] ; then
+			echo "ERROR: \$$var not set"
 			exit 1 
 		fi
 	done

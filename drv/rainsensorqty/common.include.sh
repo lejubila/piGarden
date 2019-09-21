@@ -8,7 +8,7 @@
 
 
 #note:
-#RAINSENSORQTY_MONPID="$TMP_PATH/rainsensorqty_monitor.pid"
+#RAINSENSORQTY_MONPID="$TMPDIR/rainsensorqty_monitor.pid"
 #
 
 d() # short date & time
@@ -78,5 +78,13 @@ do
         howmuch=$2
         printf "RAINED on %s for %.2f mm\n" "$(date --date="@$1")" $( $JQ -n "$howmuch * $RAINSENSORQTY_MMEACH" )
 done
+}
+
+check_TMPDIR()
+{
+        if [[ $(df  | awk '$NF=="/tmp" {print $1}') != "tmpfs" ]] ; then
+                echo "WARNING: /tmp isn't a tmp file system"
+                echo -e "\tplease add to your /etc/fstab file:\n\ttmpfs           /tmp            tmpfs defaults,noatime,nosuid   0       0"
+        fi
 }
 
