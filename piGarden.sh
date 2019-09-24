@@ -620,7 +620,8 @@ function json_status {
 		for scheduled in `$PIGARDENSCHED_PATH sched`
 		do
 			local ev=$(echo $scheduled|$CUT -f1 -d";")
-			local al=${!ev}
+			local evcomplete="$ev"_ALIAS
+			local al=${!evcomplete}
 			local json_get_schedule="\"$ev\": {\"alias\": \"$al\", \"entry\": \"$scheduled\"}, $json_get_schedule"
 		done
 		if [[ !  -z  $json_get_schedule ]]; then
