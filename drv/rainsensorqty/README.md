@@ -2,8 +2,8 @@
 # Driver rainsensorqty - driver for measure the rain volume
 # Author: androtto
 # file README.md
-# Version: 0.2.0
-# Data: 11/Aug/2019
+# Version: 0.2.30
+# Data: 21/Sep/2019
 
 
 FILE DI CONFIGURAZIONE /etc/piGarden.conf:
