@@ -1,5 +1,6 @@
-# 0.5.15 - xx/xx/2019
-- Added api for manage piGardenSched scheduling
+# 0.5.14 - 24/09/2019
+- Updated rainsensorqty driver to version 0.2.3 
+- Added api and command for manage piGardenSched scheduling
 
 # 0.5.13 - 12/08/2019
 - Added driver rainsensorqty for menage rainfall detection based on quantity
