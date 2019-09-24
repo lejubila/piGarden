@@ -3,12 +3,12 @@
 # Author: androtto
 # file "common.include.sh"
 # common functions used by driver
-# Version: 0.2.0
-# Data: 11/Aug/2019
+# Version: 0.2.0a
+# Data: 13/Aug/2019
 
 
 #note:
-#RAINSENSORQTY_MONPID="$TMP_PATH/rainsensorqty_monitor.pid"
+#RAINSENSORQTY_MONPID="$TMPDIR/rainsensorqty_monitor.pid"
 #
 
 d() # short date & time
@@ -67,3 +67,24 @@ rain_history()
 		return 0
 	fi
 }
+
+rain_when_amount()
+{
+# from standard input
+cat - | while read line
+do
+        set -- ${line//:/ }
+        when=$1
+        howmuch=$2
+        printf "RAINED on %s for %.2f mm\n" "$(date --date="@$1")" $( $JQ -n "$howmuch * $RAINSENSORQTY_MMEACH" )
+done
+}
+
+check_TMPDIR()
+{
+        if [[ $(df  | awk '$NF=="/tmp" {print $1}') != "tmpfs" ]] ; then
+                echo "WARNING: /tmp isn't a tmp file system"
+                echo -e "\tplease add to your /etc/fstab file:\n\ttmpfs           /tmp            tmpfs defaults,noatime,nosuid   0       0"
+        fi
+}
+
