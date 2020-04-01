@@ -41,8 +41,8 @@ sudo make install
 
 ``` bash
 cd
-git clone git://git.drogon.net/wiringPi
-cd wiringPi
+git clone https://github.com/WiringPi/WiringPi.git
+cd WiringPi
 git pull origin 
 ./build
 ```
