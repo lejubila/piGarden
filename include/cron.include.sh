@@ -559,7 +559,79 @@ function cron_disable_all_open_close {
 		fi
 		
         done
+}
 
 
 
+#
+# Attiva tutte le schedulazioni di apertura e chiusura elettrovalvole
+#
+function cron_enable_all_open_close {
+
+	local a=""
+	local al=""
+	local cron=""
+
+	#
+	# Disabilita tutte le schedulazioni di apertura
+	#
+        for i in $(seq $EV_TOTAL)
+        do
+                a=EV"$i"_ALIAS
+                al=${!a}
+                local crons=`get_cron_open $al`
+		if [[ ! -z "$crons" ]]; then
+			del_cron_open $al
+			IFS=$'\n'       # make newlines the only separator
+			for cron in $crons
+			do
+				#echo "-- $cron --"
+				CRON_M=`echo $cron | $CUT -d' ' -f1,1`
+				CRON_H=`echo $cron | $CUT -d' ' -f2,2`
+				CRON_DOM=`echo $cron | $CUT -d' ' -f3,3`
+				CRON_MON=`echo $cron | $CUT -d' ' -f4,4`
+				CRON_DOW=`echo $cron | $CUT -d' ' -f5,5`
+
+				if [[ ${CRON_M:0:1} == "#" ]]; then
+					CRON_M=${CRON_M:1:${#CRON_M}}
+				fi
+				#echo "++ $CRON_M $CRON_H $CRON_DOM $CRON_MON $CRON_DOW ++"
+
+				add_cron_open $al "$CRON_M" "$CRON_H" "$CRON_DOM" "$CRON_MON" "$CRON_DOW"
+			done
+		fi
+		
+        done
+
+
+	#
+	# Disabilita tutte le schedulazioni di chiusura
+	#
+        for i in $(seq $EV_TOTAL)
+        do
+                a=EV"$i"_ALIAS
+                al=${!a}
+                local crons=`get_cron_close $al`
+		if [[ ! -z "$crons" ]]; then
+			del_cron_close $al
+			IFS=$'\n'       # make newlines the only separator
+			for cron in $crons
+			do
+				#echo "-- $cron --"
+				CRON_M=`echo $cron | $CUT -d' ' -f1,1`
+				CRON_H=`echo $cron | $CUT -d' ' -f2,2`
+				CRON_DOM=`echo $cron | $CUT -d' ' -f3,3`
+				CRON_MON=`echo $cron | $CUT -d' ' -f4,4`
+				CRON_DOW=`echo $cron | $CUT -d' ' -f5,5`
+
+				if [[ ${CRON_M:0:1} == "#" ]]; then
+					CRON_M=${CRON_M:1:${#CRON_M}}
+				fi
+				#echo "++ $CRON_M $CRON_H $CRON_DOM $CRON_MON $CRON_DOW ++"
+
+				add_cron_close $al "$CRON_M" "$CRON_H" "$CRON_DOM" "$CRON_MON" "$CRON_DOW"
+			done
+		fi
+		
+        done
 }

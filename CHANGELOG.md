@@ -1,3 +1,6 @@
+# 0.6.0 - xx/04/2020
+- Ass support for enable all cron fron api
+
 # 0.5.14 - 24/09/2019
 - Updated rainsensorqty driver to version 0.2.3 
 - Added api and command for manage piGardenSched scheduling

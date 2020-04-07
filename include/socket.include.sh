@@ -102,6 +102,12 @@ function socket_server_command {
 			json_status
 			;;
 
+		cron_enable_all_open_close)
+			cron_enable_all_open_close &> /dev/null
+			message_write "success" "All solenoid enabled"
+			json_status
+			;;
+
 		set_general_cron)
 			local vret=""
 			for i in $arg2 $arg3 $arg4 $arg5 $arg6 $arg7
