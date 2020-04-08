@@ -2,8 +2,8 @@
 # Driver rainsensorqty - driver for measure the rain volume
 # Author: androtto
 # file README.md
-# Version: 0.2.30
-# Data: 21/Sep/2019
+# Version: 0.2.5
+# Data: 07/Apr/2020
 
 
 FILE DI CONFIGURAZIONE /etc/piGarden.conf:
@@ -37,19 +37,38 @@ nella sottodirectory command sono presenti:
 commands/rainsensorqty_CHECK.sh
 	chiama la funzione di verifica pioggia, la medesima chiamata da check_rain_sensor
 commands/rainsensorqty_HISTORY.sh
-	visualizza lo storico della pioggia
+	visualizza lo storico della pioggia consultando il file $RAINSENSORQTY_HISTORY
+	puo' essere lanciato con l''opzione -force per ricostruire il file $RAINSENSORQTY_HISTORY dal $RAINSENSORQTY_HISTORYRAW
+	e con un argomento X, che permette di evidenziare solo gli ultimi X eventi
+commands/rainsensorqty_HISTORYRAW.sh
+	visualizza lo storico della pioggia consultando il file $RAINSENSORQTY_HISTORYRAW
+	puo' essere lanciato senza argomenti per processare l'intero file, chiede conferma visto che i tempi sono potenzialmente lunghi
+	con un argomento X, che permette di evidenziare solo gli ultimi X eventi
 commands/rainsensorqty_INIT.sh
 	inizializza il driver eseguendo lo script di monitoring - normalmente tale processo avviene da piGarden.sh
 	utile quando si vuole testare dei cambiamenti o se necessario riavviare dopo il kill del comando successivo
 commands/rainsensorqty_KILL.sh
 	killa i processi di monitoring ed eventuali figli
 commands/rainsensorqty_RAINNOW.sh
-	simula una pioggia registrandola in $RAINSENSORQTY_LASTRAIN
+	simula una pioggia registrandola in $RAINSENSORQTY_LASTRAIN $RAINSENSORQTY_HISTORY $RAINSENSORQTY_HISTORYRAW
+	puo' essere lanciato in 3 modi:
+	senza argomenti: genera una pioggia per un numero di loop pari al valore della variabile RAINSENSORQTY_LOOPSFORSETRAINING, quindi una pioggia completa
+	con un argomento: che indica quanti loop
+	con due argomenti: quanti loop e quanti secondi tra uno e l'altro
 commands/rainsensorqty_REMOVELASTRAIN.sh
-	rimuove dai file $RAINSENSORQTY_LASTRAIN $RAINSENSORQTY_HISTORY l'ultima pioggia registrata
+	rimuove dai file $RAINSENSORQTY_LASTRAIN $RAINSENSORQTY_HISTORY $RAINSENSORQTY_HISTORYRAW l'ultima pioggia registrata
 commands/rainsensorqty_RESET.sh
 	invia il SIGUSR1 al processo di monitor per resettare i cicli. Viene visualizzato il reset solo dopo il successivo PULSE, questo perche' non e' possibile per lo script ricevere il trap in quanto il processo $GPIO e' attivo in attesa del PULSE
 
+questi i timestamps alla data del file:
+-rwxr-xr-x 1 pi pi 1044 Sep 24 18:26 rainsensorqty_CHECK.sh
+-rwxr-xr-x 1 pi pi 1139 Nov 28 00:17 rainsensorqty_HISTORYRAW.sh
+-rwxr-xr-x 1 pi pi 1462 Nov 19 00:19 rainsensorqty_HISTORY.sh
+-rwxr-xr-x 1 pi pi  596 Sep 24 18:26 rainsensorqty_INIT.sh
+-rwxr-xr-x 1 pi pi 1300 Sep 24 18:26 rainsensorqty_KILL.sh
+-rwxr-xr-x 1 pi pi 1111 Nov 27 00:05 rainsensorqty_RAINNOW.sh
+-rwxr-xr-x 1 pi pi 1252 Nov 22 00:18 rainsensorqty_REMOVELASTRAIN.sh
+-rwxr-xr-x 1 pi pi  897 Sep 24 18:26 rainsensorqty_RESET.sh
 
 ULTERIORI VARIABILI in config.include.sh
 ----------------------------------------
@@ -65,14 +84,14 @@ RAINSENSORQTY_LASTRAIN="$STATUS_DIR/rainsensorqty_lastrain"
 	memorizza l'ultima pioggia
 RAINSENSORQTY_HISTORY="$STATUS_DIR/rainsensorqty_history"
 	memorizza tutte le piogge permettendo di visualizzare lo storico (commands/rainsensorqty_HISTORY.sh)
+RAINSENSORQTY_HISTORYRAW="$STATUS_DIR/rainsensorqty_history.raw"
+	memorizza in formato grezzo (raw) tutti gli impulsi registrati  (formato: "secondi:impulsi" ) - consultabile il contenuto con commands/rainsensorqty_HISTORYRAW.sh
 
 RAINSENSORQTY_MONITORLOG="$DIR_SCRIPT/log/rainsensorqty_monitor.log"
 	log dello script di monitoring, popolato solo se RAINSENSORQTY_verbose="yes"
 
 RAINSENSORQTY_MONPID="$TMPDIR/rainsensorqty_monitor.pid"
 	file che viene popolato con il pid dello script di monitoring
-RAINSENSORQTY_STATE="$TMPDIR/rainsensorqty_state"
-	file che viene popolato con l'ultimo stato della vaschetta (formato timestamp:counter)
 
 RAINSENSORQTY_DIR="$DIR_SCRIPT/drv/rainsensorqty"
 	home directory del driver
@@ -103,5 +122,3 @@ GPIO_RESISTOR="none" #pull-up|pull-down|none
 	se lo stato di riposo e' 1, lo script attende la variazione verso 0 (falling)
 	la variabile RAINSENSORQTY_PULSE viene impostata secondo il valore di RAIN_GPIO_STATE presente in /etc/piGarden.conf
 	cioe' il valore che ci si aspetta per registrare il riempimento della vaschetta dello stato di pioggia
-
-

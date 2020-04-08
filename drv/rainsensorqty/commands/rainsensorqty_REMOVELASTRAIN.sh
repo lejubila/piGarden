@@ -3,8 +3,8 @@
 # Author: androtto
 # file "test_rainsensorqty_CHECK.sh"
 # test script for checking rain status using drv_rainsensorqty_rain_sensor_get function
-# Version: 0.2.0a
-# Data: 13/Aug/2019
+# Version: 0.2.5
+# Data: 07/Apr/2020
 
 SCRIPTDIR="$(cd `dirname $0` ; pwd )"
 SCRIPTNAME=${0##*/}
@@ -26,26 +26,19 @@ LOG_OUTPUT_DRV_FILE="$DIR_SCRIPT/log/$LOG_OUTPUT_DRV_FILE"
 # RAINSENSORQTY_LASTRAIN
 # RAINSENSORQTY_HISTORY
 
-rain_history # update rain history file if not
-
-echo "RAIN HISTORY - last five events"
-tail -5 $RAINSENSORQTY_HISTORY | rain_when_amount
-
-echo -e "\nLAST RAIN"
-cat $RAINSENSORQTY_LASTRAIN | rain_when_amount
-
-#exit # for test
-
-echo -e "\nbackup to .old files"
-cp -p $RAINSENSORQTY_HISTORY ${RAINSENSORQTY_HISTORY}.old
-cp -p  $RAINSENSORQTY_LASTRAIN ${RAINSENSORQTY_LASTRAIN}.old
+echo "RAIN HISTORY - last two events"
+tail -2 $RAINSENSORQTY_HISTORY 
+tail -2 $RAINSENSORQTY_HISTORY | rain_when_amount
 
 echo "...removing last event"
-head -n-1 ${RAINSENSORQTY_HISTORY}.old > $RAINSENSORQTY_HISTORY 
-tail -1 $RAINSENSORQTY_HISTORY > $RAINSENSORQTY_LASTRAIN 
+removelastrain
+echo "...rebuilding ${RAINSENSORQTY_HISTORY} from ${RAINSENSORQTY_HISTORYRAW}"
+if ! rainevents > ${RAINSENSORQTY_HISTORY} ; then
+	echo "WARNING: rainevents function had error"
+fi
+tail -1 ${RAINSENSORQTY_HISTORYRAW} > ${RAINSENSORQTY_LASTRAIN}
 
-echo -e "\nnew RAIN HISTORY - last five events"
-tail -5 $RAINSENSORQTY_HISTORY | rain_when_amount
+echo -e "\nnew RAIN HISTORY - last two events"
+tail -2 $RAINSENSORQTY_HISTORY 
+tail -2 $RAINSENSORQTY_HISTORY | rain_when_amount
 
-echo -e "\nnew LAST RAIN"
-cat $RAINSENSORQTY_LASTRAIN | rain_when_amount

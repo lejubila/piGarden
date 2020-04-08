@@ -3,13 +3,18 @@
 # Author: androtto
 # file "common.include.sh"
 # common functions used by driver
-# Version: 0.2.0a
-# Data: 13/Aug/2019
+# Version: 0.2.5
+# Data: 08/Jan/2020
 
 
 #note:
 #RAINSENSORQTY_MONPID="$TMPDIR/rainsensorqty_monitor.pid"
 #
+
+sec2date()
+{
+        date --date="@$1"
+}
 
 d() # short date & time
 {
@@ -57,13 +62,28 @@ en_echo() # enhanched echo - check verbose variable
 
 rain_history()
 {
+	[[ ! -f $RAINSENSORQTY_HISTORYRAW ]] && return 1
 	[[ ! -f $RAINSENSORQTY_HISTORY ]] && touch $RAINSENSORQTY_HISTORY
-	[[ ! -f $RAINSENSORQTY_LASTRAIN ]] && return 1
-	if grep -q ^$(<$RAINSENSORQTY_LASTRAIN)$ $RAINSENSORQTY_HISTORY ; then
-		: # do nothing
-		return 2
+	> $RAINSENSORQTY_HISTORYTMP
+
+	if lastrainevent=$( rainevents 1 ) ; then
+       		: # done ok
 	else
-		cat $RAINSENSORQTY_LASTRAIN >> $RAINSENSORQTY_HISTORY
+        	echo "WARNING: rainevents function had errors"
+		return 1
+	fi
+
+#old	#if grep -q ^$(<$RAINSENSORQTY_LASTRAIN)$ $RAINSENSORQTY_HISTORY ; then
+	if grep -q ^${lastrainevent}$ $RAINSENSORQTY_HISTORY ; then
+		: # already present
+		return 0
+	else
+		: # missing and fixed 
+		if [[ $1 == tmp ]] ; then
+			echo $lastrainevent > $RAINSENSORQTY_HISTORYTMP
+		else
+			echo $lastrainevent >> $RAINSENSORQTY_HISTORY
+		fi
 		return 0
 	fi
 }
@@ -71,12 +91,14 @@ rain_history()
 rain_when_amount()
 {
 # from standard input
+# format  $time:$endtime:$endsequence
 cat - | while read line
 do
         set -- ${line//:/ }
-        when=$1
-        howmuch=$2
-        printf "RAINED on %s for %.2f mm\n" "$(date --date="@$1")" $( $JQ -n "$howmuch * $RAINSENSORQTY_MMEACH" )
+        start=$1
+        stop=$2
+        howmuch=$3
+        printf "RAINED for %7.2f mm between %s and %s\n" $( $JQ -n "$howmuch * $RAINSENSORQTY_MMEACH" ) "$(date --date="@$start")" "$(date --date="@$stop")"
 done
 }
 
@@ -88,3 +110,54 @@ check_TMPDIR()
         fi
 }
 
+rainevents()
+{
+	if [[ ! -f $RAINSENSORQTY_HISTORYRAW ]] ; then
+		#echo "WARNING: no \$RAINSENSORQTY_HISTORYRAW file"# cannot echo, redirected output
+		return 1
+	fi
+	case $1 in
+       		[0-9]|[0-9][0-9]) howmanyevent=$1 ;;
+#		-1) skiplast=true ;;
+		*) howmanyevent=-1 ;;
+	esac
+
+	newloop=yes
+	tac $RAINSENSORQTY_HISTORYRAW | while read line
+	do
+		set -- ${line//:/ }
+		time=$1
+		sequence=$2
+		if [[ $newloop == yes ]] ; then
+			endtime=$time
+			endsequence=$sequence
+			newloop=no
+		fi
+		if (( sequence == 1 )) ; then
+#			[[ $skiplast=true ]] && { skilast=false ; continue ; }
+			echo $time:$endtime:$endsequence
+			newloop=yes
+			(( event +=1 ))
+		fi
+		(( howmanyevent == event )) && break
+	done | sort -k1n
+}
+
+removelastrain()
+{
+	if [[ ! -f $RAINSENSORQTY_HISTORYRAW ]] ; then
+		echo "WARNING: no \$RAINSENSORQTY_HISTORYRAW file"
+		return 1
+	fi
+
+	next=false
+	tac $RAINSENSORQTY_HISTORYRAW | while read line
+	do
+		set -- ${line//:/ }
+		time=$1
+		sequence=$2
+		[[ $next = true ]] && echo $line
+		(( sequence == 1 )) && next=true
+	done | tac > ${RAINSENSORQTY_HISTORYRAW}_$$
+	mv ${RAINSENSORQTY_HISTORYRAW}_$$ $RAINSENSORQTY_HISTORYRAW
+}

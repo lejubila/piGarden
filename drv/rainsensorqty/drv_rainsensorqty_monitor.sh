@@ -4,8 +4,8 @@
 # Author: androtto
 # file "drv_rainsensorqty_monitor.sh"
 # monitor script
-# Version: 0.2.2
-# Data: 08/Sep/2019
+# Version: 0.2.5
+# Data: 08/Jan/2020
 
 resetcounter()
 {
@@ -76,8 +76,7 @@ do
 	fi
   	(( counter+=1 ))
 	en_echo "$RAINSENSORQTY_PULSE PULSE #$counter RECEIVED" 
-	echo "$now:$counter" > ${RAINSENSORQTY_STATE} &
-	echo "$now:$counter" >> ${RAINSENSORQTY_STATE_HIST} &
+	echo "$now:$counter" >> ${RAINSENSORQTY_HISTORYRAW} &
 	MMWATER=$( $JQ -n "$counter*$MMEACH" )
 	text=$(printf "%.2f mm height (#%d pulse)" $MMWATER $counter )
 	if (( counter >= RAINSENSORQTY_LOOPSFORSETRAINING )) ; then 

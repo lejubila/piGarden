@@ -1,5 +1,6 @@
 # 0.6.0 - xx/04/2020
-- Ass support for enable all cron fron api
+- Add support for enable all cron fron api
+- Update rainsensorqty driver to version 0.2.5
 
 # 0.5.14 - 24/09/2019
 - Updated rainsensorqty driver to version 0.2.3 
