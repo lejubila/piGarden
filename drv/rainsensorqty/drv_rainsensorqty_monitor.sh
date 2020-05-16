@@ -4,8 +4,8 @@
 # Author: androtto
 # file "drv_rainsensorqty_monitor.sh"
 # monitor script
-# Version: 0.2.5
-# Data: 08/Jan/2020
+# Version: 0.2.5b
+# Data: 12/May/2020
 
 resetcounter()
 {
@@ -58,13 +58,13 @@ rain_history
 
 echo ""
 en_echo "---- NEW RUN ----"
+en_echo "WAITING FOR $RAINSENSORQTY_PULSE PULSE" 
 
 # loop forever
 while true
 do
 	before=`date +%s`
 	sleep $RAINSENSOR_DEBOUNCE
-	en_echo "WAITING FOR $RAINSENSORQTY_PULSE PULSE" 
 	$GPIO -g wfi $gpio_port $RAINSENSORQTY_PULSE
 	now=`date +%s`
 	(( elapsed = now - before ))
@@ -75,9 +75,9 @@ do
 		rain_history &
 	fi
   	(( counter+=1 ))
-	en_echo "$RAINSENSORQTY_PULSE PULSE #$counter RECEIVED" 
 	echo "$now:$counter" >> ${RAINSENSORQTY_HISTORYRAW} &
 	MMWATER=$( $JQ -n "$counter*$MMEACH" )
+	en_echo $( printf "%s PULSE #%d RECEIVED (%.2f mm)" $RAINSENSORQTY_PULSE $counter $MMWATER )
 	text=$(printf "%.2f mm height (#%d pulse)" $MMWATER $counter )
 	if (( counter >= RAINSENSORQTY_LOOPSFORSETRAINING )) ; then 
 		drv_rainsensorqty_writelog $f "RAINING - $text" &
