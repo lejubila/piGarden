@@ -4,7 +4,7 @@
 function check_rain_online {
 
 	if [ "$WEATHER_SERVICE" == "none" ]; then
-		log_write "check_rain_online - online service is disable"
+		log_write "rain" "warning" "check_rain_online - online service is disabled"
 		return
 	fi
 
@@ -17,7 +17,7 @@ function check_rain_online {
 
 	if [[ $local_epoch =~ ^-?[0-9]+$ ]]; then
 		if [ $local_epoch -eq 0 ]; then
-			log_write "check_rain_online - failed read online data"
+			log_write "rain" "error" "check_rain_online - failed read online data"
 		else
 			if [ $local_epoch -gt 0 ]; then
 				current_state_rain_online='rain'
@@ -27,14 +27,14 @@ function check_rain_online {
 			fi
 			weather=$(cat "$STATUS_DIR/last_weather_online" | $JQ -M ".weather")
 			
-			log_write "check_rain_online - weather=$weather, local_epoch=$local_epoch"
+			log_write "rain" "info" "check_rain_online - weather=$weather, local_epoch=$local_epoch"
 			if [ "$current_state_rain_online" != "$last_state_rain_online" ]; then
 				echo "$current_state_rain_online" > "$STATUS_DIR/last_state_rain_online"
 				trigger_event "check_rain_online_change" "$current_state_rain_online" "$weather"
 			fi
 		fi
 	else
-		log_write "check_rain_online - failed read online data"
+		log_write "rain" "error" "check_rain_online - failed read online data"
 	fi
 
 	trigger_event "check_rain_online_after" "$current_state_rain_online" "$weather"
@@ -57,11 +57,11 @@ function check_rain_sensor {
 			current_state_rain_sensor='rain'
 			local local_epoch=`date +%s`
 			echo $local_epoch > "$STATUS_DIR/last_rain_sensor"
-			log_write "check_rain_sensor - now it's raining ($local_epoch)"
+			log_write "rain" "info" "check_rain_sensor - now it's raining ($local_epoch)"
 			#return $local_epoch	
 		else
 			current_state_rain_sensor='norain'
-			log_write "check_rain_sensor - now is not raining"
+			log_write "rain" "info" "check_rain_sensor - now is not raining"
 		fi
 		if [ "$current_state_rain_sensor" != "$last_state_rain_sensor" ]; then
 			echo "$current_state_rain_sensor" > "$STATUS_DIR/last_state_rain_sensor"
@@ -69,7 +69,7 @@ function check_rain_sensor {
 		fi
 		trigger_event "check_rain_sensor_after" "$current_state_rain_sensor"
 	else
-		log_write "Rain sensor not present"
+		log_write "rain" "warning" "Rain sensor not present"
 	fi
 
 }
@@ -113,7 +113,7 @@ function close_all_for_rain {
 			#echo "$al = $state"
 			if [ "$state" = "1" ] && [ "$evnorain" != "1" ]; then
 				ev_close $al
-				log_write "close_all_for_rain - Close solenoid '$al' for rain"
+				log_write "irrigate" "warning" "close_all_for_rain - Close solenoid '$al' for rain"
 			fi
 		done
 	fi

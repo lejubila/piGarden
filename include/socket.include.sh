@@ -19,7 +19,7 @@ function stop_socket_server {
                 exit 1
         fi
 
-	log_write "stop socket server"
+	log_write "socket_server" "info" "stop socket server"
 
         kill -9 $(list_descendants `cat "$TCPSERVER_PID_FILE"`) 2> /dev/null
         kill -9 `cat "$TCPSERVER_PID_FILE"` 2> /dev/null
@@ -44,7 +44,7 @@ function socket_server_command {
 		user=$(echo "$user" | $TR -d '[\r\n]')
 		password=$(echo "$password" | $TR -d '[\r\n]')
 		if [ "$user" != "$TCPSERVER_USER" ] || [ "$password" != "$TCPSERVER_PWD" ]; then
-			log_write "socket connection from: $TCPREMOTEIP - Bad socket server credentials - user:$user"
+			log_write "socket_server" "warning" "socket connection from: $TCPREMOTEIP - Bad socket server credentials - user:$user"
 			json_error 0 "Bad socket server credentials"
 			return
 		fi
@@ -61,7 +61,7 @@ function socket_server_command {
 	arg7=$(echo "$line " | $CUT -d ' ' -f7)
 	arg8=$(echo "$line " | $CUT -d ' ' -f8)
 
-	log_write "socket connection from: $TCPREMOTEIP - command: $arg1 $arg2 $arg3 $arg4 $arg5 $arg6 $arg7 $arg8"
+	log_write "socket_server" "info" "socket connection from: $TCPREMOTEIP - command: $arg1 $arg2 $arg3 $arg4 $arg5 $arg6 $arg7 $arg8"
 	
 	#reset_messages &> /dev/null
 
@@ -127,7 +127,7 @@ function socket_server_command {
 
 			if [[ ! -z $vret ]]; then
 				json_error 0 "Cron set failed"
-				log_write "Cron set failed: $vret"
+				log_write "socket_server" "error" "Cron set failed: $vret"
 			else
 				message_write "success" "Cron set successfull"
 				json_status
@@ -142,7 +142,7 @@ function socket_server_command {
 
 			if [[ ! -z $vret ]]; then
 				json_error 0 "Cron set failed"
-				log_write "Cron del failed: $vret"
+				log_write "socket_server" "error" "Cron del failed: $vret"
 			else
 				message_write "success" "Cron set successfull"
 				json_status
@@ -157,7 +157,7 @@ function socket_server_command {
 
 			if [[ ! -z $vret ]]; then
 				json_error 0 "Cron del failed"
-				log_write "Cron del failed: $vret"
+				log_write "socket_server" "error" "Cron del failed: $vret"
 			else
 				message_write "success" "Scheduled start successfully deleted"
 				json_status "get_cron_open_in:$arg2"
@@ -173,7 +173,7 @@ function socket_server_command {
 
 			if [[ ! -z $vret ]]; then
 				json_error 0 "Cron set failed"
-				log_write "Cron set failed: $vret"
+				log_write "socket_server" "error" "Cron set failed: $vret"
 			else
 				message_write "success" "Cron set successfull"
 				json_status
@@ -188,7 +188,7 @@ function socket_server_command {
 
 			if [[ ! -z $vret ]]; then
 				json_error 0 "Cron set failed"
-				log_write "Cron set failed: $vret"
+				log_write "socket_server" "error" "Cron set failed: $vret"
 			else
 				message_write "success" "Cron set successfull"
 				json_status
@@ -203,7 +203,7 @@ function socket_server_command {
 
 			if [[ ! -z $vret ]]; then
 				json_error 0 "Cron set failed"
-				log_write "Cron set failed: $vret"
+				log_write "socket_server" "error" "Cron set failed: $vret"
 			else
 				message_write "success" "Cron set successfull"
 				json_status
@@ -218,7 +218,7 @@ function socket_server_command {
 
 			if [[ ! -z $vret ]]; then
 				json_error 0 "piGardenSched command failed"
-				log_write "piGardenSched command failed: $vret"
+				log_write "socket_server" "error" "piGardenSched command failed: $vret"
 			else
 				message_write "success" "Schedule set successfull"
 				json_status

@@ -35,7 +35,7 @@ function drv_sonoff_tasmota_http_rele_open {
 		error="${error%\"}"
 		error="${error#\"}"
 		echo "error=$error"
-	        log_write "Remote rele open error: $error"
+	        log_write "drv_sonoff_tasmota_http" "error" "Remote rele open error: $error"
         	message_write "warning" "Remote rele open error: $error"
 		return 1
 	fi
@@ -69,7 +69,7 @@ function drv_sonoff_tasmota_http_rele_close {
 		error="${error%\"}"
 		error="${error#\"}"
 		echo "error=$error"
-	        log_write "Remote rele close error: $error"
+	        log_write "drv_sonoff_tasmota_http" "error" "Remote rele close error: $error"
         	message_write "warning" "Remote rele close error: $error"
 		return 1
 	fi

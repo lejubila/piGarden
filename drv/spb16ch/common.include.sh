@@ -74,7 +74,7 @@ function drv_spb16ch_boards_id_load {
 			SPB16CH_USED_ID+=("$board_id")
 		done
 	else
-		log_write "spb16ch: file $SPB16CH_BOARD_ID_STORE_FILE not found: remember to run 'piGarden init' to generate the file"
+		log_write "drv_spb16ch" "error" "spb16ch: file $SPB16CH_BOARD_ID_STORE_FILE not found: remember to run 'piGarden init' to generate the file"
 	fi
 
 }

@@ -10,7 +10,7 @@
 #
 function initialize {
 
-	log_write "Run initialize"
+	log_write "general" "info" "Run initialize"
 
 	unlock
 
@@ -50,13 +50,13 @@ function initialize {
 	# Inizializza il sensore di rilevamento pioggia
 	if [ -n "$RAIN_GPIO" ]; then 
 		drv_rain_sensor_init "$RAIN_GPIO"
-		log_write "Rain sensor initialized"
+		log_write "rain" "info" "Rain sensor initialized"
 	else
-		log_write "Rain sensor not present"
+		log_write "rain" "info" "Rain sensor not present"
 	fi
 
 	trigger_event "init_after" ""
-	log_write "End initialize"
+	log_write "general" "info" "End initialize"
 
 }
 
@@ -98,7 +98,7 @@ function ev_open {
 				message_write "warning" "Solenoid not open for rain"
 				trigger_event "ev_not_open_for_rain_online" "$1" 
 				trigger_event "ev_not_open_for_rain" "$1" 
-				log_write "Solenoid '$1' not open for rain (online check)"
+				log_write "irrigate" "warning" "Solenoid '$1' not open for rain (online check)"
 				return
 			fi
 		fi
@@ -113,7 +113,7 @@ function ev_open {
 				message_write "warning" "Solenoid not open for rain"
 				trigger_event "ev_not_open_for_rain_sensor" "$1" 
 				trigger_event "ev_not_open_for_rain" "$1" 
-				log_write "Solenoid '$1' not open for rain (sensor check)"
+				log_write "irrigate" "warning" "Solenoid '$1' not open for rain (sensor check)"
 				return
 			fi
 		fi
@@ -126,7 +126,7 @@ function ev_open {
 
 	trigger_event "ev_open_before" "$1" "$2"
 	if [ $? -ne 0 ]; then
-		log_write "Solenoid '$1' not open due to external event"
+		log_write "irrigate" "warning" "Solenoid '$1' not open due to external event"
 		message_write 'warning' "Solenoid not open due to external event"
 		mqtt_status
 		return
@@ -150,7 +150,7 @@ function ev_open {
 
 	ev_set_state $EVNUM $state
 
-	log_write "Solenoid '$1' open"
+	log_write "irrigate" "info" "Solenoid '$1' open"
 	message_write "success" "Solenoid open"
 
 	trigger_event "ev_open_after" "$1" "$2"
@@ -259,7 +259,7 @@ function ev_close {
 
 	ev_set_state $EVNUM 0
 
-	log_write "Solenoid '$1' close"
+	log_write "irrigate" "info" "Solenoid '$1' close"
 	message_write "success" "Solenoid close"
 
 	trigger_event "ev_close_after" "$1"
@@ -285,7 +285,9 @@ function supply_negative {
 
 #
 # Scrive un messaggio nel file di log
-# $1 log da scrivere
+# $1 type
+# $2 level
+# $3 log da scrivere
 #
 function log_write {
 	if [ -e "$LOG_FILE" ]; then
@@ -304,7 +306,25 @@ function log_write {
 		fi
 	fi
 
-	echo -e "`date`\t\t$1" >> $LOG_FILE
+	echo -e "`date`\t\t$1\t$2\t$3" >> $LOG_FILE
+
+	log_send "$1" "$2" "`date '+%Y-%m-%d %H:%M:%S'`" "$3"
+
+}
+
+#
+# Invia un log verso piGardenWeb
+# $1 type
+# $2 level
+# $3 date time
+# $4 messaggio
+#
+function log_send {
+
+	if [[ ! -z "$LOG_URL" ]]; then
+		$CURL $LOG_CURL_PARAM "$LOG_URL" -d "api_token=$LOG_API_TOKEN&type=$1&level=$2&datetime_log=$3&message=$4" &> /dev/null &
+	fi
+
 }
 
 #
@@ -373,7 +393,7 @@ function gpio_alias2number {
 		fi
 	done
 
-	log_write "ERROR solenoid alias not found: $1"
+	log_write "general" "error" "ERROR solenoid alias not found: $1"
 	message_write "warning" "Solenoid alias not found"
 	mqtt_status
 	exit 1
@@ -393,7 +413,7 @@ function ev_alias2number {
 		fi
 	done
 
-	log_write "ERROR solenoid alias not found: $1"
+	log_write "general" "error" "ERROR solenoid alias not found: $1"
 	message_write "warning" "Solenoid alias not found"
 	mqtt_status
 	exit 1
@@ -480,7 +500,7 @@ function close_all {
 			#echo "$al = $state"
 			if [[ "$state" -gt "0" || "$1" = "force" ]]; then
 				ev_close $al
-				log_write "close_all - Close solenoid '$al' for rain"
+				log_write "irrigate" "info" "close_all - Close solenoid '$al' for rain"
 			fi
 		done
 
@@ -779,12 +799,12 @@ function lock {
 		local foo=bar
 	else
 		if [ "$current_time" -gt "$max_time" ]; then
-			log_write "Maximum locked time reached"
+			log_write "general" "error" "Maximum locked time reached"
 			sleep $max_time
 			unlock
 			exit 1
 		fi
-		log_write "Sleep 1 second for locked state"
+		log_write "general" "info" "Sleep 1 second for locked state"
 		sleep 1
 		lock $current_time
 		return
@@ -833,7 +853,7 @@ function send_identifier {
 	fi
 	echo "$ID" > "$FILE_ID"
 
-	log_write "Send installation identifier to collect usage"
+	log_write "general" "info" "Send installation identifier to collect usage"
 
 	$CURL https://www.lejubila.net/statistic/collect_usage/piGarden/$ID/$VERSION/$SUB_VERSION/$RELEASE_VERSION > /dev/null 2>&1
 
@@ -875,7 +895,7 @@ function cmd_pigardensched {
 
 	if [ $PIGARDENSCHED == 0 ]; then
 		echo "piGardenSched not configured in piGarden" >&2
-		log_write "piGardenSched not configured in piGarden"
+		log_write "piGardenSched" "error" "piGardenSched not configured in piGarden"
 		return
 	fi
 
@@ -1130,7 +1150,7 @@ case "$1" in
                 nohup $0 start_socket_server_daemon > /dev/null 2>&1 &
 
                 echo "Daemon is started widh pid $!"
-		log_write "start socket server with pid $!"
+		log_write "socket_server" "info" "start socket server with pid $!"
                 ;;
 
 	start_socket_server_daemon)

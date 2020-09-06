@@ -1,3 +1,6 @@
+# 0.6.1 - 06/09/2020
+- Add support for send log to piGardenWeb
+
 # 0.6.0 - 16/05/2020
 - Add support for enable all cron fron api
 - Update rainsensorqty driver to version 0.2.5b

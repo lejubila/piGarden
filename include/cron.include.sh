@@ -10,7 +10,7 @@ function cron_del {
 
 	if [ -z "$CRON_TYPE" ]; then
 		echo "Cron type is empty" >&2
-		log_write "Cron type is empty"
+		log_write "cron" "error" "Cron type is empty"
 		return 1
 	fi
 
@@ -25,17 +25,17 @@ function cron_del {
 	fi
 	if ! [[ $START =~ $re ]] ; then
   		echo "Cron start don't find" >&2
-  		log_write "Cron start don't find"
+  		log_write "cron" "error" "Cron start don't find"
 		return 1
 	fi
 	if ! [[ $END =~ $re ]] ; then
   		echo "Cron end cron don't find" >&2
-  		log_write "Cron end cron don't find"
+  		log_write "cron" "error" "Cron end cron don't find"
 		return 1
 	fi
 	if [ "$START" -gt "$END" ]; then
   		echo "Wrong position for start and end in cron" >&2
-  		log_write "Wrong position for start and end in cron"
+  		log_write "cron" "error" "Wrong position for start and end in cron"
 		return 1
 	fi
 
@@ -74,7 +74,7 @@ function cron_add {
 
 	if [ -z "$CRON_TYPE" ]; then
 		echo "Cron type is empty" >&2
-		log_write "Cron type is empty"
+		log_write "cron" "error" "Cron type is empty"
 		return 1
 	fi
 
@@ -91,12 +91,12 @@ function cron_add {
 	else
 		if ! [[ $START =~ $re ]] ; then
   			echo "Cron start don't find" >&2
-  			log_write "Cron start don't find"
+  			log_write "cron" "error" "Cron start don't find"
 			return 1
 		fi
 		if ! [[ $END =~ $re ]] ; then
   			echo "Cron end cron don't find" >&2
-  			log_write "Cron end cron don't find"
+  			log_write "cron" "error" "Cron end cron don't find"
 			return 1
 		fi
 		START=$(($START + 1))
@@ -104,7 +104,7 @@ function cron_add {
 
 		if [ "$START" -gt "$END" ]; then
   			echo "Wrong position for start and end in cron" >&2
-  			log_write "Wrong position for start and end in cron"
+  			log_write "cron" "error" "Wrong position for start and end in cron"
 			return 1
 		fi
 		
@@ -183,7 +183,7 @@ function cron_add {
 
 		*)
 			echo "Wrong cron type: $CRON_TYPE"
-			log_write "Wrong cron type: $CRON_TYPE"
+			log_write "cron" "error" "Wrong cron type: $CRON_TYPE"
 			;;
 
 	esac
@@ -225,7 +225,7 @@ function cron_get {
 
 	if [ -z "$CRON_TYPE" ]; then
 		echo "Cron type is empty" >&2
-		log_write "Cron type is empty"
+		log_write "cron" "error" "Cron type is empty"
 		return 1
 	fi
 
@@ -241,12 +241,12 @@ function cron_get {
 	else
 		if ! [[ $START =~ $re ]] ; then
   			echo "Cron start don't find" >&2
-  			log_write "Cron start don't find"
+  			log_write "cron" "error" "Cron start don't find"
 			return 1
 		fi
 		if ! [[ $END =~ $re ]] ; then
   			echo "Cron end cron don't find" >&2
-  			log_write "Cron end cron don't find"
+  			log_write "cron" "error" "Cron end cron don't find"
 			return 1
 		fi
 		START=$(($START + 1))
@@ -254,7 +254,7 @@ function cron_get {
 
 		if [ "$START" -gt "$END" ]; then
   			echo "Wrong position for start and end in cron" >&2
-  			log_write "Wrong position for start and end in cron"
+  			log_write "cron" "error" "Wrong position for start and end in cron"
 			return 1
 		fi
 		
@@ -370,7 +370,7 @@ function add_cron_open {
 
 	local exists=`alias_exists $1`
 	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
+		log_write "cron" "error" "Alias $1 not found"
 		echo "Alias $1 not found"
 		return 1
 	fi
@@ -387,7 +387,7 @@ function del_cron_open {
 
 	local exists=`alias_exists $1`
 	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
+		log_write "cron" "error" "Alias $1 not found"
 		echo "Alias $1 not found"
 		return 1
 	fi
@@ -404,7 +404,7 @@ function get_cron_open {
 
 	local exists=`alias_exists $1`
 	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
+		log_write "cron" "error" "Alias $1 not found"
 		echo "Alias $1 not found"
 		return 1
 	fi
@@ -421,7 +421,7 @@ function del_cron_open_in {
 
 	local exists=`alias_exists $1`
 	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
+		log_write "cron" "error" "Alias $1 not found"
 		echo "Alias $1 not found"
 		return 1
 	fi
@@ -439,7 +439,7 @@ function get_cron_close {
 
 	local exists=`alias_exists $1`
 	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
+		log_write "cron" "error" "Alias $1 not found"
 		echo "Alias $1 not found"
 		return 1
 	fi
@@ -462,7 +462,7 @@ function add_cron_close {
 
 	local exists=`alias_exists $1`
 	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
+		log_write "cron" "error" "Alias $1 not found"
 		echo "Alias $1 not found"
 		return 1
 	fi
@@ -479,7 +479,7 @@ function del_cron_close {
 
 	local exists=`alias_exists $1`
 	if [ "check $exists" = "check FALSE" ]; then
-		log_write "Alias $1 not found"
+		log_write "cron" "error" "Alias $1 not found"
 		echo "Alias $1 not found"
 		return 1
 	fi

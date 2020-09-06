@@ -2,6 +2,14 @@
 LOG_FILE="/home/pi/piGarden/log/piGarden.log"
 LOG_FILE_MAX_SIZE=1048576 # 1MB
 
+#
+# Enable send log to piGardenWeb
+#
+
+#LOG_URL="http://url_of_your_pigardenweb/api/log"
+#LOG_API_TOKEN="token_of_pigardenweb_user"
+#LOG_CURL_PARAM="--data-urlencode -k"
+
 # Log file for driver output
 #LOG_OUTPUT_DRV_FILE="/tmp/piGarden.drv.log"
 

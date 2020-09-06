@@ -19,7 +19,7 @@ function drv_spb16ch_rele_open {
 	local rele_data=${SPB16CH_RELE_MAP[$rele_id]}
 	if [[ -z $rele_data ]]; then
 		local message="Error - Rele map not defined - rele_id=$rele_id - ($1)"
-		log_write "$message"
+		log_write "drv_spb16ch" "error" "$message"
 		message_write "warning" "$message"
 	fi
 	local address_num=${rele_data:0:2}
@@ -52,7 +52,7 @@ function drv_spb16ch_rele_close {
 	local rele_data=${SPB16CH_RELE_MAP[$rele_id]}
 	if [[ -z $rele_data ]]; then
 		local message="Error - Rele map not defined - rele_id=$rele_id - ($1)"
-		log_write "$message"
+		log_write "drv_spb16ch" "error" "$message"
 		message_write "warning" "$message"
 	fi
 	local address_num=${rele_data:0:2}

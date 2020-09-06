@@ -94,7 +94,7 @@ function drv_rele_init {
                 $GPIO -g mode $idx out                # setta il gpio nella modalita di scrittura
 	# Il driver definito non è stato trovato
 	elif [ "$fnc" == "drvnotfound" ]; then
-	        log_write "Driver not found: $idx"
+	        log_write "drv" "error" "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 	else
 		echo "$(date) $fnc arg:$idx" >> "$LOG_OUTPUT_DRV_FILE"
@@ -116,7 +116,7 @@ function drv_rele_close {
 		$GPIO -g write $idx $RELE_GPIO_CLOSE	
 	# Il driver definito non è stato trovato
 	elif [ "$fnc" == "drvnotfound" ]; then
-	        log_write "Driver not found: $idx"
+	        log_write "drv" "error" "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 		return 1
 	else
@@ -142,7 +142,7 @@ function drv_rele_open {
 		$GPIO -g write $idx $RELE_GPIO_OPEN	
 	# Il driver definito non è stato trovato
 	elif [ "$fnc" == "drvnotfound" ]; then
-	        log_write "Driver not found: $idx"
+	        log_write "drv" "error" "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 		return 1
 	else
@@ -172,7 +172,7 @@ function drv_supply_bistable_init {
 		$GPIO -g mode $idx1 out
 	# Il driver definito non è stato trovato
 	elif [ "$fnc1" == "drvnotfound" ]; then
-	        log_write "Driver not found: $idx1"
+	        log_write "drv" "error" "Driver not found: $idx1"
         	message_write "warning" "Driver not found: $idx1"
 		return
 	else
@@ -186,7 +186,7 @@ function drv_supply_bistable_init {
 		$GPIO -g mode $idx2 out
 	# Il driver definito non è stato trovato
 	elif [ "$fnc2" == "drvnotfound" ]; then
-	        log_write "Driver not found: $idx2"
+	        log_write "drv" "error" "Driver not found: $idx2"
         	message_write "warning" "Driver not found: $idx2"
 	else
 		echo "$(date) $fnc2 arg:$idx2" >> "$LOG_OUTPUT_DRV_FILE"
@@ -212,7 +212,7 @@ function drv_supply_positive {
 		$GPIO -g write $idx1 $SUPPLY_GPIO_POS
 	# Il driver definito non è stato trovato
 	elif [ "$fnc1" == "drvnotfound" ]; then
-	        log_write "Driver not found: $idx1"
+	        log_write "drv" "error" "Driver not found: $idx1"
         	message_write "warning" "Driver not found: $idx1"
 		return
 	else
@@ -225,7 +225,7 @@ function drv_supply_positive {
 		$GPIO -g write $idx2 $SUPPLY_GPIO_POS
 	# Il driver definito non è stato trovato
 	elif [ "$fnc2" == "drvnotfound" ]; then
-	        log_write "Driver not found: $idx2"
+	        log_write "drv" "error" "Driver not found: $idx2"
         	message_write "warning" "Driver not found: $idx2"
 	else
 		echo "$(date) $fnc2 arg:$idx2" >> "$LOG_OUTPUT_DRV_FILE"
@@ -251,7 +251,7 @@ function drv_supply_negative {
 		$GPIO -g write $idx1 $SUPPLY_GPIO_NEG
 	# Il driver definito non è stato trovato
 	elif [ "$fnc1" == "drvnotfound" ]; then
-	        log_write "Driver not found: $idx1"
+	        log_write "drv" "error" "Driver not found: $idx1"
         	message_write "warning" "Driver not found: $idx1"
 		return
 	else
@@ -264,7 +264,7 @@ function drv_supply_negative {
 		$GPIO -g write $idx2 $SUPPLY_GPIO_NEG
 	# Il driver definito non è stato trovato
 	elif [ "$fnc2" == "drvnotfound" ]; then
-	        log_write "Driver not found: $idx2"
+	        log_write "drv" "error" "Driver not found: $idx2"
         	message_write "warning" "Driver not found: $idx2"
 	else
 		echo "$(date) $fnc2 arg:$idx2" >> "$LOG_OUTPUT_DRV_FILE"
@@ -288,7 +288,7 @@ function drv_rain_sensor_init {
 		$GPIO -g mode $idx in
 	# Il driver definito non è stato trovato
 	elif [ "$fnc" == "drvnotfound" ]; then
-	        log_write "Driver not found: $idx"
+	        log_write "drv" "error" "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 	else
 		echo "$(date) $fnc arg:$idx" >> "$LOG_OUTPUT_DRV_FILE"
@@ -312,7 +312,7 @@ function drv_rain_sensor_get {
 		vret=`$GPIO -g read $idx`
 	# Il driver definito non è stato trovato
 	elif [ "$fnc" == "drvnotfound" ]; then
-	        log_write "Driver not found: $idx"
+	        log_write "drv" "error" "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 	else
 		echo "$(date) $fnc arg:$idx" >> "$LOG_OUTPUT_DRV_FILE"
@@ -335,11 +335,11 @@ function drv_rain_online_get {
 
 	# Nessun driver definito, esegue la lettura del sensore tramite gpio del raspberry
 	if [ -z "$fnc" ]; then
-	        log_write "Driver not found: $idx"
+	        log_write "drv" "error" "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 	# Il driver definito non è stato trovato
 	elif [ "$fnc" == "drvnotfound" ]; then
-	        log_write "Driver not found: $idx"
+	        log_write "drv" "error" "Driver not found: $idx"
         	message_write "warning" "Driver not found: $idx"
 	else
 		echo "$(date) $fnc arg:$idx" >> "$LOG_OUTPUT_DRV_FILE"
