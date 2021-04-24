@@ -60,6 +60,46 @@ en_echo() # enhanched echo - check verbose variable
 	[[ $RAINSENSORQTY_verbose = yes ]] && echo "$(d) $*"
 }
 
+check_incomplete_loop()
+{
+	[[ ! -f $RAINSENSORQTY_HISTORYRAW ]] && return 1
+	[[ ! -f $RAINSENSORQTY_HISTORY ]] && touch $RAINSENSORQTY_HISTORY
+	> $RAINSENSORQTY_HISTORYTMP
+
+	if lastrainevent=$( rainevents 1 ) ; then
+       		: # done ok
+	else
+        	echo "WARNING: rainevents function had errors"
+		return 1
+	fi
+
+        set -- ${lastrainevent//:/ }
+	local started=$1
+	local before=$2
+	local counter=$3
+
+	wrongevent=$(awk -F ":" '$1=="'$started'" && $2!="'$before'" {print $0}' $RAINSENSORQTY_HISTORY) 
+	if [[ -n $wrongevent ]] ; then
+		echo "ERROR: wrong last rain event found: $wrongevent , right one should be: $lastrainevent"
+		return 2
+	fi
+
+	if grep -q ^${lastrainevent}$ $RAINSENSORQTY_HISTORY ; then
+		: # already present
+		return 0
+	else
+
+		: # missing and fixed 
+		if [[ $1 == tmp ]] ; then
+			echo $lastrainevent > $RAINSENSORQTY_HISTORYTMP
+		else
+			echo $lastrainevent >> $RAINSENSORQTY_HISTORY
+		fi
+		return 1
+	fi
+}
+
+#next function is not used anymore
 rain_history()
 {
 	[[ ! -f $RAINSENSORQTY_HISTORYRAW ]] && return 1
@@ -134,7 +174,7 @@ rainevents()
 			newloop=no
 		fi
 		if (( sequence == 1 )) ; then
-#			[[ $skiplast=true ]] && { skilast=false ; continue ; }
+#			[[ $skiplast=true ]] && { skiplast=false ; continue ; }
 			echo $time:$endtime:$endsequence
 			newloop=yes
 			(( event +=1 ))

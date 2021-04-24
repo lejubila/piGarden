@@ -1,3 +1,6 @@
+# 0.6.2 - 24/04/2021
+- Update rainsensorqty driver to version 0.2.5c
+
 # 0.6.1 - 06/09/2020
 - Add support for send log to piGardenWeb
 
