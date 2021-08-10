@@ -727,6 +727,10 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT list_alias                                   view list of aliases solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status alias                              show status solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status_all                                show status solenoids"
+	echo -e "\t$NAME_SCRIPT last_rain_sensor_timestamp                   show timestamp of last rain sensor"
+	echo -e "\t$NAME_SCRIPT last_rain_online_timestamp                   show timestamp of last rain online"
+	echo -e "\t$NAME_SCRIPT reset_last_rain_sensor_timestamp             show timestamp of last rain sensor"
+	echo -e "\t$NAME_SCRIPT reset_last_rain_online_timestamp             show timestamp of last rain online"
 	echo -e "\t$NAME_SCRIPT json_status [get_cron|get_cron_open_in|get_schedule] show status in json format"
 	echo -e "\t$NAME_SCRIPT mqtt_status                                  send status in json format to mqtt broker"
 	echo -e "\t$NAME_SCRIPT check_rain_online                            check rain from http://api.wunderground.com/"
@@ -1004,7 +1008,7 @@ function debug2 {
 
 VERSION=0
 SUB_VERSION=6
-RELEASE_VERSION=2
+RELEASE_VERSION=3
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
@@ -1117,6 +1121,22 @@ case "$1" in
 
 	mqtt_status)
 		mqtt_status $2
+		;;
+
+	last_rain_sensor_timestamp)
+		last_rain_sensor_timestamp
+		;;
+
+	last_rain_online_timestamp)
+		last_rain_online_timestamp
+		;;
+
+	reset_last_rain_sensor_timestamp)
+		reset_last_rain_sensor_timestamp
+		;;
+
+	reset_last_rain_online_timestamp)
+		reset_last_rain_online_timestamp
 		;;
 
 	check_rain_online)

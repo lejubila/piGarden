@@ -120,4 +120,38 @@ function close_all_for_rain {
 
 }
 
+#
+# Mostra il timestamp dell'ultima pioggia rilevato dal sensore
+#
+function last_rain_sensor_timestamp {
+	cat "$STATUS_DIR/last_rain_sensor" 2> /dev/null
+}
+
+#
+# Mostra il timestamp dell'ultima pioggia rilevato dal servizio online
+#
+function last_rain_online_timestamp {
+	cat "$STATUS_DIR/last_rain_online" 2> /dev/null
+}
+
+#
+# Resetta il timestamp dell'ultima pioggia rilevato dal sensore
+#
+function reset_last_rain_sensor_timestamp {
+	trigger_event "reset_last_rain_sensor_timestamp_before" ""
+	rm "$STATUS_DIR/last_rain_sensor" 2> /dev/null
+	trigger_event "reset_last_rain_sensor_timestamp_after" ""
+	log_write "rain" "info" "reset_last_rain_sensor_timestamp"
+}
+
+#
+# Resetta mostra il timestamp dell'ultima pioggia rilevato dal servizio online
+#
+function reset_last_rain_online_timestamp {
+	trigger_event "reset_last_rain_online_timestamp_before" ""
+	rm "$STATUS_DIR/last_rain_online" 2> /dev/null
+	trigger_event "reset_last_rain_online_timestamp_before" ""
+	log_write "rain" "info" "reset_last_rain_online_timestamp"
+}
+
 

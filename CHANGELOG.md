@@ -1,3 +1,7 @@
+# 0.6.3 - 10/08/2021
+- Add command last_rain_sensor_timestamp, last_rain_online_timestamp, reset_last_rain_sensor_timestamp, reset_last_rain_online_timestamp
+- Add socket server api for reset_last_rain_sensor_timestamp, reset_last_rain_online_timestamp
+
 # 0.6.2 - 24/04/2021
 - Update rainsensorqty driver to version 0.2.5c
 

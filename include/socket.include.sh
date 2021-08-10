@@ -240,6 +240,19 @@ function socket_server_command {
 			nohup $PATH_SCRIPT poweroff > /dev/null 2>&1 &
 			;;
 
+		reset_last_rain_sensor_timestamp)
+			reset_last_rain_sensor_timestamp
+			message_write "success" "Timestamp of last sensor rain successfull reset"
+			json_status
+			;;
+
+		reset_last_rain_online_timestamp)
+			reset_last_rain_online_timestamp
+			message_write "success" "Timestamp of last online rain successfull reset"
+			json_status
+			;;
+
+
 		*)
 			json_error 0 "invalid command"
 			;;
