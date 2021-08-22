@@ -252,6 +252,14 @@ function socket_server_command {
 			json_status
 			;;
 
+		sensor_status_set)
+	                if [ "empty$arg2" == "empty" ]; then
+        	                json_error 0 "Alias sensor not specified"
+			else
+                		sensor_status_set $arg2 $arg3 &> /dev/null
+				json_status 
+			fi
+			;;
 
 		*)
 			json_error 0 "invalid command"

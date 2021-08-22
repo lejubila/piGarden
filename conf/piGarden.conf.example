@@ -107,6 +107,8 @@ EV1_ALIAS="1" #
 EV1_GPIO=17   #		Physical 11 - wPi 0
 #EV1_NORAIN=1 # 	Non interrompe l'irrigazione di questa zona in caso di pioggia
 #EV1_MONOSTABLE=1 #	L'elettrovalvola è monostabile
+#EV1_SENSOR_ALIAS=Mi_Flora 	# Nome del sensore (definito in SENSORx_ALIAS) per stabilire l'umidità del terreno
+#EV1_SENSOR_MOISTURE=50 	# Percentule di umidità ottimale
 
 EV2_ALIAS="2" #
 EV2_GPIO=27   #		Physical 13 - wPi 2
@@ -122,6 +124,16 @@ EV5_GPIO=23   #		Physical 16 - wPi 4
 
 EV6_ALIAS="6" #
 EV6_GPIO=24   #		Physical 18 - wPi 5
+
+
+
+# Numero di sensori
+SENSOR_TOTAL=1
+
+# Definizione sensori
+SENSOR1_ALIAS=Mi_Flora
+
+
 
 
 # Definisci il servizio online da utilizzare per il controllo delle condizioni meteo, puoi scegliere openweathermap oppure wunderground.

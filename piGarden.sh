@@ -684,8 +684,9 @@ function json_status {
 	fi
 	local json_cron_open_in="\"cron_open_in\":{$json_get_cron_open_in}"
 	local json_timestamp="\"timestamp\": $(date +%s)"
+	local json_sensor="$(json_sensor_status_all)"
 
-	json="{$json_version,$json_timestamp,$json_event,$json,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron,$json_cron_open_in $json_schedule}"
+	json="{$json_version,$json_timestamp,$json_event,$json,$json_sensor,$json_last_weather_online,$json_error,$json_last_info,$json_last_warning,$json_last_success,$json_last_rain_online,$json_last_rain_sensor,$json_cron,$json_cron_open_in $json_schedule}"
 
 	echo "$json"
 
@@ -727,14 +728,25 @@ function show_usage {
 	echo -e "\t$NAME_SCRIPT list_alias                                   view list of aliases solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status alias                              show status solenoid"
 	echo -e "\t$NAME_SCRIPT ev_status_all                                show status solenoids"
+
+	echo -e "\n"
+	echo -e "\t$NAME_SCRIPT list_alias_sensor                            view list of aliases sensor"
+	echo -e "\t$NAME_SCRIPT sensor_status alias [type]                   show status sensor (type: $SENSOR_STATE_TYPE)"
+	echo -e "\t$NAME_SCRIPT sensor_status_set alias type value           set status of sensor (type: $SENSOR_STATE_TYPE)"
+	echo -e "\t$NAME_SCRIPT sensor_status_all                            show status of all sensors"
+
+	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT last_rain_sensor_timestamp                   show timestamp of last rain sensor"
 	echo -e "\t$NAME_SCRIPT last_rain_online_timestamp                   show timestamp of last rain online"
 	echo -e "\t$NAME_SCRIPT reset_last_rain_sensor_timestamp             show timestamp of last rain sensor"
 	echo -e "\t$NAME_SCRIPT reset_last_rain_online_timestamp             show timestamp of last rain online"
+	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT json_status [get_cron|get_cron_open_in|get_schedule] show status in json format"
 	echo -e "\t$NAME_SCRIPT mqtt_status                                  send status in json format to mqtt broker"
-	echo -e "\t$NAME_SCRIPT check_rain_online                            check rain from http://api.wunderground.com/"
+	echo -e "\n"
+	echo -e "\t$NAME_SCRIPT check_rain_online                            check rain from online api service"
 	echo -e "\t$NAME_SCRIPT check_rain_sensor                            check rain from hardware sensor"
+	echo -e "\n"
 	echo -e "\t$NAME_SCRIPT close_all_for_rain                           close all solenoid if it's raining"
 	echo -e "\t$NAME_SCRIPT close_all [force]                            close all solenoid"
 	echo -e "\n"
@@ -1008,7 +1020,7 @@ function debug2 {
 
 VERSION=0
 SUB_VERSION=6
-RELEASE_VERSION=3
+RELEASE_VERSION=4
 
 DIR_SCRIPT=`dirname $0`
 NAME_SCRIPT=${0##*/}
@@ -1034,6 +1046,7 @@ fi
 . "$DIR_SCRIPT/include/cron.include.sh"
 . "$DIR_SCRIPT/include/socket.include.sh"
 . "$DIR_SCRIPT/include/rain.include.sh"
+. "$DIR_SCRIPT/include/sensor.include.sh"
 . "$DIR_SCRIPT/include/events.include.sh"
 
 MESSAGE_INFO=""
@@ -1043,7 +1056,13 @@ MESSAGE_SUCCESS=""
 CURRENT_EVENT=""
 CURRENT_EVENT_ALIAS=""
 
+SENSOR_STATE_TYPE="moisture temperature fertility illuminance"
+
 PARENT_PID=0
+
+if [ -z $SENSOR_TOTAL ]; then
+	SENSOR_TOTAL=0
+fi
 
 if [ -z $LOG_OUTPUT_DRV_FILE ]; then
 	LOG_OUTPUT_DRV_FILE="/dev/null"
@@ -1113,6 +1132,26 @@ case "$1" in
 
 	ev_status_all)
 		ev_status_all
+		;;
+
+	list_alias_sensor)
+		list_alias_sensor
+		;;
+
+	sensor_status)
+		sensor_status $2 $3
+		;;
+	
+	sensor_status_all)
+		sensor_status_all
+		;;
+
+	sensor_status_set)
+		sensor_status_set $2 $3 $4
+		;;
+
+	json_sensor_status_all)
+		json_sensor_status_all
 		;;
 
 	json_status)

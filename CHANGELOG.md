@@ -1,3 +1,8 @@
+# 0.6.4 - xx/xx/2021
+- Add support for sensor mi flora
+- Add command line: sensor_status, sensor_status_all, sensor_status_set
+- Add api command: sensor_status_set
+
 # 0.6.3 - 10/08/2021
 - Add command last_rain_sensor_timestamp, last_rain_online_timestamp, reset_last_rain_sensor_timestamp, reset_last_rain_online_timestamp
 - Add socket server api for reset_last_rain_sensor_timestamp, reset_last_rain_online_timestamp
