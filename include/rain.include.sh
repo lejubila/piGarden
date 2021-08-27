@@ -75,10 +75,31 @@ function check_rain_sensor {
 }
 
 #
-# Chiude tutte le elettrovalvole se sta piovendo
+# Chiude tutte le elettrovalvole se sta piovendo oppure chiude quelle che hanno raggiunto l'mudità massima impostata
 # Eseguie il controllo in tempo reale sul sensore hardware e sui dati dell'ultima chiamata eseguita online
 #
 function close_all_for_rain {
+
+	#
+	# Chiude le elettrovalvole che hanno raggiunto l'umidità del terreno impostata in EVx_SENSOR_MOISTURE
+	#
+
+	for i in $(seq $EV_TOTAL)
+	do
+		local a=EV"$i"_ALIAS
+		local al=${!a}
+		ev_status $al
+		local state=$?
+		local moisture=$(ev_check_moisture $i)
+		if [ "$state" = "1" ] && [ "$moisture" -gt 0 ]; then
+			ev_close $al
+			log_write "irrigate" "warning" "close_all_for_rain - Close solenoid '$al' because maximum soil moisture has been reached"
+		fi
+	done
+
+	#
+	# Chiude le elettrovalvole in caso di pioggia
+	#
 
 	local close_all=0
 	local now=`date +%s`
@@ -102,6 +123,12 @@ function close_all_for_rain {
 	fi
 
 	if [ "$close_all" = "1" ]; then
+
+		#
+		# PIOVE 
+		# Valuta se la sciare aperte le elettrovalvole in caso l'umidità del sensore non sia stata raggiunta
+		#
+
 		for i in $(seq $EV_TOTAL)
 		do
 			local a=EV"$i"_ALIAS
@@ -110,13 +137,16 @@ function close_all_for_rain {
 			local evnorain=${!a}
 			ev_status $al
 			local state=$?
+			local moisture=$(ev_check_moisture $i)
 			#echo "$al = $state"
-			if [ "$state" = "1" ] && [ "$evnorain" != "1" ]; then
+			if [ "$state" = "1" ] && [ "$evnorain" != "1" ] && [ "$moisture" -ne 0 ]; then
 				ev_close $al
 				log_write "irrigate" "warning" "close_all_for_rain - Close solenoid '$al' for rain"
 			fi
 		done
+
 	fi
+
 
 }
 

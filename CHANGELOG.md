@@ -1,7 +1,9 @@
 # 0.6.4 - xx/xx/2021
-- Add support for sensor mi flora
+- Add support for sensor: moisture, temperature, fertility, illuminance
 - Add command line: sensor_status, sensor_status_all, sensor_status_set
 - Add api command: sensor_status_set
+- Add event ev_not_open_for_moisture, sensor_set_state_before, sensor_set_state_after
+- Added zone humidity management: when a zone has reached the humidity defined in EVx_SENSOR_MOISTURE it does not start irrigation or interrupts it if it is already active. In case of rain it does not stop irrigation if the soil humidity has not reached the configured value
 
 # 0.6.3 - 10/08/2021
 - Add command last_rain_sensor_timestamp, last_rain_online_timestamp, reset_last_rain_sensor_timestamp, reset_last_rain_online_timestamp

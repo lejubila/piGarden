@@ -5,7 +5,9 @@
 # $3 stato da scrivere
 #
 function sensor_set_state {
+	trigger_event "sensor_set_state_before" $1 $2 $3
 	echo "$3" > "$STATUS_DIR/sensor$1_$2"
+	trigger_event "sensor_set_state_after" $1 $2 $3
 }
 
 #
@@ -155,3 +157,42 @@ function json_sensor_status_all {
 	js="\"sensor\": {$js_item}"
 	echo $js
 }
+
+#
+# Controlla se la zona comandata da un elettrovalvola ha raggiunto l'umidità necessaria per interrompere l'irrigazione
+# Se è stata superata l'umidità indicata in EVx_SENSOR_MOISTURE ritorna l'umidità attuale del sensore relativo all'elettrovalvola
+# in caso contrario ritorna 0, se no è impostato il parametro EV_xSENSOR_ALIAS o EVxSENSOR?MOISTURE ritorna il valore -1
+#
+# $1 numero elettrovalvola da controllare
+#
+function ev_check_moisture {
+
+	local s=EV"$1"_SENSOR_ALIAS
+	local sa=${!s}
+
+	if [[ -z $sa ]]; then
+		echo -1
+		return
+	fi
+
+	local moisture=$(sensor_status $sa moisture)
+
+	local s=EV"$1"_SENSOR_MOISTURE
+	local max_moisture=${!s}
+
+	if [ -z $max_moisture ]; then
+		echo -1
+		return
+	fi
+
+	if [ $moisture -gt $max_moisture ]; then
+		log_write "sensor" "info" "humidity of the \"$sa\" sensor reached: $moisture%"
+		echo $moisture
+		return $moisture
+	fi
+
+	echo 0
+	return 0
+}
+
+

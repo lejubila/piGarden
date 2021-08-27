@@ -88,35 +88,48 @@ function ev_open {
 	local EV_IS_MONOSTABLE_VAR=EV"$EVNUM"_MONOSTABLE
 	local EV_IS_MONOSTABLE=${!EV_IS_MONOSTABLE_VAR}
 
-	if [ ! "$2" = "force" ] && [ "$EVNORAIN" != "1" ]; then
-		if [[ "$NOT_IRRIGATE_IF_RAIN_ONLINE" -gt 0 && -f $STATUS_DIR/last_rain_online ]]; then
-			local last_rain=`cat $STATUS_DIR/last_rain_online`
-			local now=`date +%s`
-			local dif=0
-			let "dif = now - last_rain"
-			if [ $dif -lt $NOT_IRRIGATE_IF_RAIN_ONLINE ]; then
-				message_write "warning" "Solenoid not open for rain"
-				trigger_event "ev_not_open_for_rain_online" "$1" 
-				trigger_event "ev_not_open_for_rain" "$1" 
-				log_write "irrigate" "warning" "Solenoid '$1' not open for rain (online check)"
-				return
+	if [ ! "$2" = "force" ]; then
+
+		local moisture=$(ev_check_moisture $EVNUM)
+		if [ $moisture -gt 0 ]; then
+			message_write "warning" "solenoid not open because maximum soil moisture has been reached"
+			trigger_event "ev_not_open_for_moisture" "$1" 
+			log_write "irrigate" "warning" "Solenoid '$1' not open because maximum soil moisture has been reached"
+			return
+		fi
+
+		if [ "$EVNORAIN" != "1" ]; then
+
+			if [[ "$NOT_IRRIGATE_IF_RAIN_ONLINE" -gt 0 && -f $STATUS_DIR/last_rain_online ]]; then
+				local last_rain=`cat $STATUS_DIR/last_rain_online`
+				local now=`date +%s`
+				local dif=0
+				let "dif = now - last_rain"
+				if [ $dif -lt $NOT_IRRIGATE_IF_RAIN_ONLINE ] && [ $moisture -ne 0 ]; then
+					message_write "warning" "Solenoid not open for rain"
+					trigger_event "ev_not_open_for_rain_online" "$1" 
+					trigger_event "ev_not_open_for_rain" "$1" 
+					log_write "irrigate" "warning" "Solenoid '$1' not open for rain (online check)"
+					return
+				fi
+			fi
+
+			check_rain_sensor
+			if [[ "$NOT_IRRIGATE_IF_RAIN_SENSOR" -gt 0 && -f $STATUS_DIR/last_rain_sensor && $moisture -ne 0 ]]; then
+				local last_rain=`cat $STATUS_DIR/last_rain_sensor`
+				local now=`date +%s`
+				local dif=0
+				let "dif = now - last_rain"
+				if [ $dif -lt $NOT_IRRIGATE_IF_RAIN_SENSOR ]; then
+					message_write "warning" "Solenoid not open for rain"
+					trigger_event "ev_not_open_for_rain_sensor" "$1" 
+					trigger_event "ev_not_open_for_rain" "$1" 
+					log_write "irrigate" "warning" "Solenoid '$1' not open for rain (sensor check)"
+					return
+				fi
 			fi
 		fi
 
-		check_rain_sensor
-		if [[ "$NOT_IRRIGATE_IF_RAIN_SENSOR" -gt 0 && -f $STATUS_DIR/last_rain_sensor ]]; then
-			local last_rain=`cat $STATUS_DIR/last_rain_sensor`
-			local now=`date +%s`
-			local dif=0
-			let "dif = now - last_rain"
-			if [ $dif -lt $NOT_IRRIGATE_IF_RAIN_SENSOR ]; then
-				message_write "warning" "Solenoid not open for rain"
-				trigger_event "ev_not_open_for_rain_sensor" "$1" 
-				trigger_event "ev_not_open_for_rain" "$1" 
-				log_write "irrigate" "warning" "Solenoid '$1' not open for rain (sensor check)"
-				return
-			fi
-		fi
 	fi
 
 	local state=1
