@@ -107,8 +107,9 @@ EV1_ALIAS="1" #
 EV1_GPIO=17   #		Physical 11 - wPi 0
 #EV1_NORAIN=1 # 	Non interrompe l'irrigazione di questa zona in caso di pioggia
 #EV1_MONOSTABLE=1 #	L'elettrovalvola è monostabile
-#EV1_SENSOR_ALIAS=Mi_Flora 	# Nome del sensore (definito in SENSORx_ALIAS) per stabilire l'umidità del terreno
-#EV1_SENSOR_MOISTURE=50 	# Percentule di umidità ottimale
+#EV1_SENSOR_ALIAS=Mi_Flora 		# Nome del sensore (definito in SENSORx_ALIAS) per stabilire l'umidità del terreno
+#EV1_SENSOR_MOISTURE=50 		# Percentule di umidità ottimale
+#EV1_SENSOR_MOISTURE_AUTOCLOSE=1	# Chiude automaticamente l'elettrovalvola quando supera l'umidità impostata in EVx_MONOSTABLE
 
 EV2_ALIAS="2" #
 EV2_GPIO=27   #		Physical 13 - wPi 2

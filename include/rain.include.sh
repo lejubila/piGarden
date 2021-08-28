@@ -90,7 +90,7 @@ function close_all_for_rain {
 		local al=${!a}
 		ev_status $al
 		local state=$?
-		local moisture=$(ev_check_moisture $i)
+		local moisture=$(ev_check_moisture_autoclose $i)
 		if [ "$state" = "1" ] && [ "$moisture" -gt 0 ]; then
 			ev_close $al
 			log_write "irrigate" "warning" "close_all_for_rain - Close solenoid '$al' because maximum soil moisture has been reached"

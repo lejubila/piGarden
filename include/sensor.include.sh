@@ -159,7 +159,8 @@ function json_sensor_status_all {
 }
 
 #
-# Controlla se la zona comandata da un elettrovalvola ha raggiunto l'umidità necessaria per interrompere l'irrigazione
+# Controlla se la zona comandata da un elettrovalvola ha raggiunto l'umidità necessaria per non fare partire l'irrigazione,
+# faerla chiudere in caso di pioggia.
 # Se è stata superata l'umidità indicata in EVx_SENSOR_MOISTURE ritorna l'umidità attuale del sensore relativo all'elettrovalvola
 # in caso contrario ritorna 0, se no è impostato il parametro EV_xSENSOR_ALIAS o EVxSENSOR?MOISTURE ritorna il valore -1
 #
@@ -186,7 +187,58 @@ function ev_check_moisture {
 	fi
 
 	if [ $moisture -gt $max_moisture ]; then
-		log_write "sensor" "info" "humidity of the \"$sa\" sensor reached: $moisture%"
+		log_write "sensor" "info" "ev_check_moisture_autoclose: humidity of the \"$sa\" sensor reached: $moisture%"
+		echo $moisture
+		return $moisture
+	fi
+
+	echo 0
+	return 0
+}
+
+#
+# Controlla se la zona comandata da un elettrovalvola ha raggiunto l'umidità necessaria per essere chiusa in automatico
+# Se è stata superata l'umidità indicata in EVx_SENSOR_MOISTURE ritorna l'umidità attuale del sensore relativo all'elettrovalvola
+# in caso contrario ritorna 0, se no è impostato il parametro EV_xSENSOR_ALIAS, EVxSENSOR_MOISTURE o 
+# EVxSENSOR_MOISTURE_AUTOCLOSE ritorna il valore -1
+#
+# $1 numero elettrovalvola da controllare
+#
+function ev_check_moisture_autoclose {
+
+	local s=EV"$1"_SENSOR_ALIAS
+	local sa=${!s}
+
+	if [[ -z $sa ]]; then
+		echo -1
+		return
+	fi
+
+	local moisture=$(sensor_status $sa moisture)
+
+	local s=EV"$1"_SENSOR_MOISTURE
+	local max_moisture=${!s}
+
+	if [ -z $max_moisture ]; then
+		echo -1
+		return
+	fi
+
+	local s=EV"$1"_SENSOR_MOISTURE_AUTOCLOSE
+	local autoclose=${!s}
+
+	if [ -z $autoclose ]; then
+		echo -1
+		return
+	fi
+
+	if [ $autoclose -ne 1 ]; then
+		echo -1
+		return
+	fi
+
+	if [ $moisture -gt $max_moisture ]; then
+		log_write "sensor" "info" "ev_check_moisture_autoclose: humidity of the \"$sa\" sensor reached: $moisture%"
 		echo $moisture
 		return $moisture
 	fi
