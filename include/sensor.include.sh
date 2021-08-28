@@ -20,7 +20,8 @@ function sensor_get_state {
 		sensor_set_state $1 $2 ""
 	fi
 
-	return `cat "$STATUS_DIR/sensor$1_$2"`
+	local state=$(cat "$STATUS_DIR/sensor$1_$2" 2> /dev/null)
+	echo $state
 }
 
 #
@@ -71,8 +72,8 @@ function sensor_status_all {
 		av=${!a}
 		for t in $SENSOR_STATE_TYPE
 		do
-			sensor_get_state $i $t
-			echo -e "$av: $t $?"
+			local state=$(sensor_get_state $i $t)
+			echo -e "$av: $t $state"
 		done
 	done
 }
@@ -88,14 +89,12 @@ function sensor_status {
 	if [ -z "$2" ]; then
 		for t in $SENSOR_STATE_TYPE
 		do
-			sensor_get_state $i $t
-			echo -e "$av: $t $?"
+			local state=$(sensor_get_state $i $t)
+			echo -e "$av: $t $state"
 		done
 	else
-		sensor_get_state $i $2
-		local state=$?
+		local state=$(sensor_get_state $i $2)
 		echo -e "$state"
-		return $state
 	fi
 
 }
@@ -143,8 +142,8 @@ function json_sensor_status_all {
 		js_type=""
 		for t in $SENSOR_STATE_TYPE
 		do
-			sensor_get_state $i $t
-			js_type="$js_type \"$t\": \"$?\", "
+			local state=$(sensor_get_state $i $t)
+			js_type="$js_type \"$t\": \"$state\", "
 		done
 		js_type="${js_type::-2}"
 		js_item="$js_item \"$av\":{$js_type}, ";
