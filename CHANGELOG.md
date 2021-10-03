@@ -1,4 +1,4 @@
-# 0.6.4 - xx/xx/2021
+# 0.6.4 - 03/10/2021
 - Add support for sensor: moisture, temperature, fertility, illuminance
 - Add command line: sensor_status, sensor_status_all, sensor_status_set
 - Add api command: sensor_status_set
